@@ -1773,4 +1773,4 @@ def water_recovery():
                               structural_integrity_data=structural_integrity_data,
                                sites=sites_list)
 if __name__ == '__main__':
-    socketio.run(app, debug=True)  # Use socketio.run instead of app.run
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))  # Use socketio.run instead of app.run
