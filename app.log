@@ -1,0 +1,23 @@
+2025-07-09 15:32:54,635 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.42.87:5000
+2025-07-09 15:32:54,650 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 15:33:58,748 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:33:58] "[32mGET / HTTP/1.1[0m" 302 -
+2025-07-09 15:34:02,408 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:02] "GET /login HTTP/1.1" 200 -
+2025-07-09 15:34:03,952 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:03] "[36mGET /static/images/reminex_SA.jpg HTTP/1.1[0m" 304 -
+2025-07-09 15:34:24,651 - __main__ - ERROR - Failed to update last login: column "last_login" of relation "users" does not exist
+LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
+                         ^
+
+2025-07-09 15:34:24,672 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:24] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-09 15:34:28,070 - __main__ - ERROR - Failed to update last login: column "last_login" of relation "users" does not exist
+LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
+                         ^
+
+2025-07-09 15:34:28,073 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:28] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-09 15:34:28,917 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:28] "GET /index HTTP/1.1" 200 -
+2025-07-09 15:34:44,410 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:44] "GET /dams HTTP/1.1" 200 -
+2025-07-09 15:34:45,398 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:45] "GET /socket.io/?EIO=4&transport=polling&t=PVld4Hx HTTP/1.1" 200 -
+2025-07-09 15:34:45,706 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:45] "GET /socket.io/?EIO=4&transport=polling&t=PVld4Lr&sid=0wmHufvq_OTyFa3mAAAA HTTP/1.1" 200 -
+2025-07-09 15:34:48,690 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:48] "POST /socket.io/?EIO=4&transport=polling&t=PVld4Lo&sid=0wmHufvq_OTyFa3mAAAA HTTP/1.1" 200 -
