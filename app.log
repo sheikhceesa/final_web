@@ -21,3 +21,56 @@ LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
 2025-07-09 15:34:45,398 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:45] "GET /socket.io/?EIO=4&transport=polling&t=PVld4Hx HTTP/1.1" 200 -
 2025-07-09 15:34:45,706 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:45] "GET /socket.io/?EIO=4&transport=polling&t=PVld4Lr&sid=0wmHufvq_OTyFa3mAAAA HTTP/1.1" 200 -
 2025-07-09 15:34:48,690 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:34:48] "POST /socket.io/?EIO=4&transport=polling&t=PVld4Lo&sid=0wmHufvq_OTyFa3mAAAA HTTP/1.1" 200 -
+2025-07-09 15:52:20,633 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.42.87:5000
+2025-07-09 15:52:20,643 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-07-09 15:52:24,357 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:52:24] "[32mGET /dams HTTP/1.1[0m" 302 -
+2025-07-09 15:52:24,415 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:52:24] "GET /login HTTP/1.1" 200 -
+2025-07-09 15:52:25,684 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:52:25] "[36mGET /static/images/reminex_SA.jpg HTTP/1.1[0m" 304 -
+2025-07-09 15:52:54,147 - __main__ - ERROR - Failed to update last login: column "last_login" of relation "users" does not exist
+LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
+                         ^
+
+2025-07-09 15:52:54,153 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:52:54] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-09 15:53:04,422 - __main__ - ERROR - Failed to update last login: column "last_login" of relation "users" does not exist
+LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
+                         ^
+
+2025-07-09 15:53:04,426 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:53:04] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-09 15:53:04,499 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:53:04] "GET /index HTTP/1.1" 200 -
+2025-07-09 15:53:04,518 - __main__ - ERROR - Failed to update last login: column "last_login" of relation "users" does not exist
+LINE 1: UPDATE users SET last_login = NOW() WHERE id = 2
+                         ^
+
+2025-07-09 15:53:04,521 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:53:04] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-07-09 15:53:39,136 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:53:39] "GET /static/images/sommifer.png HTTP/1.1" 200 -
+2025-07-09 15:56:51,286 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:56:51] "GET /socket.io/?EIO=4&transport=polling&t=PVli7x9 HTTP/1.1" 200 -
+2025-07-09 15:56:55,106 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:56:55] "GET /socket.io/?EIO=4&transport=polling&t=PVli8oa&sid=hLMh_JNZB8TS3nr5AAAA HTTP/1.1" 200 -
+2025-07-09 15:57:39,994 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:57:39] "GET /socket.io/?EIO=4&transport=websocket&sid=hLMh_JNZB8TS3nr5AAAA HTTP/1.1" 200 -
+2025-07-09 15:57:43,251 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:57:43] "GET /socket.io/?EIO=4&transport=polling&t=PVliKPI HTTP/1.1" 200 -
+2025-07-09 15:57:43,375 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:57:43] "GET /socket.io/?EIO=4&transport=polling&t=PVliKjc&sid=Cm7vpQT0hCcHEkIkAAAC HTTP/1.1" 200 -
+2025-07-09 15:57:51,153 - __main__ - INFO - Client disconnected
+2025-07-09 15:58:01,792 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:58:01] "POST /socket.io/?EIO=4&transport=polling&t=PVli8n3&sid=hLMh_JNZB8TS3nr5AAAA HTTP/1.1" 200 -
+2025-07-09 15:58:28,970 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:58:28] "GET /socket.io/?EIO=4&transport=websocket&sid=Cm7vpQT0hCcHEkIkAAAC HTTP/1.1" 200 -
+2025-07-09 15:58:30,970 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:58:30] "GET /socket.io/?EIO=4&transport=polling&t=PVliWMq HTTP/1.1" 200 -
+2025-07-09 15:58:30,993 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:58:30] "GET /socket.io/?EIO=4&transport=polling&t=PVliWM_&sid=A_xefgPzgw3YfiuoAAAE HTTP/1.1" 200 -
+2025-07-09 15:58:31,180 - __main__ - INFO - Client disconnected
+2025-07-09 15:59:16,966 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:16] "GET /socket.io/?EIO=4&transport=websocket&sid=A_xefgPzgw3YfiuoAAAE HTTP/1.1" 200 -
+2025-07-09 15:59:18,975 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:18] "GET /socket.io/?EIO=4&transport=polling&t=PVlii4o HTTP/1.1" 200 -
+2025-07-09 15:59:19,005 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:19] "GET /socket.io/?EIO=4&transport=polling&t=PVlii5C&sid=4Ftqu-jLBSg-lhHWAAAG HTTP/1.1" 200 -
+2025-07-09 15:59:31,218 - __main__ - INFO - Client disconnected
+2025-07-09 15:59:42,193 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 15:59:42] "POST /socket.io/?EIO=4&transport=polling&t=PVliKjX&sid=Cm7vpQT0hCcHEkIkAAAC HTTP/1.1" 200 -
+2025-07-09 16:00:04,993 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:04] "GET /socket.io/?EIO=4&transport=websocket&sid=4Ftqu-jLBSg-lhHWAAAG HTTP/1.1" 200 -
+2025-07-09 16:00:07,055 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:07] "GET /socket.io/?EIO=4&transport=polling&t=PVlitp5 HTTP/1.1" 200 -
+2025-07-09 16:00:07,699 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:07] "GET /socket.io/?EIO=4&transport=polling&t=PVlitsY&sid=DPNgdgYmjQKFlecrAAAI HTTP/1.1" 200 -
+2025-07-09 16:00:11,261 - __main__ - INFO - Client disconnected
+2025-07-09 16:00:14,955 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:14] "POST /socket.io/?EIO=4&transport=polling&t=PVliWMz&sid=A_xefgPzgw3YfiuoAAAE HTTP/1.1" 200 -
+2025-07-09 16:00:42,143 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:42] "POST /socket.io/?EIO=4&transport=polling&t=PVlii59&sid=4Ftqu-jLBSg-lhHWAAAG HTTP/1.1" 200 -
+2025-07-09 16:00:50,223 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:50] "POST /socket.io/?EIO=4&transport=polling&t=PVlitrp&sid=DPNgdgYmjQKFlecrAAAI HTTP/1.1" 200 -
+2025-07-09 16:00:55,033 - __main__ - INFO - Client disconnected
+2025-07-09 16:00:55,037 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:55] "GET /socket.io/?EIO=4&transport=websocket&sid=DPNgdgYmjQKFlecrAAAI HTTP/1.1" 200 -
+2025-07-09 16:00:57,003 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:57] "GET /socket.io/?EIO=4&transport=polling&t=PVlj40P HTTP/1.1" 200 -
+2025-07-09 16:00:57,236 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:00:57] "GET /socket.io/?EIO=4&transport=polling&t=PVlj41d&sid=1L31Y_1MEyrJQQVQAAAK HTTP/1.1" 200 -
+2025-07-09 16:01:04,181 - werkzeug - INFO - 127.0.0.1 - - [09/Jul/2025 16:01:04] "POST /socket.io/?EIO=4&transport=polling&t=PVlj41b&sid=1L31Y_1MEyrJQQVQAAAK HTTP/1.1" 200 -

@@ -28,6 +28,7 @@ from datetime import datetime, time
 import traceback
 import logging
 
+
 # CORS
 from flask_cors import CORS
 
@@ -47,11 +48,12 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='eventlet')
 CORS(app)
 
 # Configuration
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
+
 
 # Database configuration
 db_config = {
@@ -2059,4 +2061,10 @@ def handle_disconnect():
     logger.info('Client disconnected')
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'))
+    socketio.run(
+    app,
+    host='0.0.0.0',
+    port=int(os.environ.get('PORT', 5000)),
+    debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'),
+    allow_unsafe_werkzeug=True
+)
