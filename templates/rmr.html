@@ -1,0 +1,2834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur RMR Professionnel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --success-color: #2ecc71;
+            --success-hover: #27ae60;
+            --secondary-color: #95a5a6;
+            --secondary-hover: #7f8c8d;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --text-light: #7f8c8d;
+            --border-color: #d1d5db;
+            --bg-color: #ffffff;
+            --card-bg: #f8f9fa;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3498db;
+            --primary-hover: #2980b9;
+            --success-color: #2ecc71;
+            --success-hover: #27ae60;
+            --secondary-color: #7f8c8d;
+            --secondary-hover: #95a5a6;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #ecf0f1;
+            --light-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --text-light: #bdc3c7;
+            --border-color: #444;
+            --bg-color: #353535;
+            --card-bg: #2d2d2d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            margin-right: 20px;
+        }
+
+        .header-title {
+            flex-grow: 1;
+        }
+
+        .header-title h1 {
+            font-size: 24px;
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .header-version {
+            font-size: 12px;
+            color: var(--text-light);
+            align-self: flex-end;
+        }
+
+        /* Tab Styles */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab:hover:not(.active) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Main Calculator Layout */
+        .calculator-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .params-section {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .results-section {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Card Styles */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Button Styles */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--success-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Results Styles */
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .result-label {
+            font-weight: bold;
+        }
+
+        .result-value {
+            font-weight: 500;
+        }
+
+        /* Table Styles */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .table th, .table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+
+        /* History List */
+        .history-list {
+            list-style: none;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .history-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .history-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item-date {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .history-item-project {
+            color: var(--text-color);
+        }
+
+        .history-item-rmr {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Search Box */
+        .search-box {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px 0 0 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .search-box button {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-left: none;
+            border-radius: 0 4px 4px 0;
+            background-color: var(--secondary-color);
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--bg-color);
+            border-radius: 6px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .calculator-container {
+                flex-direction: column;
+            }
+            
+            .params-section, .results-section {
+                min-width: 100%;
+            }
+        }
+
+        /* Dark mode toggle */
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        /* Status bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 8px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-bar {
+            height: 20px;
+            width: 200px;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Menu bar */
+        .menu-bar {
+            display: flex;
+            background-color: var(--card-bg);
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .menu {
+            position: relative;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+
+        .menu:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-items {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            min-width: 200px;
+        }
+
+        .menu:hover .menu-items {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Splitter for resizable panels */
+        .splitter {
+            display: flex;
+            height: calc(100vh - 200px);
+        }
+
+        .splitter-panel {
+            overflow: auto;
+            padding: 10px;
+        }
+
+        .splitter-handle {
+            width: 10px;
+            background-color: var(--border-color);
+            cursor: col-resize;
+        }
+
+        /* Scrollable content */
+        .scrollable {
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+            padding-right: 10px;
+        }
+
+        /* Classification colors */
+        .class-I {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .class-II {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .class-III {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        .class-IV {
+            color: #e67e22;
+            font-weight: bold;
+        }
+
+        .class-V {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu">
+            Fichier
+            <div class="menu-items">
+                <div class="menu-item" onclick="newCalculation()"><i class="fas fa-file"></i> Nouveau</div>
+                <div class="menu-item" onclick="saveHistory()"><i class="fas fa-save"></i> Sauvegarder</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item">Exporter
+                    <div class="menu-items" style="left: 100%; top: 0;">
+                        <div class="menu-item" onclick="exportResults('txt')">Exporter en texte</div>
+                        <div class="menu-item" onclick="exportResults('pdf')">Exporter en PDF</div>
+                        <div class="menu-item" onclick="exportResults('csv')">Exporter en CSV</div>
+                    </div>
+                </div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="printResults()"><i class="fas fa-print"></i> Imprimer</div>
+                <div class="menu-item" onclick="printPreview()">Aperçu avant impression</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="showPreferences()"><i class="fas fa-cog"></i> Préférences</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="window.close()"><i class="fas fa-times"></i> Quitter</div>
+            </div>
+        </div>
+        <div class="menu">
+            Édition
+            <div class="menu-items">
+                <div class="menu-item" onclick="copyResults()"><i class="fas fa-copy"></i> Copier les résultats</div>
+                <div class="menu-item" onclick="switchTab('history-tab')"><i class="fas fa-history"></i> Historique</div>
+            </div>
+        </div>
+        <div class="menu">
+            Affichage
+            <div class="menu-items">
+                <div class="menu-item" onclick="zoomIn()"><i class="fas fa-search-plus"></i> Zoom avant</div>
+                <div class="menu-item" onclick="zoomOut()"><i class="fas fa-search-minus"></i> Zoom arrière</div>
+                <div class="menu-item" onclick="resetZoom()">Réinitialiser zoom</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="toggleTab('calculator-tab')"><input type="checkbox" checked id="tab-calculator"> Calculateur</div>
+                <div class="menu-item" onclick="toggleTab('visualizations-tab')"><input type="checkbox" checked id="tab-visualizations"> Visualisations</div>
+                <div class="menu-item" onclick="toggleTab('documentation-tab')"><input type="checkbox" checked id="tab-documentation"> Documentation</div>
+                <div class="menu-item" onclick="toggleTab('history-tab')"><input type="checkbox" checked id="tab-history"> Historique</div>
+            </div>
+        </div>
+        <div class="menu">
+            Outils
+            <div class="menu-items">
+                <div class="menu-item" onclick="compareCalculations()"><i class="fas fa-columns"></i> Comparer des calculs</div>
+                <div class="menu-item" onclick="showAdvancedCalculations()"><i class="fas fa-calculator"></i> Calculs avancés</div>
+            </div>
+        </div>
+        <div class="menu">
+            Aide
+            <div class="menu-items">
+                <div class="menu-item" onclick="showGuide()"><i class="fas fa-question-circle"></i> Guide d'utilisation</div>
+                <div class="menu-item" onclick="openOnlineHelp()"><i class="fas fa-globe"></i> Aide en ligne</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="checkForUpdates()"><i class="fas fa-sync-alt"></i> Vérifier les mises à jour</div>
+                <div class="menu-divider"></div>
+                <div class="menu-item" onclick="showAbout()"><i class="fas fa-info-circle"></i> À propos</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="https://via.placeholder.com/60" alt="Logo" class="header-logo">
+            <div class="header-title">
+                <h1>Calculateur RMR Professionnel</h1>
+                <p>Système de classification des massifs rocheux de Bieniawski</p>
+            </div>
+            <div class="header-version">v2.2</div>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btn-secondary" onclick="newCalculation()"><i class="fas fa-file"></i> Nouveau</button>
+            <button class="btn btn-secondary" onclick="saveHistory()"><i class="fas fa-save"></i> Sauvegarder</button>
+            <button class="btn btn-secondary" onclick="printResults()"><i class="fas fa-print"></i> Imprimer</button>
+            <div style="flex-grow: 1;"></div>
+            <button class="btn btn-success" onclick="calculateRMR()"><i class="fas fa-calculator"></i> Calculer RMR</button>
+            <button class="btn btn-secondary" onclick="switchTab('history-tab')"><i class="fas fa-history"></i> Historique</button>
+            <button class="btn btn-secondary" onclick="showGuide()"><i class="fas fa-question-circle"></i> Aide</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="calculator-tab">Calculateur</div>
+            <div class="tab" data-tab="visualizations-tab">Visualisations</div>
+            <div class="tab" data-tab="documentation-tab">Documentation</div>
+            <div class="tab" data-tab="history-tab">Historique</div>
+        </div>
+
+        <!-- Calculator Tab -->
+        <div class="tab-content active" id="calculator-tab">
+            <div class="splitter">
+                <div class="splitter-panel" id="params-panel">
+                    <div class="scrollable">
+                        <p style="color: var(--text-light); margin-bottom: 15px;">
+                            Sélectionnez les paramètres géotechniques ci-dessous pour calculer la classification RMR. 
+                            Les résultats se mettront à jour automatiquement.
+                        </p>
+
+                        <div class="card">
+                            <div class="card-title">Méthode de calcul</div>
+                            <select class="form-control" id="calculation-method">
+                                <option>RMR89 (Original)</option>
+                                <option>RMR14 (Mise à jour)</option>
+                                <option>Paramètres personnalisés</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">1. Résistance de la roche intacte (UCS)</div>
+                            <select class="form-control" id="rock-strength">
+                                <option value="15">UCS : 250+ MPa (Roche très résistante)</option>
+                                <option value="12" selected>UCS : 100-250 MPa (Roche résistante)</option>
+                                <option value="7">UCS : 50-100 MPa (Roche moyennement résistante)</option>
+                                <option value="4">UCS : 25-50 MPa (Roche peu résistante)</option>
+                                <option value="2">UCS : 5-25 MPa (Roche très peu résistante)</option>
+                                <option value="1">UCS : 1-5 MPa (Roche extrêmement peu résistante)</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">2. Désignation de qualité de la roche (RQD)</div>
+                            <select class="form-control" id="rqd">
+                                <option value="20">RQD : 90-100% (Roche excellente)</option>
+                                <option value="17" selected>RQD : 75-90% (Bonne roche)</option>
+                                <option value="13">RQD : 50-75% (Roche acceptable)</option>
+                                <option value="8">RQD : 25-50% (Mauvaise roche)</option>
+                                <option value="3">RQD : 0-25% (Roche très mauvaise)</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">3. Espacement des discontinuités</div>
+                            <select class="form-control" id="joint-spacing">
+                                <option value="20">&gt; 200 cm (Espacement très large)</option>
+                                <option value="15">60-200 cm (Espacement large)</option>
+                                <option value="10" selected>20-60 cm (Espacement moyen)</option>
+                                <option value="8">6-20 cm (Espacement serré)</option>
+                                <option value="5">&lt; 6 cm (Espacement très serré)</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">4. Conditions des discontinuités</div>
+                            <select class="form-control" id="joint-condition">
+                                <option value="30">Excellent : surfaces rugueuses, non altérées</option>
+                                <option value="25" selected>Bon : surfaces légèrement rugueuses, légèrement altérées</option>
+                                <option value="20">Acceptable : surfaces moyennement altérées</option>
+                                <option value="10">Mauvais : surfaces polies ou avec remplissage mineur</option>
+                                <option value="0">Très mauvais : remplissage épais ou gouge</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">5. Conditions d'eau souterraine</div>
+                            <select class="form-control" id="groundwater">
+                                <option value="15" selected>Sec (0 l/min)</option>
+                                <option value="10">Humide (&lt;10 l/min)</option>
+                                <option value="7">Mouillé (10-25 l/min)</option>
+                                <option value="4">Ruisselant (25-125 l/min)</option>
+                                <option value="0">Débitant (&gt;125 l/min)</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">6. Ajustement pour l'orientation des discontinuités</div>
+                            <select class="form-control" id="joint-orientation">
+                                <option value="0" selected>Très favorable</option>
+                                <option value="-2">Favorable</option>
+                                <option value="-5">Acceptable</option>
+                                <option value="-10">Défavorable</option>
+                                <option value="-12">Très défavorable</option>
+                            </select>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">Informations sur le projet</div>
+                            <div class="form-group">
+                                <label for="project-name">Nom :</label>
+                                <input type="text" class="form-control" id="project-name" placeholder="Nom du projet">
+                            </div>
+                            <div class="form-group">
+                                <label for="project-location">Localisation :</label>
+                                <input type="text" class="form-control" id="project-location" placeholder="Localisation">
+                            </div>
+                            <div class="form-group">
+                                <label for="project-engineer">Ingénieur :</label>
+                                <input type="text" class="form-control" id="project-engineer" placeholder="Ingénieur responsable">
+                            </div>
+                            <div class="form-group">
+                                <label for="project-date">Date :</label>
+                                <input type="text" class="form-control" id="project-date" placeholder="" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="project-notes">Notes :</label>
+                                <textarea class="form-control" id="project-notes" placeholder="Notes supplémentaires..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="resetForm()"><i class="fas fa-undo"></i> Réinitialiser</button>
+                            <button class="btn btn-success" onclick="calculateRMR()"><i class="fas fa-calculator"></i> Calculer RMR</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="splitter-handle" id="splitter-handle"></div>
+
+                <div class="splitter-panel" id="results-panel">
+                    <div class="scrollable">
+                        <div class="card" style="background-color: #f0f9ff; border-color: #bae6fd;">
+                            <div id="project-summary">
+                                <strong>Projet :</strong> Nouveau projet<br>
+                                <strong>Date :</strong> <span id="current-date"></span>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">Résultats du calcul RMR</div>
+                            <div class="result-item">
+                                <span class="result-label">Score RMR :</span>
+                                <span class="result-value" id="rmr-score">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Classification :</span>
+                                <span class="result-value" id="rmr-classification">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Valeur Q estimée :</span>
+                                <span class="result-value" id="q-value">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Temps de tenue :</span>
+                                <span class="result-value" id="stand-up-time">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Cohésion estimée (kPa) :</span>
+                                <span class="result-value" id="cohesion">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Angle de frottement (°) :</span>
+                                <span class="result-value" id="friction-angle">-</span>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">Guide d'interprétation</div>
+                            <div style="overflow-x: auto;">
+                                <table class="table">
+                                    <tr>
+                                        <th>Classe</th>
+                                        <th>Valeur RMR</th>
+                                        <th>Qualité</th>
+                                        <th>Cohésion (kPa)</th>
+                                        <th>Angle de frottement</th>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #d5f5e3;">I</td>
+                                        <td style="background-color: #d5f5e3;">81-100</td>
+                                        <td style="background-color: #d5f5e3;">Très bonne</td>
+                                        <td style="background-color: #d5f5e3;">&gt;400</td>
+                                        <td style="background-color: #d5f5e3;">&gt;45°</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #a3e4d7;">II</td>
+                                        <td style="background-color: #a3e4d7;">61-80</td>
+                                        <td style="background-color: #a3e4d7;">Bonne</td>
+                                        <td style="background-color: #a3e4d7;">300-400</td>
+                                        <td style="background-color: #a3e4d7;">35-45°</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #f9e79f;">III</td>
+                                        <td style="background-color: #f9e79f;">41-60</td>
+                                        <td style="background-color: #f9e79f;">Acceptable</td>
+                                        <td style="background-color: #f9e79f;">200-300</td>
+                                        <td style="background-color: #f9e79f;">25-35°</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #f5cba7;">IV</td>
+                                        <td style="background-color: #f5cba7;">21-40</td>
+                                        <td style="background-color: #f5cba7;">Mauvaise</td>
+                                        <td style="background-color: #f5cba7;">100-200</td>
+                                        <td style="background-color: #f5cba7;">15-25°</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="background-color: #fadbd8;">V</td>
+                                        <td style="background-color: #fadbd8;">0-20</td>
+                                        <td style="background-color: #fadbd8;">Très mauvaise</td>
+                                        <td style="background-color: #fadbd8;">&lt;100</td>
+                                        <td style="background-color: #fadbd8;">&lt;15°</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <p style="margin-top: 15px;"><strong>Temps de tenue estimé :</strong><br>
+                            • RMR &gt; 80 : 10 ans pour un tunnel de 10m de diamètre<br>
+                            • RMR 60-80 : 6 mois pour un tunnel de 10m de diamètre<br>
+                            • RMR 40-60 : 1 semaine pour un tunnel de 5m de diamètre<br>
+                            • RMR 20-40 : 8 heures pour un tunnel de 2.5m de diamètre<br>
+                            • RMR &lt; 20 : 1 heure pour un tunnel de 1m de diamètre</p>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="saveHistory()"><i class="fas fa-save"></i> Sauvegarder</button>
+                            <div style="flex-grow: 1;"></div>
+                            <button class="btn btn-success" onclick="exportResults('pdf')"><i class="fas fa-file-export"></i> Exporter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualizations Tab -->
+        <div class="tab-content" id="visualizations-tab">
+            <div class="tabs">
+                <div class="tab active" data-subtab="parameters-chart">Répartition des paramètres</div>
+                <div class="tab" data-subtab="comparison-chart">Comparaison des paramètres</div>
+                <div class="tab" data-subtab="trends-chart">Tendances historiques</div>
+            </div>
+
+            <div class="tab-content active" id="parameters-chart">
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="tab-content" id="comparison-chart">
+                <div class="chart-container">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+
+            <div class="tab-content" id="trends-chart">
+                <div class="chart-container">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <p id="no-history-message" style="text-align: center; color: var(--text-light); display: none;">
+                    Données historiques insuffisantes pour afficher les tendances
+                </p>
+            </div>
+        </div>
+
+        <!-- Documentation Tab -->
+        <div class="tab-content" id="documentation-tab">
+            <div class="scrollable">
+                <h2 style="color: var(--text-color);">Système Rock Mass Rating (RMR)</h2>
+                <p style="color: var(--text-light); margin-bottom: 15px;">
+                    Le système Rock Mass Rating (RMR), également connu sous le nom de classification géomécanique de Bieniawski, 
+                    est une méthode quantitative pour évaluer la qualité d'un massif rocheux. Développé dans les années 1970, 
+                    il est largement utilisé en géotechnique pour la conception de tunnels, de pentes et de fondations.
+                </p>
+                
+                <h3 style="color: var(--text-color);">Paramètres RMR</h3>
+                <p style="color: var(--text-light);">La classification RMR est calculée à partir de six paramètres :</p>
+                <ol style="color: var(--text-light); margin-bottom: 15px;">
+                    <li><strong>Résistance à la compression uniaxiale de la roche intacte (UCS)</strong> - Mesure la résistance de la roche intacte</li>
+                    <li><strong>Rock Quality Designation (RQD)</strong> - Mesure la qualité de la roche basée sur les carottes de forage</li>
+                    <li><strong>Espacement des joints</strong> - Distance moyenne entre les fractures</li>
+                    <li><strong>Condition des joints</strong> - État des surfaces de fracture</li>
+                    <li><strong>Conditions d'eau souterraine</strong> - Influence de l'eau sur le massif rocheux</li>
+                    <li><strong>Orientation des joints</strong> - Effet de l'orientation des joints par rapport à l'excavation</li>
+                    <li><strong>Formule Q</strong> - Q = exp((RMR - 44)/9)</li>
+                    <li><strong>Formule RMR</strong> - RMR = A1 + A2 + A3 + A4 + A5 + A6</li>
+                </ol>
+                
+                <h3 style="color: var(--text-color);">Applications pratiques</h3>
+                <p style="color: var(--text-light);">Le RMR est utilisé pour :</p>
+                <ul style="color: var(--text-light); margin-bottom: 15px;">
+                    <li>Estimer les paramètres de résistance du massif rocheux</li>
+                    <li>Déterminer le soutènement requis pour les tunnels</li>
+                    <li>Évaluer la stabilité des pentes rocheuses</li>
+                    <li>Prédire le comportement du massif rocheux pendant l'excavation</li>
+                    <li>Estimer les propriétés mécaniques équivalentes</li>
+                </ul>
+                
+                <h3 style="color: var(--text-color);">Limitations</h3>
+                <p style="color: var(--text-light);">Le système RMR présente certaines limitations :</p>
+                <ul style="color: var(--text-light); margin-bottom: 15px;">
+                    <li>Principalement adapté aux roches dures</li>
+                    <li>Moins précis pour les roches très fracturées ou altérées</li>
+                    <li>Ne tient pas compte des contraintes in situ</li>
+                    <li>Doit être utilisé avec d'autres méthodes pour une évaluation complète</li>
+                </ul>
+                
+                <h3 style="color: var(--text-color);">Références</h3>
+                <p style="color: var(--text-light);">Bieniawski, Z.T. (1989). <i>Engineering Rock Mass Classifications</i>. Wiley.</p>
+                <p style="color: var(--text-light);">Bieniawski, Z.T. (1976). Rock mass classifications in rock engineering. <i>Proceedings of the Symposium on Exploration for Rock Engineering</i>, Johannesburg, 1: 97-106.</p>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div class="tab-content" id="history-tab">
+            <p style="color: var(--text-light); margin-bottom: 15px;">
+                Historique des calculs précédents :
+            </p>
+
+            <div class="search-box">
+                <input type="text" id="history-search" placeholder="Rechercher dans l'historique...">
+                <button onclick="clearSearch()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="card">
+                <ul class="history-list" id="history-list">
+                    <li class="history-item">
+                        <div class="history-item-date">2023-06-15</div>
+                        <div class="history-item-project">Tunnel de Montagne</div>
+                        <div class="history-item-rmr">RMR: 72 (Classe II)</div>
+                    </li>
+                    <li class="history-item">
+                        <div class="history-item-date">2023-05-28</div>
+                        <div class="history-item-project">Excavation Minière</div>
+                        <div class="history-item-rmr">RMR: 58 (Classe III)</div>
+                    </li>
+                    <li class="history-item">
+                        <div class="history-item-date">2023-04-10</div>
+                        <div class="history-item-project">Projet de Fondation</div>
+                        <div class="history-item-rmr">RMR: 85 (Classe I)</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-danger" onclick="clearHistory()"><i class="fas fa-trash"></i> Effacer l'historique</button>
+                <div style="flex-grow: 1;"></div>
+                <button class="btn btn-secondary" onclick="compareSelected()"><i class="fas fa-columns"></i> Comparer la sélection</button>
+                <button class="btn btn-success" onclick="loadSelected()"><i class="fas fa-folder-open"></i> Charger la sélection</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div id="status-message">Prêt</div>
+        <div class="progress-bar" id="progress-bar" style="display: none;">
+            <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+    </div>
+
+    <div class="theme-toggle" onclick="toggleTheme()">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal" id="about-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">À propos - Calculateur RMR</div>
+                <div class="modal-close" onclick="closeModal('about-modal')">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                    <img src="https://via.placeholder.com/80" alt="Logo" style="margin-right: 20px;">
+                    <div>
+                        <h2 style="color: var(--text-color);">Calculateur RMR Professionnel</h2>
+                        <p style="color: var(--text-light);">Version 2.2</p>
+                    </div>
+                </div>
+                
+                <p style="color: var(--text-color); margin-bottom: 15px;">
+                    Outil professionnel pour le calcul du Rock Mass Rating (RMR) selon le système de classification de Bieniawski.
+                </p>
+                
+                <p style="color: var(--text-color);"><strong>Fonctionnalités :</strong></p>
+                <ul style="color: var(--text-color); margin-bottom: 15px;">
+                    <li>Calcul automatique du RMR et classification</li>
+                    <li>Estimation de la valeur Q</li>
+                    <li>Prédiction du temps de tenue</li>
+                    <li>Export vers multiples formats (TXT, PDF, CSV)</li>
+                    <li>Historique des calculs avec comparaison</li>
+                    <li>Graphiques interactifs</li>
+                </ul>
+                
+                <p style="color: var(--text-light); text-align: center; margin-top: 20px;">
+                    © 2023-2024 Solutions GéoTech. Tous droits réservés.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('about-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Modal -->
+    <div class="modal" id="preferences-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Préférences</div>
+                <div class="modal-close" onclick="closeModal('preferences-modal')">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div class="tabs">
+                    <div class="tab active" data-pref-tab="general-tab">Général</div>
+                    <div class="tab" data-pref-tab="calculation-tab">Calcul</div>
+                    <div class="tab" data-pref-tab="export-tab">Export</div>
+                </div>
+
+                <div class="tab-content active" id="general-tab">
+                    <div class="form-group">
+                        <label for="theme-preference">Thème :</label>
+                        <select class="form-control" id="theme-preference">
+                            <option>Clair</option>
+                            <option>Sombre</option>
+                            <option>Système</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="units-preference">Unités :</label>
+                        <select class="form-control" id="units-preference">
+                            <option>Métrique (m, kPa)</option>
+                            <option>Impérial (ft, psi)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="auto-save-preference">Sauvegarde auto. :</label>
+                        <select class="form-control" id="auto-save-preference">
+                            <option>Jamais</option>
+                            <option>À la fermeture</option>
+                            <option>Après calcul</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="calculation-tab">
+                    <div class="form-group">
+                        <label for="method-preference">Méthode par défaut :</label>
+                        <select class="form-control" id="method-preference">
+                            <option>RMR89</option>
+                            <option>RMR14</option>
+                            <option>Personnalisé</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="decimals-preference">Décimales :</label>
+                        <select class="form-control" id="decimals-preference">
+                            <option>0</option>
+                            <option>1</option>
+                            <option selected>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="export-tab">
+                    <div class="form-group">
+                        <label for="export-format-preference">Format d'export :</label>
+                        <select class="form-control" id="export-format-preference">
+                            <option>PDF</option>
+                            <option>CSV</option>
+                            <option>TXT</option>
+                            <option>JSON</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="export-date-preference">Inclure la date :</label>
+                        <select class="form-control" id="export-date-preference">
+                            <option>Oui</option>
+                            <option>Non</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('preferences-modal')">Annuler</button>
+                <button class="btn btn-primary" onclick="savePreferences()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculation Details Modal -->
+    <div class="modal" id="details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Détails du calcul</div>
+                <div class="modal-close" onclick="closeModal('details-modal')">&times;</div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                    <strong style="color: var(--text-color);">Calcul du :</strong> <span id="detail-date">2023-06-15</span>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" data-detail-tab="project-tab">Projet</div>
+                    <div class="tab" data-detail-tab="params-tab">Paramètres</div>
+                    <div class="tab" data-detail-tab="results-tab">Résultats</div>
+                </div>
+
+                <div class="tab-content active" id="project-tab">
+                    <div class="form-group">
+                        <label>Projet :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-project-name">Tunnel de Montagne</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Localisation :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-project-location">Alpes Françaises</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ingénieur :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-project-engineer">Jean Dupont</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes :</label>
+                        <div class="form-control" style="background-color: var(--card-bg); min-height: 100px;" id="detail-project-notes">Calcul préliminaire pour le tunnel principal</div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="params-tab">
+                    <div class="form-group">
+                        <label>Résistance de la roche :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-rock-strength">UCS : 100-250 MPa (Roche résistante)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>RQD :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-rqd">RQD : 75-90% (Bonne roche)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Espacement des joints :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-joint-spacing">20-60 cm (Espacement moyen)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Condition des joints :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-joint-condition">Bon : surfaces légèrement rugueuses, légèrement altérées</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Eau souterraine :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-groundwater">Sec (0 l/min)</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientation des joints :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-joint-orientation">Très favorable</div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="results-tab">
+                    <div class="form-group">
+                        <label>Score RMR :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-rmr-score">72 points</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Classification :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-rmr-classification">Classe II - Bonne roche</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Valeur Q :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-q-value">2.45</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Cohésion :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-cohesion">300-400</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Angle de frottement :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-friction-angle">35-45°</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Temps de tenue :</label>
+                        <div class="form-control" style="background-color: var(--card-bg);" id="detail-stand-up-time">6 mois (tunnel 10m)</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="loadFromDetails()">Charger le calcul</button>
+                <button class="btn btn-primary" onclick="closeModal('details-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Modal -->
+    <div class="modal" id="comparison-modal">
+        <div class="modal-content" style="width: 90%; max-width: 1200px;">
+            <div class="modal-header">
+                <div class="modal-title">Comparaison des calculs</div>
+                <div class="modal-close" onclick="closeModal('comparison-modal')">&times;</div>
+            </div>
+            <div class="modal-body">
+                <h2 style="color: var(--text-color);">Comparaison des calculs RMR</h2>
+                <p>Généré le <span id="comparison-date"></span></p>
+
+                <h3 style="color: var(--text-color); margin-top: 20px;">Informations sur le projet</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table" id="comparison-project-table">
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Calcul 1 (2023-06-15)</th>
+                            <th>Calcul 2 (2023-05-28)</th>
+                        </tr>
+                        <tr>
+                            <td>Nom du projet</td>
+                            <td>Tunnel de Montagne</td>
+                            <td>Excavation Minière</td>
+                        </tr>
+                        <tr>
+                            <td>Localisation</td>
+                            <td>Alpes Françaises</td>
+                            <td>Site Minier Nord</td>
+                        </tr>
+                        <tr>
+                            <td>Ingénieur</td>
+                            <td>Jean Dupont</td>
+                            <td>Marie Lambert</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3 style="color: var(--text-color); margin-top: 20px;">Paramètres d'entrée</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table" id="comparison-params-table">
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Calcul 1 (2023-06-15)</th>
+                            <th>Calcul 2 (2023-05-28)</th>
+                        </tr>
+                        <tr>
+                            <td>Résistance de la roche</td>
+                            <td>UCS : 100-250 MPa (Roche résistante)</td>
+                            <td>UCS : 50-100 MPa (Roche moyennement résistante)</td>
+                        </tr>
+                        <tr>
+                            <td>RQD</td>
+                            <td>RQD : 75-90% (Bonne roche)</td>
+                            <td>RQD : 50-75% (Roche acceptable)</td>
+                        </tr>
+                        <tr>
+                            <td>Espacement des joints</td>
+                            <td>20-60 cm (Espacement moyen)</td>
+                            <td>6-20 cm (Espacement serré)</td>
+                        </tr>
+                        <tr>
+                            <td>Condition des joints</td>
+                            <td>Bon : surfaces légèrement rugueuses, légèrement altérées</td>
+                            <td>Acceptable : surfaces moyennement altérées</td>
+                        </tr>
+                        <tr>
+                            <td>Eau souterraine</td>
+                            <td>Sec (0 l/min)</td>
+                            <td>Humide (&lt;10 l/min)</td>
+                        </tr>
+                        <tr>
+                            <td>Orientation des joints</td>
+                            <td>Très favorable</td>
+                            <td>Acceptable</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3 style="color: var(--text-color); margin-top: 20px;">Résultats</h3>
+                <div style="overflow-x: auto;">
+                    <table class="table" id="comparison-results-table">
+                        <tr>
+                            <th>Paramètre</th>
+                            <th>Calcul 1 (2023-06-15)</th>
+                            <th>Calcul 2 (2023-05-28)</th>
+                        </tr>
+                        <tr>
+                            <td>Score RMR</td>
+                            <td>72 points</td>
+                            <td>58 points</td>
+                        </tr>
+                        <tr>
+                            <td>Classification</td>
+                            <td>Classe II - Bonne roche</td>
+                            <td>Classe III - Roche acceptable</td>
+                        </tr>
+                        <tr>
+                            <td>Valeur Q estimée</td>
+                            <td>2.45</td>
+                            <td>1.28</td>
+                        </tr>
+                        <tr>
+                            <td>Temps de tenue</td>
+                            <td>6 mois (tunnel 10m)</td>
+                            <td>1 semaine (tunnel 5m)</td>
+                        </tr>
+                        <tr>
+                            <td>Cohésion estimée</td>
+                            <td>300-400 kPa</td>
+                            <td>200-300 kPa</td>
+                        </tr>
+                        <tr>
+                            <td>Angle de frottement</td>
+                            <td>35-45°</td>
+                            <td>25-35°</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="exportComparison()">Exporter la comparaison</button>
+                <button class="btn btn-primary" onclick="closeModal('comparison-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTheme = 'light';
+        let historyData = [
+            {
+                date: "2023-06-15 14:30:00",
+                project: {
+                    name: "Tunnel de Montagne",
+                    location: "Alpes Françaises",
+                    engineer: "Jean Dupont",
+                    notes: "Calcul préliminaire pour le tunnel principal"
+                },
+                parameters: {
+                    rockStrength: "UCS : 100-250 MPa (Roche résistante)",
+                    rqd: "RQD : 75-90% (Bonne roche)",
+                    jointSpacing: "20-60 cm (Espacement moyen)",
+                    jointCondition: "Bon : surfaces légèrement rugueuses, légèrement altérées",
+                    groundwater: "Sec (0 l/min)",
+                    jointOrientation: "Très favorable"
+                },
+                results: {
+                    rmr: "72 points",
+                    classification: "Classe II - Bonne roche",
+                    qValue: "2.45",
+                    cohesion: "300-400",
+                    frictionAngle: "35-45°",
+                    standUpTime: "6 mois (tunnel 10m)"
+                }
+            },
+            {
+                date: "2023-05-28 10:15:00",
+                project: {
+                    name: "Excavation Minière",
+                    location: "Site Minier Nord",
+                    engineer: "Marie Lambert",
+                    notes: "Évaluation pour la galerie principale"
+                },
+                parameters: {
+                    rockStrength: "UCS : 50-100 MPa (Roche moyennement résistante)",
+                    rqd: "RQD : 50-75% (Roche acceptable)",
+                    jointSpacing: "6-20 cm (Espacement serré)",
+                    jointCondition: "Acceptable : surfaces moyennement altérées",
+                    groundwater: "Humide (<10 l/min)",
+                    jointOrientation: "Acceptable"
+                },
+                results: {
+                    rmr: "58 points",
+                    classification: "Classe III - Roche acceptable",
+                    qValue: "1.28",
+                    cohesion: "200-300",
+                    frictionAngle: "25-35°",
+                    standUpTime: "1 semaine (tunnel 5m)"
+                }
+            },
+            {
+                date: "2023-04-10 09:45:00",
+                project: {
+                    name: "Projet de Fondation",
+                    location: "Site de Construction Est",
+                    engineer: "Pierre Martin",
+                    notes: "Analyse pour les fondations du bâtiment principal"
+                },
+                parameters: {
+                    rockStrength: "UCS : 250+ MPa (Roche très résistante)",
+                    rqd: "RQD : 90-100% (Roche excellente)",
+                    jointSpacing: "60-200 cm (Espacement large)",
+                    jointCondition: "Excellent : surfaces rugueuses, non altérées",
+                    groundwater: "Sec (0 l/min)",
+                    jointOrientation: "Très favorable"
+                },
+                results: {
+                    rmr: "92 points",
+                    classification: "Classe I - Roche très bonne",
+                    qValue: "5.75",
+                    cohesion: ">400",
+                    frictionAngle: ">45°",
+                    standUpTime: "10 ans (tunnel 10m)"
+                }
+            }
+        ];
+
+        // Chart instances
+        let pieChart, barChart, lineChart;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date
+            const today = new Date();
+            document.getElementById('project-date').value = formatDate(today);
+            document.getElementById('current-date').textContent = formatDate(today);
+            document.getElementById('comparison-date').textContent = formatDateTime(today);
+
+            // Initialize tabs
+            initTabs();
+            
+            // Initialize subtabs
+            initSubTabs();
+            
+            // Initialize preference tabs
+            initPreferenceTabs();
+            
+            // Initialize detail tabs
+            initDetailTabs();
+            
+            // Initialize splitter
+            initSplitter();
+            
+            // Initialize charts
+            initCharts();
+            
+            // Load history
+            loadHistory();
+            
+            // Check for first run
+            checkFirstRun();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Calculate initial RMR
+            calculateRMR();
+        });
+
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab[data-tab]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab[data-tab]').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        function initSubTabs() {
+            const subtabs = document.querySelectorAll('.tab[data-subtab]');
+            subtabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all subtabs and contents
+                    document.querySelectorAll('.tab[data-subtab]').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content[id$="-chart"]').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked subtab and corresponding content
+                    this.classList.add('active');
+                    const subtabId = this.getAttribute('data-subtab');
+                    document.getElementById(subtabId).classList.add('active');
+                });
+            });
+        }
+
+        function initPreferenceTabs() {
+            const tabs = document.querySelectorAll('.tab[data-pref-tab]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab[data-pref-tab]').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content[id$="-tab"]').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-pref-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        function initDetailTabs() {
+            const tabs = document.querySelectorAll('.tab[data-detail-tab]');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and contents
+                    document.querySelectorAll('.tab[data-detail-tab]').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content[id^="detail-"]').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-detail-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        }
+
+        function initSplitter() {
+            const splitter = document.getElementById('splitter-handle');
+            const leftPanel = document.getElementById('params-panel');
+            const rightPanel = document.getElementById('results-panel');
+            
+            let isDragging = false;
+            
+            splitter.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                document.body.style.cursor = 'col-resize';
+                leftPanel.style.userSelect = 'none';
+                leftPanel.style.pointerEvents = 'none';
+                rightPanel.style.userSelect = 'none';
+                rightPanel.style.pointerEvents = 'none';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const containerWidth = document.querySelector('.calculator-container').offsetWidth;
+                const handleWidth = splitter.offsetWidth;
+                const minWidth = 300;
+                
+                let leftWidth = e.clientX - leftPanel.getBoundingClientRect().left;
+                let rightWidth = containerWidth - leftWidth - handleWidth;
+                
+                // Enforce minimum widths
+                if (leftWidth < minWidth) leftWidth = minWidth;
+                if (rightWidth < minWidth) {
+                    leftWidth = containerWidth - minWidth - handleWidth;
+                    rightWidth = minWidth;
+                }
+                
+                leftPanel.style.width = leftWidth + 'px';
+                rightPanel.style.width = rightWidth + 'px';
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                document.body.style.cursor = '';
+                leftPanel.style.userSelect = '';
+                leftPanel.style.pointerEvents = '';
+                rightPanel.style.userSelect = '';
+                rightPanel.style.pointerEvents = '';
+            });
+        }
+
+        function initCharts() {
+            // Pie Chart for Parameter Contributions
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Résistance roche', 'RQD', 'Espacement joints', 'Condition joints', 'Eau', 'Orientation'],
+                    datasets: [{
+                        data: [12, 17, 10, 25, 15, 0],
+                        backgroundColor: [
+                            '#3498db', '#2ecc71', '#f1c40f', '#e74c3c', '#9b59b6', '#1abc9c'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Contribution des paramètres au RMR',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Bar Chart for Parameter Comparison
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            barChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Résistance roche', 'RQD', 'Espacement joints', 'Condition joints', 'Eau', 'Orientation'],
+                    datasets: [{
+                        label: 'Valeurs des paramètres',
+                        data: [12, 17, 10, 25, 15, 0],
+                        backgroundColor: [
+                            '#3498db', '#2ecc71', '#f1c40f', '#e74c3c', '#9b59b6', '#1abc9c'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Valeurs des paramètres',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Score'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Line Chart for Historical Trends
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2023-04-10', '2023-05-28', '2023-06-15'],
+                    datasets: [{
+                        label: 'Score RMR',
+                        data: [92, 58, 72],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Tendances historiques RMR',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score RMR'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadHistory() {
+            const historyList = document.getElementById('history-list');
+            historyList.innerHTML = '';
+            
+            if (historyData.length === 0) {
+                historyList.innerHTML = '<li class="history-item">Aucun historique disponible</li>';
+                return;
+            }
+            
+            // Sort by date (newest first)
+            historyData.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            historyData.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.dataset.date = item.date;
+                
+                // Extract just the date part (first 10 characters)
+                const datePart = item.date.substring(0, 10);
+                
+                li.innerHTML = `
+                    <div class="history-item-date">${datePart}</div>
+                    <div class="history-item-project">${item.project.name}</div>
+                    <div class="history-item-rmr">RMR: ${item.results.rmr.split(' ')[0]} (${item.results.classification.split(' - ')[0]})</div>
+                `;
+                
+                li.addEventListener('click', function() {
+                    // Toggle selected state
+                    this.classList.toggle('selected');
+                });
+                
+                li.addEventListener('dblclick', function() {
+                    showCalculationDetails(item);
+                });
+                
+                historyList.appendChild(li);
+            });
+        }
+
+        function checkFirstRun() {
+            if (!localStorage.getItem('firstRun')) {
+                showWelcomeMessage();
+                localStorage.setItem('firstRun', 'completed');
+            }
+        }
+
+        function setupEventListeners() {
+            // Parameter change events
+            document.getElementById('rock-strength').addEventListener('change', calculateRMR);
+            document.getElementById('rqd').addEventListener('change', calculateRMR);
+            document.getElementById('joint-spacing').addEventListener('change', calculateRMR);
+            document.getElementById('joint-condition').addEventListener('change', calculateRMR);
+            document.getElementById('groundwater').addEventListener('change', calculateRMR);
+            document.getElementById('joint-orientation').addEventListener('change', calculateRMR);
+            
+            // Project info change events
+            document.getElementById('project-name').addEventListener('input', updateProjectSummary);
+            document.getElementById('project-location').addEventListener('input', updateProjectSummary);
+            document.getElementById('project-engineer').addEventListener('input', updateProjectSummary);
+            
+            // History search
+            document.getElementById('history-search').addEventListener('input', filterHistory);
+        }
+
+        function calculateRMR() {
+            showProgressBar();
+            
+            // Get values from form
+            const rockStrength = parseInt(document.getElementById('rock-strength').value);
+            const rqd = parseInt(document.getElementById('rqd').value);
+            const jointSpacing = parseInt(document.getElementById('joint-spacing').value);
+            const jointCondition = parseInt(document.getElementById('joint-condition').value);
+            const groundwater = parseInt(document.getElementById('groundwater').value);
+            const jointOrientation = parseInt(document.getElementById('joint-orientation').value);
+            
+            updateProgress(20);
+            
+            // Calculate RMR
+            const rmr = rockStrength + rqd + jointSpacing + jointCondition + groundwater + jointOrientation;
+            document.getElementById('rmr-score').textContent = rmr + ' points';
+            
+            updateProgress(40);
+            
+            // Calculate Q value
+            const qValue = Math.exp((rmr - 44) / 9);
+            const decimals = parseInt(document.getElementById('decimals-preference').value) || 2;
+            document.getElementById('q-value').textContent = qValue.toFixed(decimals);
+            
+            updateProgress(60);
+            
+            // Determine classification
+            let classification, classificationClass, cohesion, frictionAngle, standUpTime;
+            
+            if (rmr >= 81) {
+                classification = "Classe I - Roche très bonne";
+                classificationClass = "class-I";
+                cohesion = ">400";
+                frictionAngle = ">45°";
+                standUpTime = "10 ans (tunnel 10m)";
+            } else if (rmr >= 61) {
+                classification = "Classe II - Bonne roche";
+                classificationClass = "class-II";
+                cohesion = "300-400";
+                frictionAngle = "35-45°";
+                standUpTime = "6 mois (tunnel 10m)";
+            } else if (rmr >= 41) {
+                classification = "Classe III - Roche acceptable";
+                classificationClass = "class-III";
+                cohesion = "200-300";
+                frictionAngle = "25-35°";
+                standUpTime = "1 semaine (tunnel 5m)";
+            } else if (rmr >= 21) {
+                classification = "Classe IV - Mauvaise roche";
+                classificationClass = "class-IV";
+                cohesion = "100-200";
+                frictionAngle = "15-25°";
+                standUpTime = "8 heures (tunnel 2.5m)";
+            } else {
+                classification = "Classe V - Roche très mauvaise";
+                classificationClass = "class-V";
+                cohesion = "<100";
+                frictionAngle = "<15°";
+                standUpTime = "1 heure (tunnel 1m)";
+            }
+            
+            updateProgress(80);
+            
+            // Update results
+            const classificationElement = document.getElementById('rmr-classification');
+            classificationElement.textContent = classification;
+            classificationElement.className = "result-value " + classificationClass;
+            
+            document.getElementById('cohesion').textContent = cohesion;
+            document.getElementById('friction-angle').textContent = frictionAngle;
+            document.getElementById('stand-up-time').textContent = standUpTime;
+            
+            // Update project summary
+            updateProjectSummary();
+            
+            // Update charts
+            updateCharts(rockStrength, rqd, jointSpacing, jointCondition, groundwater, Math.abs(jointOrientation), rmr);
+            
+            updateProgress(100);
+            
+            // Hide progress bar after a delay
+            setTimeout(hideProgressBar, 1000);
+            
+            // Show completion message
+            showStatusMessage("Calcul terminé", 5000);
+            
+            // Auto-save if preference is set
+            if (document.getElementById('auto-save-preference').value === "Après calcul") {
+                saveHistory();
+            }
+        }
+
+        function updateCharts(rockStrength, rqd, jointSpacing, jointCondition, groundwater, jointOrientation, rmr) {
+            // Update pie chart
+            pieChart.data.datasets[0].data = [rockStrength, rqd, jointSpacing, jointCondition, groundwater, jointOrientation];
+            pieChart.update();
+            
+            // Update bar chart
+            barChart.data.datasets[0].data = [rockStrength, rqd, jointSpacing, jointCondition, groundwater, jointOrientation];
+            barChart.update();
+            
+            // Update line chart if we have history
+            if (historyData.length >= 2) {
+                document.getElementById('no-history-message').style.display = 'none';
+                
+                // Sort history by date
+                const sortedHistory = [...historyData].sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                // Extract dates and RMR values
+                const dates = sortedHistory.map(item => item.date.substring(0, 10));
+                const rmrValues = sortedHistory.map(item => parseInt(item.results.rmr.split(' ')[0]));
+                
+                // Update chart data
+                lineChart.data.labels = dates;
+                lineChart.data.datasets[0].data = rmrValues;
+                lineChart.update();
+            } else {
+                document.getElementById('no-history-message').style.display = 'block';
+            }
+        }
+
+        function updateProjectSummary() {
+            const projectName = document.getElementById('project-name').value || "Nouveau projet";
+            const projectLocation = document.getElementById('project-location').value || "Non spécifiée";
+            const projectEngineer = document.getElementById('project-engineer').value || "Non spécifié";
+            const projectDate = document.getElementById('project-date').value;
+            
+            document.getElementById('project-summary').innerHTML = `
+                <strong>Projet :</strong> ${projectName}<br>
+                <strong>Localisation :</strong> ${projectLocation}<br>
+                <strong>Ingénieur :</strong> ${projectEngineer}<br>
+                <strong>Date :</strong> ${projectDate}
+            `;
+        }
+
+        function resetForm() {
+            // Reset form values to defaults
+            document.getElementById('rock-strength').selectedIndex = 1;
+            document.getElementById('rqd').selectedIndex = 1;
+            document.getElementById('joint-spacing').selectedIndex = 2;
+            document.getElementById('joint-condition').selectedIndex = 1;
+            document.getElementById('groundwater').selectedIndex = 0;
+            document.getElementById('joint-orientation').selectedIndex = 0;
+            
+            // Clear project info
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-location').value = '';
+            document.getElementById('project-engineer').value = '';
+            document.getElementById('project-notes').value = '';
+            
+            // Clear results
+            document.getElementById('rmr-score').textContent = '-';
+            document.getElementById('rmr-classification').textContent = '-';
+            document.getElementById('q-value').textContent = '-';
+            document.getElementById('cohesion').textContent = '-';
+            document.getElementById('friction-angle').textContent = '-';
+            document.getElementById('stand-up-time').textContent = '-';
+            
+            // Update project summary
+            updateProjectSummary();
+            
+            // Show confirmation message
+            showStatusMessage("Formulaire réinitialisé", 5000);
+        }
+
+        function saveHistory() {
+            if (!document.getElementById('rmr-score').textContent || document.getElementById('rmr-score').textContent === '-') {
+                showAlert("Historique", "Aucun résultat à sauvegarder.");
+                return;
+            }
+            
+            const today = new Date();
+            const historyEntry = {
+                date: formatDateTime(today),
+                project: {
+                    name: document.getElementById('project-name').value || "Nouveau projet",
+                    location: document.getElementById('project-location').value || "",
+                    engineer: document.getElementById('project-engineer').value || "",
+                    notes: document.getElementById('project-notes').value || ""
+                },
+                parameters: {
+                    rockStrength: document.getElementById('rock-strength').options[document.getElementById('rock-strength').selectedIndex].text,
+                    rqd: document.getElementById('rqd').options[document.getElementById('rqd').selectedIndex].text,
+                    jointSpacing: document.getElementById('joint-spacing').options[document.getElementById('joint-spacing').selectedIndex].text,
+                    jointCondition: document.getElementById('joint-condition').options[document.getElementById('joint-condition').selectedIndex].text,
+                    groundwater: document.getElementById('groundwater').options[document.getElementById('groundwater').selectedIndex].text,
+                    jointOrientation: document.getElementById('joint-orientation').options[document.getElementById('joint-orientation').selectedIndex].text
+                },
+                results: {
+                    rmr: document.getElementById('rmr-score').textContent,
+                    classification: document.getElementById('rmr-classification').textContent,
+                    qValue: document.getElementById('q-value').textContent,
+                    cohesion: document.getElementById('cohesion').textContent,
+                    frictionAngle: document.getElementById('friction-angle').textContent,
+                    standUpTime: document.getElementById('stand-up-time').textContent
+                }
+            };
+            
+            // Add to history data
+            historyData.push(historyEntry);
+            
+            // Update history display
+            loadHistory();
+            
+            // Show confirmation message
+            showStatusMessage("Calcul sauvegardé dans l'historique", 5000);
+        }
+
+        function filterHistory() {
+            const searchText = document.getElementById('history-search').value.toLowerCase();
+            const historyItems = document.querySelectorAll('.history-item');
+            
+            historyItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(searchText) ? '' : 'none';
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('history-search').value = '';
+            filterHistory();
+        }
+
+        function showCalculationDetails(item) {
+            // Populate details modal
+            document.getElementById('detail-date').textContent = item.date.substring(0, 10);
+            
+            // Project tab
+            document.getElementById('detail-project-name').textContent = item.project.name;
+            document.getElementById('detail-project-location').textContent = item.project.location;
+            document.getElementById('detail-project-engineer').textContent = item.project.engineer;
+            document.getElementById('detail-project-notes').textContent = item.project.notes;
+            
+            // Parameters tab
+            document.getElementById('detail-rock-strength').textContent = item.parameters.rockStrength;
+            document.getElementById('detail-rqd').textContent = item.parameters.rqd;
+            document.getElementById('detail-joint-spacing').textContent = item.parameters.jointSpacing;
+            document.getElementById('detail-joint-condition').textContent = item.parameters.jointCondition;
+            document.getElementById('detail-groundwater').textContent = item.parameters.groundwater;
+            document.getElementById('detail-joint-orientation').textContent = item.parameters.jointOrientation;
+            
+            // Results tab
+            document.getElementById('detail-rmr-score').textContent = item.results.rmr;
+            document.getElementById('detail-rmr-classification').textContent = item.results.classification;
+            document.getElementById('detail-q-value').textContent = item.results.qValue;
+            document.getElementById('detail-cohesion').textContent = item.results.cohesion;
+            document.getElementById('detail-friction-angle').textContent = item.results.frictionAngle;
+            document.getElementById('detail-stand-up-time').textContent = item.results.standUpTime;
+            
+            // Store current item in modal for loading later
+            document.getElementById('details-modal').dataset.currentItem = JSON.stringify(item);
+            
+            // Show modal
+            document.getElementById('details-modal').style.display = 'flex';
+        }
+
+        function loadFromDetails() {
+            const item = JSON.parse(document.getElementById('details-modal').dataset.currentItem);
+            
+            // Load project info
+            document.getElementById('project-name').value = item.project.name;
+            document.getElementById('project-location').value = item.project.location;
+            document.getElementById('project-engineer').value = item.project.engineer;
+            document.getElementById('project-notes').value = item.project.notes;
+            
+            // Load parameters by matching text
+            setSelectByText('rock-strength', item.parameters.rockStrength);
+            setSelectByText('rqd', item.parameters.rqd);
+            setSelectByText('joint-spacing', item.parameters.jointSpacing);
+            setSelectByText('joint-condition', item.parameters.jointCondition);
+            setSelectByText('groundwater', item.parameters.groundwater);
+            setSelectByText('joint-orientation', item.parameters.jointOrientation);
+            
+            // Close modal
+            closeModal('details-modal');
+            
+            // Calculate RMR (which will update results)
+            calculateRMR();
+            
+            // Switch to calculator tab
+            switchTab('calculator-tab');
+            
+            // Show confirmation message
+            showStatusMessage("Entrée historique chargée", 3000);
+        }
+
+        function setSelectByText(selectId, text) {
+            const select = document.getElementById(selectId);
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].text.includes(text.split('(')[0].trim())) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function clearHistory() {
+            if (confirm("Êtes-vous sûr de vouloir effacer tout l'historique ?")) {
+                historyData = [];
+                loadHistory();
+                showStatusMessage("Historique effacé", 5000);
+            }
+        }
+
+        function loadSelected() {
+            const selectedItems = document.querySelectorAll('.history-item.selected');
+            if (selectedItems.length === 0) {
+                showAlert("Charger", "Aucun élément sélectionné");
+                return;
+            }
+            
+            // For now, just load the first selected item
+            const date = selectedItems[0].dataset.date;
+            const item = historyData.find(i => i.date === date);
+            
+            if (item) {
+                showCalculationDetails(item);
+            }
+        }
+
+        function compareSelected() {
+            const selectedItems = document.querySelectorAll('.history-item.selected');
+            if (selectedItems.length < 2) {
+                showAlert("Comparer", "Veuillez sélectionner au moins 2 éléments à comparer");
+                return;
+            }
+            
+            // Get selected items from history data
+            const selectedDates = Array.from(selectedItems).map(item => item.dataset.date);
+            const itemsToCompare = historyData.filter(item => selectedDates.includes(item.date));
+            
+            // Sort by date for consistent display
+            itemsToCompare.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // Update comparison tables
+            updateComparisonTables(itemsToCompare);
+            
+            // Show comparison modal
+            document.getElementById('comparison-modal').style.display = 'flex';
+        }
+
+        function updateComparisonTables(items) {
+            // Update project table
+            const projectTable = document.getElementById('comparison-project-table');
+            projectTable.innerHTML = `
+                <tr>
+                    <th>Paramètre</th>
+                    ${items.map((item, index) => `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`).join('')}
+                </tr>
+                <tr>
+                    <td>Nom du projet</td>
+                    ${items.map(item => `<td>${item.project.name}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Localisation</td>
+                    ${items.map(item => `<td>${item.project.location}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Ingénieur</td>
+                    ${items.map(item => `<td>${item.project.engineer}</td>`).join('')}
+                </tr>
+            `;
+            
+            // Update parameters table
+            const paramsTable = document.getElementById('comparison-params-table');
+            paramsTable.innerHTML = `
+                <tr>
+                    <th>Paramètre</th>
+                    ${items.map((item, index) => `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`).join('')}
+                </tr>
+                <tr>
+                    <td>Résistance de la roche</td>
+                    ${items.map(item => `<td>${item.parameters.rockStrength}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>RQD</td>
+                    ${items.map(item => `<td>${item.parameters.rqd}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Espacement des joints</td>
+                    ${items.map(item => `<td>${item.parameters.jointSpacing}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Condition des joints</td>
+                    ${items.map(item => `<td>${item.parameters.jointCondition}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Eau souterraine</td>
+                    ${items.map(item => `<td>${item.parameters.groundwater}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Orientation des joints</td>
+                    ${items.map(item => `<td>${item.parameters.jointOrientation}</td>`).join('')}
+                </tr>
+            `;
+            
+            // Update results table
+            const resultsTable = document.getElementById('comparison-results-table');
+            resultsTable.innerHTML = `
+                <tr>
+                    <th>Paramètre</th>
+                    ${items.map((item, index) => `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`).join('')}
+                </tr>
+                <tr>
+                    <td>Score RMR</td>
+                    ${items.map(item => `<td>${item.results.rmr}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Classification</td>
+                    ${items.map(item => `<td>${item.results.classification}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Valeur Q estimée</td>
+                    ${items.map(item => `<td>${item.results.qValue}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Temps de tenue</td>
+                    ${items.map(item => `<td>${item.results.standUpTime}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Cohésion estimée</td>
+                    ${items.map(item => `<td>${item.results.cohesion}</td>`).join('')}
+                </tr>
+                <tr>
+                    <td>Angle de frottement</td>
+                    ${items.map(item => `<td>${item.results.frictionAngle}</td>`).join('')}
+                </tr>
+            `;
+        }
+
+        function exportResults(format) {
+            if (!document.getElementById('rmr-score').textContent || document.getElementById('rmr-score').textContent === '-') {
+                showAlert("Export", "Aucun résultat à exporter. Veuillez effectuer un calcul d'abord.");
+                return;
+            }
+            
+            const projectName = document.getElementById('project-name').value || "Resultats";
+            let fileName = `RMR_${projectName.replace(/[^a-z0-9]/gi, '_')}`;
+            let content = '';
+            
+            // Common header
+            const header = `=== Résultats du calcul RMR ===
+===============================
+
+Informations sur le projet :
+Nom : ${document.getElementById('project-name').value || 'Non spécifié'}
+Localisation : ${document.getElementById('project-location').value || 'Non spécifiée'}
+Ingénieur : ${document.getElementById('project-engineer').value || 'Non spécifié'}
+Date : ${document.getElementById('project-date').value}
+Notes : ${document.getElementById('project-notes').value || 'Aucune'}
+
+Paramètres d'entrée :
+1. Résistance de la roche : ${document.getElementById('rock-strength').options[document.getElementById('rock-strength').selectedIndex].text}
+2. RQD : ${document.getElementById('rqd').options[document.getElementById('rqd').selectedIndex].text}
+3. Espacement des joints : ${document.getElementById('joint-spacing').options[document.getElementById('joint-spacing').selectedIndex].text}
+4. Condition des joints : ${document.getElementById('joint-condition').options[document.getElementById('joint-condition').selectedIndex].text}
+5. Eau souterraine : ${document.getElementById('groundwater').options[document.getElementById('groundwater').selectedIndex].text}
+6. Orientation des joints : ${document.getElementById('joint-orientation').options[document.getElementById('joint-orientation').selectedIndex].text}
+
+Résultats :
+• Score RMR : ${document.getElementById('rmr-score').textContent}
+• Classification : ${document.getElementById('rmr-classification').textContent}
+• Valeur Q estimée : ${document.getElementById('q-value').textContent}
+• Temps de tenue : ${document.getElementById('stand-up-time').textContent}
+• Cohésion estimée : ${document.getElementById('cohesion').textContent} kPa
+• Angle de frottement : ${document.getElementById('friction-angle').textContent}
+
+Généré par Calculateur RMR Professionnel
+Date d'export : ${formatDateTime(new Date())}
+`;
+            
+            switch (format) {
+                case 'txt':
+                    content = header;
+                    fileName += '.txt';
+                    downloadTextFile(content, fileName);
+                    break;
+                    
+                case 'csv':
+                    content = `Category,Parameter,Value
+Project,Name,${document.getElementById('project-name').value || ''}
+Project,Location,${document.getElementById('project-location').value || ''}
+Project,Engineer,${document.getElementById('project-engineer').value || ''}
+Project,Date,${document.getElementById('project-date').value}
+Project,Notes,"${document.getElementById('project-notes').value || ''}"
+
+Input,Rock Strength,${document.getElementById('rock-strength').options[document.getElementById('rock-strength').selectedIndex].text}
+Input,RQD,${document.getElementById('rqd').options[document.getElementById('rqd').selectedIndex].text}
+Input,Joint Spacing,${document.getElementById('joint-spacing').options[document.getElementById('joint-spacing').selectedIndex].text}
+Input,Joint Condition,${document.getElementById('joint-condition').options[document.getElementById('joint-condition').selectedIndex].text}
+Input,Groundwater,${document.getElementById('groundwater').options[document.getElementById('groundwater').selectedIndex].text}
+Input,Joint Orientation,${document.getElementById('joint-orientation').options[document.getElementById('joint-orientation').selectedIndex].text}
+
+Results,RMR Score,${document.getElementById('rmr-score').textContent}
+Results,Classification,${document.getElementById('rmr-classification').textContent}
+Results,Q Value,${document.getElementById('q-value').textContent}
+Results,Stand-up Time,${document.getElementById('stand-up-time').textContent}
+Results,Cohesion,${document.getElementById('cohesion').textContent}
+Results,Friction Angle,${document.getElementById('friction-angle').textContent}
+
+Metadata,Export Date,${formatDateTime(new Date())}
+Metadata,Software,Calculateur RMR Professionnel v2.2
+`;
+                    fileName += '.csv';
+                    downloadTextFile(content, fileName);
+                    break;
+                    
+                case 'pdf':
+                    generatePDF(fileName);
+                    break;
+            }
+            
+            showStatusMessage(`Résultats exportés en ${format.toUpperCase()}`, 5000);
+        }
+
+        function downloadTextFile(content, fileName) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function generatePDF(fileName) {
+            fileName += '.pdf';
+            
+            // Use html2canvas to capture the results section
+            const element = document.getElementById('results-panel');
+            
+            showProgressBar();
+            updateProgress(50);
+            
+            html2canvas(element).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; // A4 width in mm
+                const pageHeight = 295; // A4 height in mm
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+                
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+                
+                // Add new page if content is too long
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(fileName);
+                hideProgressBar();
+            });
+        }
+
+        function exportComparison() {
+            const items = Array.from(document.querySelectorAll('.history-item.selected'))
+                .map(item => historyData.find(i => i.date === item.dataset.date))
+                .filter(item => item !== undefined);
+                
+            if (items.length < 2) {
+                showAlert("Export", "Veuillez sélectionner au moins 2 calculs à exporter");
+                return;
+            }
+            
+            // Generate HTML content
+            let html = `
+            <html>
+            <head>
+            <style>
+                body { font-family: Arial; margin: 20px; }
+                h1 { color: #2c3e50; }
+                h2 { color: #2c3e50; border-bottom: 1px solid #d1d5db; padding-bottom: 5px; }
+                table { border-collapse: collapse; width: 100%; margin: 15px 0; }
+                th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+                th { background-color: #3498db; color: white; }
+            </style>
+            </head>
+            <body>
+                <h1>Comparaison des calculs RMR</h1>
+                <p>Généré le ${formatDateTime(new Date())}</p>
+            `;
+            
+            // Add project comparison
+            html += `<h2>Informations sur le projet</h2><table><tr><th>Paramètre</th>`;
+            items.forEach((item, index) => {
+                html += `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Nom du projet</td>`;
+            items.forEach(item => {
+                html += `<td>${item.project.name}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Localisation</td>`;
+            items.forEach(item => {
+                html += `<td>${item.project.location}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Ingénieur</td>`;
+            items.forEach(item => {
+                html += `<td>${item.project.engineer}</td>`;
+            });
+            html += `</tr></table>`;
+            
+            // Add parameters comparison
+            html += `<h2>Paramètres d'entrée</h2><table><tr><th>Paramètre</th>`;
+            items.forEach((item, index) => {
+                html += `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Résistance de la roche</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.rockStrength}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>RQD</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.rqd}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Espacement des joints</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.jointSpacing}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Condition des joints</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.jointCondition}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Eau souterraine</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.groundwater}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Orientation des joints</td>`;
+            items.forEach(item => {
+                html += `<td>${item.parameters.jointOrientation}</td>`;
+            });
+            html += `</tr></table>`;
+            
+            // Add results comparison
+            html += `<h2>Résultats</h2><table><tr><th>Paramètre</th>`;
+            items.forEach((item, index) => {
+                html += `<th>Calcul ${index + 1} (${item.date.substring(0, 10)})</th>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Score RMR</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.rmr}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Classification</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.classification}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Valeur Q estimée</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.qValue}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Temps de tenue</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.standUpTime}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Cohésion estimée</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.cohesion}</td>`;
+            });
+            html += `</tr>`;
+            
+            html += `<tr><td>Angle de frottement</td>`;
+            items.forEach(item => {
+                html += `<td>${item.results.frictionAngle}</td>`;
+            });
+            html += `</tr></table>`;
+            
+            html += `
+                <p style="margin-top: 30px; font-size: 10px; color: #95a5a6; text-align: center;">
+                    Généré par Calculateur RMR Professionnel - © ${new Date().getFullYear()}
+                </p>
+            </body>
+            </html>
+            `;
+            
+            // Download as HTML file
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Comparaison_RMR_${formatDate(new Date())}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatusMessage("Comparaison exportée", 5000);
+        }
+
+        function printResults() {
+            if (!document.getElementById('rmr-score').textContent || document.getElementById('rmr-score').textContent === '-') {
+                showAlert("Imprimer", "Aucun résultat à imprimer.");
+                return;
+            }
+            
+            // Open print dialog
+            window.print();
+            showStatusMessage("Impression envoyée", 5000);
+        }
+
+        function printPreview() {
+            if (!document.getElementById('rmr-score').textContent || document.getElementById('rmr-score').textContent === '-') {
+                showAlert("Aperçu", "Aucun résultat à imprimer.");
+                return;
+            }
+            
+            // For web, print preview is handled by the browser's print dialog
+            printResults();
+        }
+
+        function copyResults() {
+            if (!document.getElementById('rmr-score').textContent || document.getElementById('rmr-score').textContent === '-') {
+                showAlert("Copier", "Aucun résultat à copier.");
+                return;
+            }
+            
+            const results = `
+=== Résultats RMR ===
+Projet: ${document.getElementById('project-name').value || 'Non spécifié'}
+Date: ${document.getElementById('project-date').value}
+
+Score RMR: ${document.getElementById('rmr-score').textContent}
+Classification: ${document.getElementById('rmr-classification').textContent}
+Valeur Q: ${document.getElementById('q-value').textContent}
+Cohésion: ${document.getElementById('cohesion').textContent} kPa
+Angle de frottement: ${document.getElementById('friction-angle').textContent}
+Temps de tenue: ${document.getElementById('stand-up-time').textContent}
+`.trim();
+            
+            navigator.clipboard.writeText(results).then(() => {
+                showStatusMessage("Résultats copiés", 3000);
+            }).catch(err => {
+                showAlert("Erreur", "Erreur lors de la copie : " + err);
+            });
+        }
+
+        function showPreferences() {
+            document.getElementById('preferences-modal').style.display = 'flex';
+        }
+
+        function savePreferences() {
+            // Save theme preference
+            const theme = document.getElementById('theme-preference').value;
+            if (theme === 'Sombre') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                currentTheme = 'dark';
+                document.getElementById('theme-icon').className = 'fas fa-sun';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                currentTheme = 'light';
+                document.getElementById('theme-icon').className = 'fas fa-moon';
+            }
+            
+            closeModal('preferences-modal');
+            showStatusMessage("Préférences enregistrées", 3000);
+        }
+
+        function toggleTheme() {
+            if (currentTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                currentTheme = 'dark';
+                document.getElementById('theme-icon').className = 'fas fa-sun';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                currentTheme = 'light';
+                document.getElementById('theme-icon').className = 'fas fa-moon';
+            }
+        }
+
+        function zoomIn() {
+            document.body.style.fontSize = (parseInt(getComputedStyle(document.body).fontSize) + 1) + 'px';
+        }
+
+        function zoomOut() {
+            const currentSize = parseInt(getComputedStyle(document.body).fontSize);
+            if (currentSize > 12) {
+                document.body.style.fontSize = (currentSize - 1) + 'px';
+            }
+        }
+
+        function resetZoom() {
+            document.body.style.fontSize = '16px';
+        }
+
+        function toggleTab(tabId) {
+            const checkbox = document.querySelector(`#tab-${tabId.split('-')[0]} input[type="checkbox"]`);
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                // Show tab
+                const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+                if (!tab) return;
+                
+                // Check if tab is already in the tab bar
+                if (!tab.parentNode) {
+                    const tabsContainer = document.querySelector('.tabs');
+                    tabsContainer.appendChild(tab);
+                }
+            } else {
+                // Hide tab
+                const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+                if (!tab) return;
+                
+                // Remove tab from tab bar but keep it in memory
+                tab.remove();
+                
+                // If this was the active tab, switch to calculator tab
+                if (tab.classList.contains('active')) {
+                    switchTab('calculator-tab');
+                }
+            }
+        }
+
+        function switchTab(tabId) {
+            const tab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+            if (tab) {
+                tab.click();
+            }
+        }
+
+        function openOnlineHelp() {
+            window.open('https://www.geotech-rmr.com/aide', '_blank');
+        }
+
+        function checkForUpdates() {
+            showProgressBar(true); // Indeterminate progress
+            
+            // Simulate network delay
+            setTimeout(() => {
+                hideProgressBar();
+                showAlert("Mise à jour", "Vous utilisez la dernière version.");
+            }, 2000);
+        }
+
+        function showAbout() {
+            document.getElementById('about-modal').style.display = 'flex';
+        }
+
+        function showWelcomeMessage() {
+            showAlert(
+                "Bienvenue", 
+                `<h2 style="color: var(--text-color);">Bienvenue dans le Calculateur RMR Professionnel</h2>
+                <p style="color: var(--text-light);">Ce logiciel vous permet de calculer la classification des massifs rocheux selon le système RMR de Bieniawski.</p>
+                <p style="color: var(--text-light);">Commencez par sélectionner les paramètres géotechniques dans l'onglet 'Paramètres', puis consultez les résultats dans l'onglet 'Résultats'.</p>
+                <p style="color: var(--text-light);">Fonctionnalités principales :</p>
+                <ul style="color: var(--text-light);">
+                    <li>Calcul automatique du RMR et classification</li>
+                    <li>Visualisation des contributions des paramètres</li>
+                    <li>Historique des calculs avec outils de comparaison</li>
+                    <li>Export vers multiples formats (TXT, PDF, CSV)</li>
+                </ul>`,
+                true
+            );
+        }
+
+        function showGuide() {
+            showAlert(
+                "Guide d'utilisation", 
+                `<h2 style="color: var(--text-color);">Guide du Calculateur RMR</h2>
+                <p style="color: var(--text-light);">1. Sélectionnez les paramètres géotechniques dans chaque section.</p>
+                <p style="color: var(--text-light);">2. Les résultats sont calculés automatiquement.</p>
+                <p style="color: var(--text-light);">3. Consultez l'onglet 'Résultats' pour voir la classification.</p>
+                <p style="color: var(--text-light);">4. Utilisez le menu Fichier pour exporter ou imprimer.</p>
+                <p style="color: var(--text-light);">5. Consultez l'onglet 'Documentation' pour plus d'informations sur le système RMR.</p>
+                <p style="color: var(--text-light);">6. L'onglet 'Historique' conserve un enregistrement de vos calculs précédents.</p>
+                <p style="color: var(--text-light);">7. Utilisez l'onglet 'Visualisations' pour voir les contributions des paramètres.</p>`,
+                true
+            );
+        }
+
+        function compareCalculations() {
+            if (historyData.length < 2) {
+                showAlert("Comparer", "Vous avez besoin d'au moins 2 calculs sauvegardés pour comparer");
+                return;
+            }
+            
+            switchTab('history-tab');
+            showAlert(
+                "Comparer des calculs", 
+                "Veuillez sélectionner 2 calculs ou plus dans la liste d'historique, puis cliquez sur le bouton 'Comparer la sélection'."
+            );
+        }
+
+        function showAdvancedCalculations() {
+            showAlert(
+                "Calculs avancés", 
+                "Cette fonctionnalité inclurait des calculs avancés de mécanique des roches comme la conception de soutènement, les calculs de boulonnage et l'estimation de l'épaisseur de béton projeté."
+            );
+        }
+
+        function newCalculation() {
+            resetForm();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showAlert(title, message, isHtml = false) {
+            const alertBox = document.createElement('div');
+            alertBox.className = 'card';
+            alertBox.style.position = 'fixed';
+            alertBox.style.top = '50%';
+            alertBox.style.left = '50%';
+            alertBox.style.transform = 'translate(-50%, -50%)';
+            alertBox.style.zIndex = '1000';
+            alertBox.style.maxWidth = '500px';
+            alertBox.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+            
+            alertBox.innerHTML = `
+                <div class="modal-header">
+                    <div class="modal-title">${title}</div>
+                    <div class="modal-close" onclick="this.parentNode.parentNode.remove()">&times;</div>
+                </div>
+                <div class="modal-body">
+                    ${isHtml ? message : `<p style="color: var(--text-light);">${message}</p>`}
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="this.parentNode.parentNode.remove()">OK</button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertBox);
+        }
+
+        function showStatusMessage(message, duration) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            
+            if (duration) {
+                setTimeout(() => {
+                    if (statusElement.textContent === message) {
+                        statusElement.textContent = 'Prêt';
+                    }
+                }, duration);
+            }
+        }
+
+        function showProgressBar(indeterminate = false) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressFill = document.getElementById('progress-bar-fill');
+            
+            progressBar.style.display = 'block';
+            
+            if (indeterminate) {
+                progressFill.style.width = '100%';
+                progressFill.style.animation = 'progressIndeterminate 2s linear infinite';
+            } else {
+                progressFill.style.animation = 'none';
+                progressFill.style.width = '0%';
+            }
+        }
+
+        function hideProgressBar() {
+            document.getElementById('progress-bar').style.display = 'none';
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progress-bar-fill').style.width = percent + '%';
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDateTime(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+
+        // Add CSS animation for indeterminate progress bar
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes progressIndeterminate {
+                0% { background-position: 0% 0%; }
+                100% { background-position: 200% 0%; }
+            }
+            
+            #progress-bar-fill[style*="animation"] {
+                background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-hover) 50%, var(--primary-color) 100%);
+                background-size: 200% 100%;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

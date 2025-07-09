@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hydrogéologie & Hydrologie | GeoVision 3D</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --secondary: #f43f5e;
+            --accent: #f59e0b;
+            --dark: #f1f5f9;
+            --darker: #e2e8f0;
+            --light: #1e293b;
+            --lighter: #0f172a;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --card-bg: #1e293b;
+            --header-bg: rgba(15, 23, 42, 0.98);
+            --map-bg: #0f172a;
+            --water-blue: rgba(10, 132, 255, 0.1);
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.9)), 
+                              url('{{ url_for('static', filename='images/background.jpg') }}');
+            background-position: center;
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--text);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(12px);
+            padding: 0.8rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: var(--transition);
+            position: relative;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        nav a:hover, nav a.active {
+            color: var(--primary-light);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        nav a:hover::after {
+            width: 80%;
+        }
+
+        main {
+            flex: 1;
+            padding: 3rem 2rem;
+            max-width: 1400px;
+            margin: 2rem auto;
+            width: 100%;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        h1 {
+            color: var(--primary-light);
+            font-size: 2.8rem;
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-light), #10b5ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.25rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #10b5ff, var(--primary));
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(16, 181, 255, 0.3);
+            margin-top: 1rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(16, 181, 255, 0.4);
+        }
+
+        .water-animation {
+            background-color: var(--map-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-top: 2rem;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(16, 181, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .water-animation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, var(--water-blue) 0%, transparent 70%);
+            animation: waterPulse 8s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        .water-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(16, 181, 255, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #10b5ff;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--text);
+        }
+
+        .feature-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        footer {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(12px);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(16, 181, 255, 0.2);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: #10b5ff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes waterPulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" fill="%2310b5ff" opacity=".25"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" fill="%2310b5ff" opacity=".5"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%2310b5ff"/></svg>');
+            background-size: cover;
+            animation: waveMove 15s linear infinite;
+            z-index: 2;
+            opacity: 0.6;
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        @media (max-width: 992px) {
+            h1 {
+                font-size: 2.4rem;
+            }
+            
+            .subtitle {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .water-animation {
+                min-height: 400px;
+                padding: 1.5rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            main {
+                padding: 2rem 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <nav>
+                <a href="{{ url_for('index') }}" class="logo">
+                    <i class="fas fa-tint"></i>
+                    <span>GeoVision Hydro</span>
+                </a>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">ACCUEIL</a></li>
+                    <li><a href="{{ url_for('dams') }}">STOCKAGE DE RÉSIDUS</a></li>
+                    <li><a href="{{ url_for('yearly') }}">VISUALISATION HYDROGÉOLOGIE</a></li>
+                    <li><a href="{{ url_for('environmental') }}" class="active">HYDROGÉOLOGIE</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Hydrogéologie & Hydrologie</h1>
+            <p class="subtitle">Solutions avancées pour la modélisation des écoulements souterrains, l'analyse des bassins versants et la gestion des ressources en eau</p>
+            <a href="yearly" class="cta-button">
+                <i class="fas fa-play"></i> Lancer la simulation
+            </a>
+        </section>
+
+        <section id="simulation" class="water-animation">
+            <div class="water-wave"></div>
+            <div class="water-content">
+                <i class="fas fa-water fa-3x" style="color: #10b5ff; margin-bottom: 1.5rem;"></i>
+                <h2 style="color: var(--text); margin-bottom: 1rem;">Module Hydrogéologique</h2>
+                <p style="color: var(--text-light); max-width: 600px;">Chargement des outils d'analyse des écoulements et de qualité des eaux souterraines...</p>
+                <div style="margin-top: 2rem; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #10b5ff, transparent);"></div>
+            </div>
+        </section>
+
+        <section class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+                <h3 class="feature-title">Modélisation des Nappes</h3>
+                <p class="feature-desc">Visualisation 3D des aquifères et analyse des directions d'écoulement des eaux souterraines.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-area"></i>
+                </div>
+                <h3 class="feature-title">Analyse de Bassin Versant</h3>
+                <p class="feature-desc">Délimitation automatique des bassins et calcul des paramètres hydrologiques.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3 class="feature-title">Qualité des Eaux</h3>
+                <p class="feature-desc">Suivi des paramètres physico-chimiques et modélisation de la dispersion des polluants.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="copyright">
+                &copy; 2025 GeoVision Hydro - Tous droits réservés
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fas fa-envelope"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

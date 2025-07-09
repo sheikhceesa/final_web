@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enregistrements de Contrôle de Densité</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.3/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --secondary: #e11d48;
+      --accent: #f59e0b;
+      --dark: #1e293b;
+      --darker: #0f172a;
+      --light: #f1f5f9;
+      --lighter: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #334155;
+      --text-light: #64748b;
+      --card-bg: #ffffff;
+      --header-bg: rgba(255, 255, 255, 0.92);
+      --map-bg: #f8fafc;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+      background-color: var(--lighter);
+      color: var(--text);
+      min-height: 100vh;
+      background-image: url('{{ url_for('static', filename='images/background.jpg') }}');
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+  }
+  
+  /* Barre de défilement personnalisée */
+  ::-webkit-scrollbar {
+      width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+      background: var(--light);
+  }
+  ::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-light);
+  }
+  
+  header {
+      background-color: var(--header-bg);
+      backdrop-filter: blur(8px);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+  }
+  
+  nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+  }
+  
+  nav ul li a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+  }
+  
+  nav ul li a:hover {
+      color: var(--primary-light);
+      background-color: rgba(37, 99, 235, 0.1);
+  }
+  
+  .hdd h1 {
+      text-align: center;
+      margin: 1.5rem 0;
+      color: var(--text);
+      font-size: 2.2rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Stats Cards */
+  .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem auto;
+      max-width: 1200px;
+      padding: 0 1.5rem;
+  }
+  
+  .stat-card {
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-card:hover {
+      transform: translateY(-5px);
+  }
+  
+  .stat-card i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+  }
+  
+  .stat-card h3 {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+  }
+  
+  .stat-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text);
+  }
+  
+  .stat-card .subtext {
+      font-size: 0.875rem;
+      color: var(--text-light);
+      margin-top: 0.5rem;
+  }
+  
+  /* Styles du formulaire */
+  .form-container {
+      background-color: var(--card-bg);
+      padding: 2rem;
+      margin: 2rem auto;
+      max-width: 900px;
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-container h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+      color: var(--text);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+  }
+  
+  .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+  }
+  
+  .form-group {
+      margin-bottom: 1rem;
+  }
+  
+  .form-group.full-width {
+      grid-column: span 2;
+  }
+  
+  .form-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.9rem;
+  }
+  
+  .form-container input,
+  .form-container textarea,
+  .form-container select {
+      width: 100%;
+      padding: 0.75rem;
+      background-color: var(--light);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      color: var(--text);
+      transition: all 0.3s ease;
+  }
+  
+  .form-container input:focus,
+  .form-container textarea:focus,
+  .form-container select:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+  }
+  
+  .form-container button {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-top: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+  }
+  
+  .form-container button:hover {
+      background-color: var(--primary-light);
+  }
+  
+  /* Styles du tableau */
+  .table-container {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      margin: 2rem auto;
+      max-width: 100%;
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      color: var(--text);
+  }
+  
+  table th, table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  table th {
+      background-color: var(--light);
+      color: var(--text);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      white-space: nowrap;
+  }
+  
+  table th:hover {
+      background-color: rgba(37, 99, 235, 0.1);
+  }
+  
+  table th.sort-asc::after {
+      content: " ↑";
+      font-size: 0.8em;
+  }
+  
+  table th.sort-desc::after {
+      content: " ↓";
+      font-size: 0.8em;
+  }
+  
+  table tr:nth-child(even) {
+      background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  table tr:hover {
+      background-color: rgba(37, 99, 235, 0.05);
+  }
+  
+  .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+  }
+  
+  .status-good {
+      background-color: var(--success);
+  }
+  
+  .status-warning {
+      background-color: var(--warning);
+  }
+  
+  .status-bad {
+      background-color: var(--danger);
+  }
+  
+  /* Styles du bouton de bascule */
+  .toggle-button-container {
+      text-align: center;
+      margin: 1.5rem 0;
+  }
+  
+  #toggle-form-button {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+  }
+  
+  #toggle-form-button:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Styles du filtre */
+  .filter-container {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      margin: 1.5rem auto;
+      max-width: 1000px;
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+  }
+  
+  .filter-group {
+      margin-bottom: 0;
+  }
+  
+  .filter-container label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.9rem;
+  }
+  
+  .filter-container select,
+  .filter-container input {
+      padding: 0.75rem;
+      width: 100%;
+      background-color: var(--light);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      color: var(--text);
+      transition: all 0.3s ease;
+  }
+  
+  .filter-container select:focus,
+  .filter-container input:focus {
+      border-color: var(--primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+  }
+  
+  .filter-actions {
+      grid-column: span 2;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+  }
+  
+  .filter-actions button {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+  }
+  
+  .filter-actions button:hover {
+      background-color: var(--primary-light);
+  }
+  
+  .filter-actions button.reset {
+      background-color: var(--light);
+      color: var(--text);
+  }
+  
+  .filter-actions button.reset:hover {
+      background-color: var(--danger);
+      color: white;
+  }
+  
+  /* Chart container */
+  .chart-container {
+      background-color: var(--card-bg);
+      padding: 1.5rem;
+      margin: 1.5rem auto;
+      max-width: 1000px;
+      border-radius: 1rem;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      position: relative;
+      height: 400px;
+  }
+  
+  .chart-container h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.25rem;
+      color: var(--text);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+  }
+  
+  /* Styles responsives */
+  @media (max-width: 768px) {
+      nav ul {
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+      }
+  
+      .hdd h1 {
+          font-size: 1.8rem;
+          margin: 1rem 0;
+      }
+  
+      .stats-container {
+          grid-template-columns: 1fr;
+      }
+  
+      .form-container, 
+      .table-container, 
+      .filter-container,
+      .chart-container {
+          padding: 1rem;
+          margin: 1rem;
+      }
+  
+      .form-grid,
+      .filter-grid {
+          grid-template-columns: 1fr;
+      }
+  
+      .form-group.full-width,
+      .filter-actions {
+          grid-column: span 1;
+      }
+  
+      table th, table td {
+          padding: 0.75rem;
+          font-size: 0.9rem;
+      }
+  
+      .form-container h2,
+      .chart-container h2 {
+          font-size: 1.3rem;
+      }
+  }
+  
+  @media (max-width: 480px) {
+      .hdd h1 {
+          font-size: 1.5rem;
+      }
+  
+      .stat-card {
+          padding: 1rem;
+      }
+  
+      .stat-card .value {
+          font-size: 1.5rem;
+      }
+  
+      .filter-actions {
+          flex-direction: column;
+      }
+  
+      .filter-actions button {
+          width: 100%;
+          justify-content: center;
+      }
+  }
+  
+  /* Utility classes */
+  .text-primary {
+      color: var(--primary);
+  }
+  
+  .text-accent {
+      color: var(--accent);
+  }
+  
+  .text-secondary {
+      color: var(--secondary);
+  }
+  
+  .text-success {
+      color: var(--success);
+  }
+  
+  .hidden {
+      display: none !important;
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> ACCUEIL</a></li>
+        <li><a href="{{ url_for('dams') }}"><i class="fas fa-database"></i> INSTALLATION DE STOCKAGE DES RÉSIDUS</a></li>
+        <li><a href="{{ url_for('weekly') }}"><i class="fas fa-clipboard-check"></i> CONTRÔLE OMS</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <div class="hdd">
+    <h1><i class="fas fa-tachometer-alt"></i> TABLEAU DE BORD DE DENSITÉ OMS</h1>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-container">
+    <div class="stat-card">
+      <i class="fas fa-ruler-combined"></i>
+      <h3>Densité Moyenne</h3>
+      <div class="value" id="avg-density">-</div>
+      <div class="subtext">Sur tous les sites</div>
+    </div>
+    <div class="stat-card">
+      <i class="fas fa-bullseye"></i>
+      <h3>Conformité</h3>
+      <div class="value" id="compliance-rate">-</div>
+      <div class="subtext">Des mesures</div>
+    </div>
+    <div class="stat-card">
+      <i class="fas fa-exclamation-triangle"></i>
+      <h3>Écarts</h3>
+      <div class="value" id="variance-count">-</div>
+      <div class="subtext">À investiguer</div>
+    </div>
+    <div class="stat-card">
+      <i class="fas fa-map-marker-alt"></i>
+      <h3>Sites Actifs</h3>
+      <div class="value" id="active-sites">-</div>
+      <div class="subtext">Avec données</div>
+    </div>
+  </div>
+
+  <!-- Density Chart -->
+  <div class="chart-container">
+    <h2><i class="fas fa-chart-line"></i> TENDANCE DE DENSITÉ</h2>
+    <canvas id="densityChart"></canvas>
+  </div>
+  
+  <div class="toggle-button-container">
+    <button id="toggle-form-button">
+      <i class="fas fa-plus-circle"></i> Ajouter un nouvel enregistrement
+    </button>
+  </div>
+  
+  <div class="form-container" id="form-container" style="display: none;">
+    <h2><i class="fas fa-plus-square"></i> Ajouter un nouvel enregistrement</h2>
+    <form method="post" action="{{ url_for('density') }}">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="date">Date :</label>
+          <input type="date" name="date" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="time">Heure :</label>
+          <input type="time" name="time" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="zone_tailing_system">Zone du système de résidus :</label>
+          <input type="text" name="zone_tailing_system" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="sites">Sites :</label>
+          <input type="text" name="sites" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="measured_density">Densité mesurée :</label>
+          <input type="number" step="0.01" name="measured_density" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="targeted_density">Densité cible :</label>
+          <input type="number" step="0.01" name="targeted_density" required>
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="corrective_action">Action corrective :</label>
+          <input type="text" name="corrective_action">
+        </div>
+        
+        <div class="form-group">
+          <label for="operator">Opérateur :</label>
+          <input type="text" name="operator" required>
+        </div>
+        
+        <div class="form-group full-width">
+          <label for="comments">Commentaires :</label>
+          <textarea name="comments" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group full-width">
+          <button type="submit">
+            <i class="fas fa-paper-plane"></i> Soumettre l'enregistrement
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  
+  <div class="filter-container">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label for="site-filter">Filtrer par site :</label>
+        <select id="site-filter">
+          <option value="">Tous les sites</option>
+          {% for site in unique_sites %}
+            <option value="{{ site }}">{{ site }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="date-range">Période :</label>
+        <select id="date-range">
+          <option value="all">Toutes les dates</option>
+          <option value="today">Aujourd'hui</option>
+          <option value="week">Cette semaine</option>
+          <option value="month">Ce mois</option>
+          <option value="quarter">Ce trimestre</option>
+          <option value="year">Cette année</option>
+          <option value="custom">Personnalisée</option>
+        </select>
+      </div>
+      
+      <div class="filter-group hidden" id="custom-date-start-group">
+        <label for="custom-date-start">Date de début :</label>
+        <input type="date" id="custom-date-start">
+      </div>
+      
+      <div class="filter-group hidden" id="custom-date-end-group">
+        <label for="custom-date-end">Date de fin :</label>
+        <input type="date" id="custom-date-end">
+      </div>
+      
+      <div class="filter-actions">
+        <button id="apply-filters">
+          <i class="fas fa-filter"></i> Appliquer les filtres
+        </button>
+        <button id="reset-filters" class="reset">
+          <i class="fas fa-undo"></i> Réinitialiser
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="table-container">
+    <table id="density-table">
+      <thead>
+        <tr>
+          <th data-sort="date">Date <i class="fas fa-sort"></i></th>
+          <th data-sort="time">Heure <i class="fas fa-sort"></i></th>
+          <th data-sort="zone">Zone <i class="fas fa-sort"></i></th>
+          <th data-sort="measured">Mesurée <i class="fas fa-sort"></i></th>
+          <th data-sort="targeted">Cible <i class="fas fa-sort"></i></th>
+          <th data-sort="difference">Différence <i class="fas fa-sort"></i></th>
+          <th data-sort="action">Action <i class="fas fa-sort"></i></th>
+          <th data-sort="operator">Opérateur <i class="fas fa-sort"></i></th>
+          <th data-sort="comments">Commentaires <i class="fas fa-sort"></i></th>
+          <th data-sort="site">Site <i class="fas fa-sort"></i></th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        {% for record in records %}
+          <tr>
+            <td>{{ record['date'] }}</td>
+            <td>{{ record['time'] }}</td>
+            <td>{{ record['zone_tailing_system'] }}</td>
+            <td>{{ record['measured_density'] }}</td>
+            <td>{{ record['targeted_density'] }}</td>
+            <td>
+              {% set diff = record['difference'] %}
+              {% if diff <= 0.02 %}
+                <span class="status-indicator status-good"></span>
+                <span class="text-success">{{ diff }}</span>
+              {% elif diff <= 0.05 %}
+                <span class="status-indicator status-warning"></span>
+                <span class="text-accent">{{ diff }}</span>
+              {% else %}
+                <span class="status-indicator status-bad"></span>
+                <span class="text-secondary">{{ diff }}</span>
+              {% endif %}
+            </td>
+            <td>{{ record['corrective_action'] or '-' }}</td>
+            <td>{{ record['operator'] }}</td>
+            <td>{{ record['comments'] or '-' }}</td>
+            <td>{{ record['sites'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  
+  <script>
+    var socket = io();
+    var densityChart = null;
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Calculate and display stats
+      updateStats();
+      
+      // Initialize the chart
+      initializeChart();
+      
+      // Set up event listeners
+      setupEventListeners();
+      
+      // Initialize table sorting
+      initTableSorting();
+    });
+
+    // Update statistics cards
+    function updateStats() {
+      const rows = document.querySelectorAll('#density-table tbody tr');
+      let totalDensity = 0;
+      let compliantCount = 0;
+      let varianceCount = 0;
+      const sites = new Set();
+      
+      rows.forEach(row => {
+        if (row.style.display !== 'none') {
+          const measured = parseFloat(row.cells[3].textContent);
+          const targeted = parseFloat(row.cells[4].textContent);
+          const diff = Math.abs(measured - targeted);
+          
+          totalDensity += measured;
+          if (diff <= 0.02) compliantCount++;
+          if (diff > 0.05) varianceCount++;
+          
+          sites.add(row.cells[9].textContent);
+        }
+      });
+      
+      const visibleCount = Array.from(rows).filter(row => row.style.display !== 'none').length;
+      
+      document.getElementById('avg-density').textContent = visibleCount > 0 
+        ? (totalDensity / visibleCount).toFixed(2) 
+        : '-';
+      
+      document.getElementById('compliance-rate').textContent = visibleCount > 0 
+        ? Math.round((compliantCount / visibleCount) * 100) + '%' 
+        : '-';
+      
+      document.getElementById('variance-count').textContent = varianceCount;
+      document.getElementById('active-sites').textContent = sites.size;
+    }
+
+    // Initialize the density chart
+    function initializeChart() {
+      const ctx = document.getElementById('densityChart').getContext('2d');
+      
+      // Destroy previous chart if it exists
+      if (densityChart) {
+        densityChart.destroy();
+      }
+      
+      // Get data from table
+      const rows = Array.from(document.querySelectorAll('#density-table tbody tr'))
+        .filter(row => row.style.display !== 'none');
+      
+      // Sort rows by date
+      rows.sort((a, b) => {
+        const dateA = new Date(a.cells[0].textContent);
+        const dateB = new Date(b.cells[0].textContent);
+        return dateA - dateB;
+      });
+      
+      const dates = [];
+      const measured = [];
+      const targeted = [];
+      
+      rows.forEach(row => {
+        dates.push(row.cells[0].textContent);
+        measured.push(parseFloat(row.cells[3].textContent));
+        targeted.push(parseFloat(row.cells[4].textContent));
+      });
+      
+      // Create new chart
+      densityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Densité Mesurée',
+              data: measured,
+              borderColor: 'rgba(59, 130, 246, 0.8)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderWidth: 2,
+              tension: 0.1,
+              fill: true
+            },
+            {
+              label: 'Densité Cible',
+              data: targeted,
+              borderColor: 'rgba(245, 158, 11, 0.8)',
+              backgroundColor: 'transparent',
+              borderWidth: 2,
+              borderDash: [5, 5],
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: false,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.7)'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'rgba(255, 255, 255, 0.7)',
+                maxRotation: 45,
+                minRotation: 45
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: 'rgba(255, 255, 255, 0.7)'
+              }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: 'rgba(30, 41, 59, 0.9)',
+              titleColor: 'rgba(226, 232, 240, 0.9)',
+              bodyColor: 'rgba(226, 232, 240, 0.8)',
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              borderWidth: 1
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+          }
+        }
+      });
+    }
+
+    // Set up event listeners
+    function setupEventListeners() {
+      // Toggle form visibility
+      document.getElementById('toggle-form-button').addEventListener('click', function() {
+        var formContainer = document.getElementById('form-container');
+        formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
+        this.innerHTML = formContainer.style.display === 'none' 
+          ? '<i class="fas fa-plus-circle"></i> Ajouter un nouvel enregistrement' 
+          : '<i class="fas fa-minus-circle"></i> Masquer le formulaire';
+      });
+
+      // Date range filter change
+      document.getElementById('date-range').addEventListener('change', function() {
+        const customStart = document.getElementById('custom-date-start-group');
+        const customEnd = document.getElementById('custom-date-end-group');
+        
+        if (this.value === 'custom') {
+          customStart.classList.remove('hidden');
+          customEnd.classList.remove('hidden');
+        } else {
+          customStart.classList.add('hidden');
+          customEnd.classList.add('hidden');
+        }
+      });
+
+      // Apply filters
+      document.getElementById('apply-filters').addEventListener('click', function() {
+        applyFilters();
+      });
+
+      // Reset filters
+      document.getElementById('reset-filters').addEventListener('click', function() {
+        document.getElementById('site-filter').value = '';
+        document.getElementById('date-range').value = 'all';
+        document.getElementById('custom-date-start-group').classList.add('hidden');
+        document.getElementById('custom-date-end-group').classList.add('hidden');
+        applyFilters();
+      });
+
+      // Add new record to the table
+      socket.on('new_record', function(data) {
+        console.log('New record received:', data);
+        addRecordToTable(data);
+        updateStats();
+        initializeChart();
+      });
+    }
+
+    // Initialize table sorting
+    function initTableSorting() {
+      const headers = document.querySelectorAll('#density-table th[data-sort]');
+      headers.forEach(header => {
+        header.addEventListener('click', function() {
+          const sortKey = this.getAttribute('data-sort');
+          const isAsc = !this.classList.contains('sort-asc');
+          
+          // Reset all headers
+          headers.forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc');
+          });
+          
+          // Set current header
+          this.classList.toggle('sort-asc', isAsc);
+          this.classList.toggle('sort-desc', !isAsc);
+          
+          // Sort the table
+          sortTable(sortKey, isAsc);
+        });
+      });
+    }
+
+    // Sort table by column
+    function sortTable(sortKey, isAsc) {
+      const table = document.getElementById('density-table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      
+      // Get column index based on sortKey
+      let colIndex;
+      switch(sortKey) {
+        case 'date': colIndex = 0; break;
+        case 'time': colIndex = 1; break;
+        case 'zone': colIndex = 2; break;
+        case 'measured': colIndex = 3; break;
+        case 'targeted': colIndex = 4; break;
+        case 'difference': colIndex = 5; break;
+        case 'action': colIndex = 6; break;
+        case 'operator': colIndex = 7; break;
+        case 'comments': colIndex = 8; break;
+        case 'site': colIndex = 9; break;
+        default: colIndex = 0;
+      }
+      
+      rows.sort((a, b) => {
+        const aVal = a.cells[colIndex].textContent;
+        const bVal = b.cells[colIndex].textContent;
+        
+        // Handle numeric values
+        if (colIndex === 3 || colIndex === 4 || colIndex === 5) {
+          const aNum = parseFloat(aVal);
+          const bNum = parseFloat(bVal);
+          return isAsc ? aNum - bNum : bNum - aNum;
+        }
+        
+        // Handle dates
+        if (colIndex === 0) {
+          const aDate = new Date(aVal);
+          const bDate = new Date(bVal);
+          return isAsc ? aDate - bDate : bDate - aDate;
+        }
+        
+        // Default string comparison
+        return isAsc 
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      });
+      
+      // Rebuild the table
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
+    // Apply all filters
+    function applyFilters() {
+      const siteFilter = document.getElementById('site-filter').value;
+      const dateRange = document.getElementById('date-range').value;
+      const customStart = document.getElementById('custom-date-start').value;
+      const customEnd = document.getElementById('custom-date-end').value;
+      
+      const rows = document.querySelectorAll('#density-table tbody tr');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      rows.forEach(row => {
+        const site = row.cells[9].textContent;
+        const dateStr = row.cells[0].textContent;
+        const recordDate = new Date(dateStr);
+        recordDate.setHours(0, 0, 0, 0);
+        
+        // Site filter
+        const siteMatch = !siteFilter || site === siteFilter;
+        
+        // Date range filter
+        let dateMatch = true;
+        
+        if (dateRange !== 'all') {
+          const timeDiff = today - recordDate;
+          const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+          
+          switch(dateRange) {
+            case 'today':
+              dateMatch = dayDiff === 0;
+              break;
+            case 'week':
+              dateMatch = dayDiff <= 7;
+              break;
+            case 'month':
+              dateMatch = dayDiff <= 30;
+              break;
+            case 'quarter':
+              dateMatch = dayDiff <= 90;
+              break;
+            case 'year':
+              dateMatch = dayDiff <= 365;
+              break;
+            case 'custom':
+              if (customStart && customEnd) {
+                const startDate = new Date(customStart);
+                const endDate = new Date(customEnd);
+                dateMatch = recordDate >= startDate && recordDate <= endDate;
+              }
+              break;
+          }
+        }
+        
+        row.style.display = (siteMatch && dateMatch) ? '' : 'none';
+      });
+      
+      // Update stats and chart
+      updateStats();
+      initializeChart();
+    }
+
+    // Function to add a new record to the table
+    function addRecordToTable(record) {
+      var tableBody = document.getElementById('table-body');
+      var row = document.createElement('tr');
+      
+      // Calculate difference
+      const measured = parseFloat(record.measured_density);
+      const targeted = parseFloat(record.targeted_density);
+      const diff = Math.abs(measured - targeted).toFixed(3);
+      
+      // Determine status
+      let statusClass, statusIndicator;
+      if (diff <= 0.02) {
+        statusClass = 'text-success';
+        statusIndicator = '<span class="status-indicator status-good"></span>';
+      } else if (diff <= 0.05) {
+        statusClass = 'text-accent';
+        statusIndicator = '<span class="status-indicator status-warning"></span>';
+      } else {
+        statusClass = 'text-secondary';
+        statusIndicator = '<span class="status-indicator status-bad"></span>';
+      }
+      
+      row.innerHTML = `
+        <td>${record.date}</td>
+        <td>${record.time}</td>
+        <td>${record.zone_tailing_system}</td>
+        <td>${record.measured_density}</td>
+        <td>${record.targeted_density}</td>
+        <td>${statusIndicator}<span class="${statusClass}">${diff}</span></td>
+        <td>${record.corrective_action || '-'}</td>
+        <td>${record.operator}</td>
+        <td>${record.comments || '-'}</td>
+        <td>${record.sites}</td>
+      `;
+      tableBody.insertBefore(row, tableBody.firstChild);
+    }
+  </script>
+</body>
+</html>

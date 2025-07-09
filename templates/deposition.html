@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Données de Dépôt</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --text-color: #333;
+      --text-light: #7f8c8d;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    /* Base Styles */
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      color: var(--text-color);
+      background-image: url('{{ url_for('static', filename='images/background.jpg') }}');
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    /* Header Styles */
+    header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 0 20px;
+      box-shadow: var(--box-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo i {
+      margin-right: 10px;
+    }
+
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav ul li {
+      display: inline;
+    }
+
+    nav ul li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 15px 0;
+      display: inline-block;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    nav ul li a:hover {
+      color: var(--light-color);
+    }
+
+    nav ul li a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 10px;
+      left: 0;
+      background-color: var(--light-color);
+      transition: var(--transition);
+    }
+
+    nav ul li a:hover::after {
+      width: 100%;
+    }
+
+    /* Hamburger Menu */
+    .hamburger-menu {
+      display: none;
+    }
+
+    .menu-button {
+      display: none;
+      cursor: pointer;
+      padding: 15px;
+    }
+
+    .menu-button span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 5px 0;
+      transition: var(--transition);
+    }
+
+    #menu-toggle:checked ~ .menu-button span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    #menu-toggle:checked ~ .menu-button span:nth-child(2) {
+      opacity: 0;
+    }
+
+    #menu-toggle:checked ~ .menu-button span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -6px);
+    }
+
+    #menu-toggle:checked ~ .menu {
+      display: block;
+    }
+
+    .menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      background-color: var(--primary-color);
+      width: 200px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 10px 0;
+      z-index: 1000;
+    }
+
+    .menu li {
+      display: block;
+    }
+
+    .menu li a {
+      padding: 10px 20px;
+      display: block;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    .container:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Page Title */
+    .page-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      color: var(--primary-color);
+      position: relative;
+    }
+
+    .page-title::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 4px;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(to right, var(--secondary-color), var(--accent-color));
+      border-radius: 2px;
+    }
+
+    /* Filter Form */
+    .filter-form {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .filter-form label {
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+
+    .filter-form select {
+      padding: 8px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      background-color: white;
+      transition: var(--transition);
+    }
+
+    .filter-form select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn i {
+      margin-right: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #219955;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background-color: var(--accent-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    /* Form Container */
+    .form-container {
+      display: none;
+      margin: 30px 0;
+      padding: 25px;
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      border: 1px solid #eee;
+    }
+
+    .form-container h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      font-size: 1.8rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .form-container label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--dark-color);
+    }
+
+    .form-container input[type="date"],
+    .form-container input[type="time"],
+    .form-container input[type="text"],
+    .form-container input[type="number"],
+    .form-container select,
+    .form-container textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+
+    .form-container input:focus,
+    .form-container select:focus,
+    .form-container textarea:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    .form-container textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .checkbox-group input {
+      width: auto;
+      margin-right: 10px;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+      overflow-x: auto;
+      margin: 30px 0;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .badge-danger {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .action-btn i {
+      font-size: 14px;
+    }
+
+    .edit-btn {
+      background-color: #f0f8ff;
+      color: var(--secondary-color);
+    }
+
+    .edit-btn:hover {
+      background-color: #d4e6f7;
+    }
+
+    .delete-btn {
+      background-color: #fff0f0;
+      color: var(--accent-color);
+    }
+
+    .delete-btn:hover {
+      background-color: #f7d4d4;
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+      margin: 20px 0;
+    }
+
+    .flash-messages ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .flash-messages li {
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: var(--border-radius);
+      display: flex;
+      align-items: center;
+    }
+
+    .flash-messages li i {
+      margin-right: 10px;
+      font-size: 18px;
+    }
+
+    .flash-messages .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .flash-messages .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    /* Visualization Container */
+    .visualization-container {
+      display: none;
+      background-color: white;
+      padding: 25px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      margin: 30px 0;
+      border: 1px solid #eee;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .chart-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin: 0;
+    }
+
+    #waterDistanceChart {
+      width: 100% !important;
+      height: 400px !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .header-container {
+        flex-direction: column;
+        padding: 10px 0;
+      }
+
+      nav ul {
+        margin-top: 15px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hamburger-menu {
+        display: block;
+      }
+
+      nav ul {
+        display: none;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .form-group {
+        width: 100%;
+        margin-bottom: 15px;
+      }
+
+      th, td {
+        padding: 8px 10px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 15px;
+      }
+
+      .page-title {
+        font-size: 2rem;
+      }
+
+      .btn {
+        padding: 8px 15px;
+        font-size: 14px;
+      }
+
+      .filter-form {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top: 4px solid var(--secondary-color);
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- En-tête -->
+  <header>
+    <div class="header-container">
+      <a href="{{ url_for('index') }}" class="logo">
+        <i class="fas fa-water"></i> Gestion des Résidus
+      </a>
+      
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> ACCUEIL</a></li>
+          <li><a href="{{ url_for('dams') }}"><i class="fas fa-database"></i> STOCKAGE DES RÉSIDUS</a></li>
+          <li><a href="{{ url_for('weekly') }}"><i class="fas fa-tasks"></i> CONTRÔLE OMS</a></li>
+        </ul>
+      </nav>
+      
+      <div class="hamburger-menu">
+        <input id="menu-toggle" type="checkbox" />
+        <label class="menu-button" for="menu-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </label>
+        <ul class="menu">
+          <li><a href="{{ url_for('density') }}"><i class="fas fa-weight"></i> CONTRÔLE DE DENSITÉ</a></li>
+          <li><a href="{{ url_for('deposition') }}"><i class="fas fa-pipe"></i> DÉPÔT DES PIPELINES</a></li>
+          <li><a href="{{ url_for('pipes') }}"><i class="fas fa-tools"></i> TUYAUX ET VANNES</a></li>
+          <li><a href="{{ url_for('leaks') }}"><i class="fas fa-tint"></i> FUITES ET DÉVERSEMENTS</a></li>
+          <li><a href="{{ url_for('wall') }}"><i class="fas fa-wall"></i> STABILITÉ DES MURS</a></li>
+          <li><a href="{{ url_for('water_management') }}"><i class="fas fa-water"></i> GESTION DE L'EAU</a></li>
+          <li><a href="{{ url_for('water_recovery') }}"><i class="fas fa-recycle"></i> SYSTÈME DE RÉCUPÉRATION</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <div class="container fade-in">
+    <h1 class="page-title">DÉPÔT DE CONDUITES</h1>
+
+    <!-- Filtre par Site -->
+    <form method="GET" action="{{ url_for('deposition') }}" class="filter-form">
+      <label for="site_filter">Filtrer par Site :</label>
+      <select name="site" id="site_filter" class="form-control">
+        <option value="">Tous les Sites</option>
+        {% for site in sites %}
+        <option value="{{ site }}" {% if request.args.get('site') == site %} selected {% endif %}>{{ site }}</option>
+        {% endfor %}
+      </select>
+      
+      <button type="button" id="resetFilter" class="btn btn-danger">
+        <i class="fas fa-times"></i> Réinitialiser
+      </button>
+    </form>
+
+    <!-- Button Group -->
+    <div class="btn-group">
+      <button id="toggleFormButton" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Ajouter un Enregistrement
+      </button>
+
+      <button id="toggleVisualizationButton" class="btn btn-success">
+        <i class="fas fa-chart-line"></i> Visualiser les Données
+      </button>
+      
+      <button id="exportDataButton" class="btn">
+        <i class="fas fa-file-export"></i> Exporter les Données
+      </button>
+    </div>
+
+    <!-- Form Container -->
+    <div id="formContainer" class="form-container">
+      <form id="dataForm" action="{{ url_for('deposition') }}" method="POST">
+        <h2><i class="fas fa-pen"></i> Nouvel Enregistrement de Dépôt</h2>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date"><i class="far fa-calendar-alt"></i> Date :</label>
+            <input type="date" id="date" name="date" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="time"><i class="far fa-clock"></i> Heure :</label>
+            <input type="time" id="time" name="time" required />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="discharge_location"><i class="fas fa-map-marker-alt"></i> Lieu de Décharge :</label>
+            <input type="text" id="discharge_location" name="discharge_location" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="discharge_coordinates"><i class="fas fa-map-pin"></i> Coordonnées de Décharge :</label>
+            <input type="text" id="discharge_coordinates" name="discharge_coordinates" required />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="flow_direction"><i class="fas fa-route"></i> Direction de l'Écoulement :</label>
+            <input type="text" id="flow_direction" name="flow_direction" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="water_distance_from_dike"><i class="fas fa-ruler"></i> Distance de l'Eau par Rapport à la Digue (m) :</label>
+            <input type="number" step="0.01" id="water_distance_from_dike" name="water_distance_from_dike" required />
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="compliance" name="compliance" />
+            <label for="compliance">Conformité :</label>
+          </div>
+          
+          <div class="form-group">
+            <label for="site"><i class="fas fa-building"></i> Site :</label>
+            <select id="site" name="site" required>
+              <option value="">Sélectionnez un site</option>
+              {% for site in sites %}
+              <option value="{{ site }}">{{ site }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="corrective_action"><i class="fas fa-tools"></i> Action Corrective :</label>
+          <textarea id="corrective_action" name="corrective_action"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="responsible"><i class="fas fa-user"></i> Responsable :</label>
+          <input type="text" id="responsible" name="responsible" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="comments"><i class="fas fa-comment"></i> Commentaires :</label>
+          <textarea id="comments" name="comments"></textarea>
+        </div>
+        
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Enregistrer
+          </button>
+          
+          <button type="button" id="cancelForm" class="btn btn-danger">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Visualization Container -->
+    <div id="visualizationContainer" class="visualization-container">
+      <div class="chart-header">
+        <h3 class="chart-title">Distance de l'Eau par Rapport à la Digue</h3>
+        <div class="chart-actions">
+          <button id="exportChartButton" class="btn">
+            <i class="fas fa-download"></i> Exporter
+          </button>
+        </div>
+      </div>
+      <canvas id="waterDistanceChart"></canvas>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner"></div>
+
+    <!-- Table Container -->
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Heure</th>
+            <th>Lieu</th>
+            <th>Coordonnées</th>
+            <th>Direction</th>
+            <th>Distance (m)</th>
+            <th>Conformité</th>
+            <th>Actions</th>
+            <th>Responsable</th>
+            <th>Site</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Les lignes du tableau seront ajoutées dynamiquement -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="pagination" style="display: none;">
+      <button id="prevPage" class="btn"><i class="fas fa-chevron-left"></i> Précédent</button>
+      <span id="pageInfo">Page 1 sur 5</span>
+      <button id="nextPage" class="btn">Suivant <i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- Messages Flash -->
+    <div class="flash-messages">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul>
+            {% for category, message in messages %}
+              <li class="{{ category }}">
+                <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                {{ message }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <!-- Insertion de Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Insertion de FileSaver.js pour l'exportation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+  <!-- Intégration de toutes les données dans une variable JavaScript -->
+  <script>
+    var allRecordsData = {{ records | tojson }};
+    var currentPage = 1;
+    var recordsPerPage = 10;
+    var currentFilteredRecords = [];
+  </script>
+
+  <script>
+    // Fonction utilitaire pour obtenir le site d'un enregistrement
+    function getRecordSite(record) {
+      return record.sites || record.site || "";
+    }
+
+    // Fonction pour filtrer les enregistrements par site
+    function getFilteredRecords(selectedSite) {
+      return allRecordsData.filter(function(record) {
+        var recordSite = getRecordSite(record);
+        return selectedSite === "" ? true : recordSite === selectedSite;
+      });
+    }
+
+    // Fonction pour formater la date
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('fr-FR');
+    }
+
+    // Fonction pour afficher/masquer le spinner de chargement
+    function toggleLoading(show) {
+      const spinner = document.getElementById('loadingSpinner');
+      spinner.style.display = show ? 'block' : 'none';
+    }
+
+    // Fonction pour mettre à jour le tableau avec pagination
+    function updateTable(filteredRecords) {
+      currentFilteredRecords = filteredRecords;
+      const tableBody = document.getElementById('tableBody');
+      const pagination = document.getElementById('pagination');
+      const pageInfo = document.getElementById('pageInfo');
+      
+      // Calculer le nombre total de pages
+      const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
+      
+      // Afficher la pagination seulement si nécessaire
+      pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+      pageInfo.textContent = `Page ${currentPage} sur ${totalPages}`;
+      
+      // Calculer les enregistrements à afficher pour la page courante
+      const startIndex = (currentPage - 1) * recordsPerPage;
+      const endIndex = Math.min(startIndex + recordsPerPage, filteredRecords.length);
+      const paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+      
+      let html = "";
+      paginatedRecords.forEach(function(record) {
+        const complianceBadge = record.compliance 
+          ? '<span class="badge badge-success"><i class="fas fa-check"></i> Oui</span>' 
+          : '<span class="badge badge-danger"><i class="fas fa-times"></i> Non</span>';
+        
+        html += `<tr>
+                  <td>${record.id}</td>
+                  <td>${formatDate(record.date)}</td>
+                  <td>${record.time || ''}</td>
+                  <td>${record.discharge_location || ''}</td>
+                  <td>${record.discharge_coordinates || ''}</td>
+                  <td>${record.flow_direction || ''}</td>
+                  <td>${record.water_distance_from_dike || ''}</td>
+                  <td>${complianceBadge}</td>
+                  <td class="action-buttons">
+                    <button class="action-btn edit-btn" data-id="${record.id}">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" data-id="${record.id}">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </td>
+                  <td>${record.responsible || ''}</td>
+                  <td>${getRecordSite(record)}</td>
+                </tr>`;
+      });
+      
+      tableBody.innerHTML = html || '<tr><td colspan="11" style="text-align: center;">Aucune donnée disponible</td></tr>';
+      
+      // Ajouter les écouteurs d'événements pour les boutons d'action
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const recordId = this.getAttribute('data-id');
+          editRecord(recordId);
+        });
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const recordId = this.getAttribute('data-id');
+          deleteRecord(recordId);
+        });
+      });
+    }
+
+    // Instance globale du graphique
+    let waterDistanceChart = null;
+
+    // Fonction pour initialiser ou mettre à jour le graphique
+    function updateChart(filteredRecords) {
+      const ctx = document.getElementById('waterDistanceChart').getContext('2d');
+      
+      // Trier les enregistrements par date
+      const sortedRecords = [...filteredRecords].sort((a, b) => {
+        return new Date(a.date) - new Date(b.date);
+      });
+      
+      const labels = sortedRecords.map(record => formatDate(record.date));
+      const data = sortedRecords.map(record => record.water_distance_from_dike);
+      const complianceData = sortedRecords.map(record => record.compliance ? 1 : 0);
+      
+      if (waterDistanceChart) {
+        // Mettre à jour le graphique existant
+        waterDistanceChart.data.labels = labels;
+        waterDistanceChart.data.datasets[0].data = data;
+        waterDistanceChart.update();
+      } else {
+        // Créer un nouveau graphique
+        waterDistanceChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Distance de l'Eau (m)",
+                data: data,
+                borderColor: 'rgba(52, 152, 219, 1)',
+                backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y'
+              },
+              {
+                label: "Conformité",
+                data: complianceData,
+                borderColor: 'rgba(46, 204, 113, 1)',
+                backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                borderWidth: 2,
+                type: 'bar',
+                yAxisID: 'y1'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                title: {
+                  display: true,
+                  text: 'Distance (m)'
+                }
+              },
+              y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                min: 0,
+                max: 1,
+                ticks: {
+                  stepSize: 1,
+                  callback: function(value) {
+                    return value === 1 ? 'Conforme' : 'Non conforme';
+                  }
+                },
+                grid: {
+                  drawOnChartArea: false
+                },
+                title: {
+                  display: true,
+                  text: 'Conformité'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Date'
+                }
+              }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  afterBody: function(context) {
+                    const index = context[0].dataIndex;
+                    const record = sortedRecords[index];
+                    return [
+                      `Lieu: ${record.discharge_location || 'N/A'}`,
+                      `Responsable: ${record.responsible || 'N/A'}`,
+                      record.comments ? `Commentaires: ${record.comments}` : ''
+                    ];
+                  }
+                }
+              },
+              legend: {
+                position: 'top',
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Fonction pour exporter les données en CSV
+    function exportToCSV(filteredRecords) {
+      if (filteredRecords.length === 0) {
+        alert('Aucune donnée à exporter');
+        return;
+      }
+      
+      const headers = [
+        'ID', 'Date', 'Heure', 'Lieu de Décharge', 'Coordonnées de Décharge',
+        'Direction de l\'Écoulement', 'Distance de l\'Eau (m)', 'Conformité',
+        'Action Corrective', 'Responsable', 'Commentaires', 'Site'
+      ];
+      
+      const csvRows = [];
+      
+      // Ajouter l'en-tête
+      csvRows.push(headers.join(','));
+      
+      // Ajouter les données
+      filteredRecords.forEach(record => {
+        const row = [
+          record.id,
+          formatDate(record.date),
+          record.time || '',
+          `"${record.discharge_location || ''}"`,
+          `"${record.discharge_coordinates || ''}"`,
+          `"${record.flow_direction || ''}"`,
+          record.water_distance_from_dike || '',
+          record.compliance ? 'Oui' : 'Non',
+          `"${record.corrective_action || ''}"`,
+          `"${record.responsible || ''}"`,
+          `"${record.comments || ''}"`,
+          `"${getRecordSite(record)}"`
+        ];
+        csvRows.push(row.join(','));
+      });
+      
+      // Créer le fichier CSV
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `deposition_data_${new Date().toISOString().slice(0, 10)}.csv`);
+    }
+
+    // Fonction pour exporter le graphique en image
+    function exportChart() {
+      if (!waterDistanceChart) {
+        alert('Aucun graphique à exporter');
+        return;
+      }
+      
+      const link = document.createElement('a');
+      link.download = `water_distance_chart_${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = document.getElementById('waterDistanceChart').toDataURL('image/png');
+      link.click();
+    }
+
+    // Fonction pour éditer un enregistrement
+    function editRecord(recordId) {
+      const record = allRecordsData.find(r => r.id == recordId);
+      if (!record) return;
+      
+      // Remplir le formulaire avec les données de l'enregistrement
+      document.getElementById('date').value = record.date || '';
+      document.getElementById('time').value = record.time || '';
+      document.getElementById('discharge_location').value = record.discharge_location || '';
+      document.getElementById('discharge_coordinates').value = record.discharge_coordinates || '';
+      document.getElementById('flow_direction').value = record.flow_direction || '';
+      document.getElementById('water_distance_from_dike').value = record.water_distance_from_dike || '';
+      document.getElementById('compliance').checked = record.compliance || false;
+      document.getElementById('corrective_action').value = record.corrective_action || '';
+      document.getElementById('responsible').value = record.responsible || '';
+      document.getElementById('comments').value = record.comments || '';
+      document.getElementById('site').value = getRecordSite(record) || '';
+      
+      // Afficher le formulaire
+      document.getElementById('formContainer').style.display = 'block';
+      
+      // Ajouter un champ caché pour l'ID de l'enregistrement
+      let idInput = document.querySelector('input[name="record_id"]');
+      if (!idInput) {
+        idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'record_id';
+        idInput.value = recordId;
+        document.getElementById('dataForm').appendChild(idInput);
+      } else {
+        idInput.value = recordId;
+      }
+      
+      // Faire défiler jusqu'au formulaire
+      document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Fonction pour supprimer un enregistrement
+    function deleteRecord(recordId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet enregistrement ?')) {
+        return;
+      }
+      
+      toggleLoading(true);
+      
+      // Envoyer une requête de suppression au serveur
+      fetch(`/deposition/delete/${recordId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erreur lors de la suppression');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Mettre à jour les données locales
+          allRecordsData = allRecordsData.filter(record => record.id != recordId);
+          
+          // Mettre à jour le tableau
+          const selectedSite = document.getElementById('site_filter').value;
+          const filteredRecords = getFilteredRecords(selectedSite);
+          updateTable(filteredRecords);
+          
+          // Mettre à jour le graphique s'il est visible
+          if (waterDistanceChart) {
+            updateChart(filteredRecords);
+          }
+          
+          alert('Enregistrement supprimé avec succès');
+        } else {
+          throw new Error(data.message || 'Erreur lors de la suppression');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(error.message);
+      })
+      .finally(() => {
+        toggleLoading(false);
+      });
+    }
+
+    // Écouteurs d'événements
+    document.addEventListener("DOMContentLoaded", function() {
+      // Initialiser le tableau
+      const selectedSite = document.getElementById('site_filter').value;
+      const filteredRecords = getFilteredRecords(selectedSite);
+      updateTable(filteredRecords);
+      
+      // Configurer la pagination
+      document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          updateTable(currentFilteredRecords);
+        }
+      });
+      
+      document.getElementById('nextPage').addEventListener('click', function() {
+        const totalPages = Math.ceil(currentFilteredRecords.length / recordsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          updateTable(currentFilteredRecords);
+        }
+      });
+      
+      // Filtre par site
+      document.getElementById("site_filter").addEventListener("change", function() {
+        currentPage = 1; // Réinitialiser à la première page
+        const selectedSite = this.value;
+        const filteredRecords = getFilteredRecords(selectedSite);
+        updateTable(filteredRecords);
+        
+        // Mettre à jour le graphique s'il est visible
+        if (document.getElementById("visualizationContainer").style.display === "block") {
+          updateChart(filteredRecords);
+        }
+      });
+      
+      // Réinitialiser le filtre
+      document.getElementById("resetFilter").addEventListener("click", function() {
+        document.getElementById("site_filter").value = "";
+        const filteredRecords = getFilteredRecords("");
+        updateTable(filteredRecords);
+        
+        // Mettre à jour le graphique s'il est visible
+        if (document.getElementById("visualizationContainer").style.display === "block") {
+          updateChart(filteredRecords);
+        }
+      });
+      
+      // Afficher/masquer le formulaire
+      document.getElementById("toggleFormButton").addEventListener("click", function () {
+        const formContainer = document.getElementById("formContainer");
+        formContainer.style.display = (formContainer.style.display === "none" || formContainer.style.display === "") ? "block" : "none";
+        
+        // Réinitialiser le formulaire s'il est affiché
+        if (formContainer.style.display === "block") {
+          document.getElementById('dataForm').reset();
+          const idInput = document.querySelector('input[name="record_id"]');
+          if (idInput) idInput.remove();
+        }
+      });
+      
+      // Annuler le formulaire
+      document.getElementById("cancelForm").addEventListener("click", function() {
+        document.getElementById("formContainer").style.display = "none";
+        document.getElementById('dataForm').reset();
+        const idInput = document.querySelector('input[name="record_id"]');
+        if (idInput) idInput.remove();
+      });
+      
+      // Afficher/masquer la visualisation
+      document.getElementById("toggleVisualizationButton").addEventListener("click", function () {
+        const visualizationContainer = document.getElementById("visualizationContainer");
+        if (visualizationContainer.style.display === "none" || visualizationContainer.style.display === "") {
+          visualizationContainer.style.display = "block";
+          
+          // Obtenir les enregistrements filtrés
+          const selectedSite = document.getElementById("site_filter").value;
+          const filteredRecords = getFilteredRecords(selectedSite);
+          
+          // Initialiser ou mettre à jour le graphique
+          updateChart(filteredRecords);
+        } else {
+          visualizationContainer.style.display = "none";
+        }
+      });
+      
+      // Exporter les données
+      document.getElementById("exportDataButton").addEventListener("click", function() {
+        const selectedSite = document.getElementById("site_filter").value;
+        const filteredRecords = getFilteredRecords(selectedSite);
+        exportToCSV(filteredRecords);
+      });
+      
+      // Exporter le graphique
+      document.getElementById("exportChartButton").addEventListener("click", exportChart);
+      
+      // Soumission du formulaire
+      document.getElementById("dataForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        toggleLoading(true);
+        
+        const formData = new FormData(this);
+        const recordId = formData.get('record_id');
+        const method = recordId ? 'PUT' : 'POST';
+        const url = recordId ? `/deposition/update/${recordId}` : '/deposition';
+        
+        fetch(url, {
+          method: method,
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Erreur lors de la sauvegarde');
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            // Recharger la page pour afficher les modifications
+            window.location.reload();
+          } else {
+            throw new Error(data.message || 'Erreur lors de la sauvegarde');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert(error.message);
+        })
+        .finally(() => {
+          toggleLoading(false);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

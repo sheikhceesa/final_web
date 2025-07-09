@@ -1,0 +1,176 @@
+/* Responsive Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Header Structure */
+header {
+    position: relative;
+    background: #f8f9fa;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Main Navigation Links (Desktop) */
+nav > ul {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    transition: all 0.3s ease;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+nav a:hover {
+    color: #007bff;
+}
+
+/* Main Content Grid */
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+.container h2{
+    color: #007bff;
+}
+
+/* Card Styling for Components */
+.graph-container,
+.map-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    min-height: 400px; /* Minimum height for better layout */
+}
+
+.map-container {
+    grid-column: 1 / -1;
+    min-height: 500px; /* Taller map container */
+}
+
+/* Hamburger Menu System */
+.hamburger-menu {
+    display: none;
+    position: relative;
+    z-index: 1000;
+}
+
+.menu-button {
+    cursor: pointer;
+    display: block;
+    padding: 12px;
+}
+
+.menu-button span {
+    display: block;
+    width: 28px;
+    height: 3px;
+    background: #333;
+    margin: 5px 0;
+    transition: all 0.3s ease;
+}
+
+#menu-toggle:checked ~ .menu {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Mobile Menu Styling */
+.menu {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 250px;
+    background: white;
+    list-style: none;
+    padding: 4rem 1rem 1rem;
+    margin: 0;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.menu li {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+/* Responsive Behavior */
+@media (max-width: 768px) {
+    /* Hide desktop navigation */
+    nav > ul {
+        display: none;
+    }
+
+    /* Show hamburger menu */
+    .hamburger-menu {
+        display: block;
+    }
+
+    /* Stack grid items vertically */
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    /* Adjust card heights for mobile */
+    .graph-container,
+    .map-container {
+        min-height: 300px;
+    }
+}
+
+@media (min-width: 769px) {
+    /* Ensure mobile menu stays hidden on desktop */
+    .menu {
+        display: none !important;
+    }
+
+    /* Prevent hamburger menu interference */
+    .hamburger-menu {
+        display: none;
+    }
+}
+
+/* Canvas Responsiveness */
+canvas {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 300px;
+}
+
+/* Error Message Styling */
+#error-container {
+    grid-column: 1 / -1;
+    padding: 1rem;
+    margin: 1rem 0;
+    background: #ffe6e6;
+    border: 1px solid #ffcccc;
+    border-radius: 4px;
+}

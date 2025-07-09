@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+  <meta name="description" content="3D Visual Decision Support Tool for DAMS - Interactive mapping and visualization tool for tailing storage facilities and hydrogeological data" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="theme-color" content="#1a56db" />
+  <title>Mine Site Water Management</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="/static/images/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png" />
+  <link rel="manifest" href="/static/site.webmanifest" />
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" as="style" />
+  <link rel="preload" href="https://unpkg.com/leaflet/dist/leaflet.css" as="style" />
+  <link rel="preload" href="https://unpkg.com/leaflet/dist/leaflet.js" as="script" />
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+
+  <!-- Custom internal styles for enhanced galleries and layout -->
+  <style>
+    :root {
+      /* Color palette */
+      --primary: #1a56db;
+      --primary-light: #3f83f8;
+      --primary-dark: #1e429f;
+      --secondary: #046c4e;
+      --accent: #e74694;
+      --dark-900: #111827;
+      --dark-800: #1f2937;
+      --dark-700: #374151;
+      --dark-600: #4b5563;
+      --dark-500: #6b7280;
+      --light-400: #9ca3af;
+      --light-300: #d1d5db;
+      --light-200: #e5e7eb;
+      --light-100: #f3f4f6;
+      --light-50: #f9fafb;
+      --success: #0e9f6e;
+      --warning: #f59e0b;
+      --error: #dc2626;
+      --info: #3b82f6;
+      
+      /* Typography */
+      --font-main: 'Roboto', sans-serif;
+      --font-heading: 'Poppins', sans-serif;
+      --text-primary: var(--dark-900);
+      --text-secondary: var(--dark-600);
+      --text-tertiary: var(--dark-500);
+      --text-light: var(--light-100);
+      
+      /* Spacing */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+      --space-24: 6rem;
+      
+      /* Border radius */
+      --radius-sm: 0.125rem;
+      --radius-md: 0.25rem;
+      --radius-lg: 0.5rem;
+      --radius-xl: 0.75rem;
+      --radius-2xl: 1rem;
+      --radius-3xl: 1.5rem;
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+      --shadow-none: 0 0 #0000;
+      
+      /* Transitions */
+      --transition-all: all 0.3s ease;
+      --transition-colors: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      --transition-opacity: opacity 0.15s ease;
+      --transition-shadow: box-shadow 0.15s ease;
+      --transition-transform: transform 0.15s ease;
+    }
+    
+    /* Base styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      color: var(--text-primary);
+      background-color: var(--light-100);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: var(--space-4);
+    }
+    
+    p {
+      margin-bottom: var(--space-4);
+    }
+    
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition-colors);
+    }
+    
+    a:hover {
+      color: var(--primary-dark);
+    }
+    
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      transition: var(--transition-all);
+    }
+    
+    /* Utility classes */
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 var(--space-6);
+    }
+    
+    .section {
+      padding: var(--space-8) 0;
+    }
+    
+    .section-heading {
+      color: var(--primary-dark);
+      font-size: 1.75rem;
+      position: relative;
+      padding-bottom: var(--space-3);
+    }
+    
+    .section-heading::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background-color: var(--primary);
+      border-radius: var(--radius-full);
+    }
+    
+    .section-description {
+      color: var(--text-secondary);
+      max-width: 800px;
+      margin-bottom: var(--space-6);
+    }
+    
+    /* Header styles */
+    .main-header {
+      background-color: var(--dark-900);
+      color: var(--light-100);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-4) 0;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--light-100);
+    }
+    
+    .logo-icon {
+      color: var(--primary-light);
+      font-size: 1.5rem;
+    }
+    
+    /* Navigation */
+    .nav-list {
+      display: flex;
+      list-style: none;
+      gap: var(--space-6);
+    }
+    
+    .nav-link {
+      color: var(--light-300);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) 0;
+      position: relative;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      color: var(--light-100);
+    }
+    
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-light);
+    }
+    
+    .nav-icon {
+      font-size: 0.9rem;
+    }
+    
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: var(--space-3) var(--space-4);
+      z-index: 1001;
+      transition: var(--transition-transform);
+    }
+    
+    .skip-link:focus {
+      top: 0;
+      transform: translateY(100px);
+    }
+    
+    /* Map section */
+    .map-container {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: var(--space-8);
+    }
+    
+    .interactive-map {
+      height: 600px;
+      width: 100%;
+      background-color: var(--light-300);
+    }
+    
+    .map-controls {
+      position: absolute;
+      bottom: var(--space-4);
+      right: var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      z-index: 500;
+    }
+    
+    .map-control-btn {
+      width: 40px;
+      height: 40px;
+      background-color: var(--light-100);
+      color: var(--primary-dark);
+      border: none;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .map-control-btn:hover {
+      background-color: var(--primary);
+      color: var(--light-100);
+      transform: translateY(-2px);
+    }
+    
+    .map-control-icon {
+      font-size: 1rem;
+    }
+    
+    /* Chart section */
+    .chart-container {
+      background-color: white;
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      box-shadow: var(--shadow-md);
+      margin-bottom: var(--space-8);
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-4);
+    }
+    
+    .chart-title {
+      font-size: 1.25rem;
+      color: var(--primary-dark);
+    }
+    
+    .chart-legend {
+      display: flex;
+      gap: var(--space-4);
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 0.875rem;
+    }
+    
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: var(--radius-sm);
+    }
+    
+    /* Gallery Styles */
+    .image-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    
+    .image-gallery img {
+      width: calc(30% - var(--space-4));
+      height: 200px;
+      border-radius: var(--radius-md);
+      object-fit: cover;
+      transition: var(--transition-all);
+      cursor: pointer;
+    }
+    
+    .image-gallery img:first-child {
+      width: calc(70% - var(--space-4));
+      height: 400px;
+    }
+    
+    .image-gallery img:hover {
+      transform: scale(1.03);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-all);
+    }
+    
+    .modal[aria-hidden="false"] {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: -1;
+    }
+    
+    .modal-container {
+      width: 90%;
+      max-width: 900px;
+      max-height: 90vh;
+      background-color: white;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-2xl);
+      transform: translateY(20px);
+      transition: var(--transition-all);
+    }
+    
+    .modal[aria-hidden="false"] .modal-container {
+      transform: translateY(0);
+    }
+    
+    .modal-content {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .modal-header {
+      padding: var(--space-4) var(--space-6);
+      background-color: var(--primary-dark);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    
+    .modal-title-icon {
+      font-size: 1.25rem;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-full);
+      transition: var(--transition-all);
+    }
+    
+    .close-btn:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .modal-body {
+      padding: var(--space-6);
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+    
+    .feature-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4);
+      background-color: var(--light-100);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--light-200);
+      transition: var(--transition-all);
+      cursor: pointer;
+      text-align: center;
+    }
+    
+    .feature-item:hover {
+      background-color: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .feature-icon {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-2);
+    }
+    
+    .feature-label {
+      font-weight: 500;
+    }
+    
+    /* Feature sections */
+    .feature-section {
+      margin-bottom: var(--space-6);
+    }
+    
+    .feature-section-title {
+      font-size: 1.25rem;
+      color: var(--primary-dark);
+      margin-bottom: var(--space-3);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    
+    .feature-section-icon {
+      color: var(--primary);
+    }
+    
+    .feature-text, .feature-data {
+      line-height: 1.7;
+    }
+    
+    /* Lightbox styles */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition-all);
+    }
+    
+    .lightbox[aria-hidden="false"] {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .lightbox-image {
+      max-width: 90%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: var(--space-4);
+      right: var(--space-4);
+      background: none;
+      border: none;
+      color: white;
+      font-size: 2rem;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-full);
+      transition: var(--transition-all);
+    }
+    
+    .lightbox-close:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    /* Footer styles */
+    .main-footer {
+      background-color: var(--dark-800);
+      color: var(--light-200);
+      padding: var(--space-12) 0 var(--space-6);
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--space-8);
+      margin-bottom: var(--space-8);
+    }
+    
+    .footer-column {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    
+    .footer-heading {
+      font-size: 1.25rem;
+      color: var(--light-100);
+      margin-bottom: var(--space-2);
+    }
+    
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    
+    .footer-link {
+      color: var(--light-300);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: var(--transition-colors);
+    }
+    
+    .footer-link:hover {
+      color: var(--light-100);
+    }
+    
+    .footer-link-icon {
+      width: 20px;
+      text-align: center;
+    }
+    
+    .footer-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-6);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--dark-700);
+    }
+    
+    .social-links {
+      display: flex;
+      gap: var(--space-4);
+    }
+    
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-full);
+      background-color: var(--dark-700);
+      color: var(--light-100);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-all);
+    }
+    
+    .social-link:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .copyright {
+      color: var(--light-400);
+      font-size: 0.875rem;
+    }
+    
+    /* Responsive adjustments */
+    @media screen and (max-width: 1024px) {
+      .header-container {
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      
+      .nav-list {
+        gap: var(--space-4);
+      }
+      
+      .interactive-map {
+        height: 500px;
+      }
+    }
+    
+    @media screen and (max-width: 768px) {
+      .section {
+        padding: var(--space-6) 0;
+      }
+      
+      .section-heading {
+        font-size: 1.5rem;
+      }
+      
+      .nav-list {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .interactive-map {
+        height: 400px;
+      }
+      
+      .image-gallery img {
+        width: calc(50% - var(--space-4));
+        height: 180px;
+      }
+      
+      .image-gallery img:first-child {
+        width: 100%;
+        height: 250px;
+      }
+      
+      .feature-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+      
+      .modal-container {
+        width: 95%;
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      .section-heading {
+        font-size: 1.3rem;
+      }
+      
+      .interactive-map {
+        height: 300px;
+      }
+      
+      .image-gallery img {
+        width: 100%;
+        height: 200px;
+      }
+      
+      .image-gallery img:first-child {
+        height: 200px;
+      }
+      
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+      }
+      
+      .chart-legend {
+        flex-wrap: wrap;
+      }
+    }
+    
+    /* Remove loading overlay */
+    .loading-overlay {
+      display: none !important;
+    }
+    
+    /* Custom marker styles */
+    .custom-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: var(--shadow-md);
+      font-weight: bold;
+      font-size: 0.75rem;
+      text-align: center;
+      transform: translate(-50%, -50%);
+    }
+    
+    /* Error message styles */
+    .error-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--error);
+      color: white;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    /* View details button */
+    .view-details-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      margin-top: var(--space-3);
+      transition: var(--transition-all);
+    }
+    
+    .view-details-btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* Popup content styles */
+    .popup-content {
+      padding: var(--space-2);
+      min-width: 200px;
+    }
+    
+    /* Tooltip styles */
+    .map-tooltip {
+      background-color: var(--dark-800);
+      color: white;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.875rem;
+      border: none;
+    }
+    
+    .map-tooltip::before {
+      border-top-color: var(--dark-800);
+    }
+    
+    /* Feature map styles */
+    .feature-map {
+      margin-bottom: var(--space-4);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div class="noscript-warning">
+      <p>JavaScript is disabled in your browser. Please enable it for the full functionality of this tool.</p>
+    </div>
+  </noscript>
+  
+  <!-- Skip to content link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- HEADER / NAVIGATION -->
+  <header class="main-header">
+    <div class="container header-container">
+      <div class="logo">
+        <i class="fas fa-water logo-icon"></i>
+        <span>Mining Water Management</span>
+      </div>
+      <nav aria-label="Main navigation">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home nav-icon"></i> Home</a></li>
+          <li class="nav-item"><a href="{{ url_for('dams') }}" class="nav-link"><i class="fas fa-dam nav-icon"></i> Tailing Storage</a></li>
+          <li class="nav-item"><a href="{{ url_for('yearly') }}" class="nav-link active" aria-current="page"><i class="fas fa-map nav-icon"></i> Hydrogeology</a></li>
+          <li class="nav-item"><a href="{{ url_for('environmental') }}" class="nav-link"><i class="fas fa-water nav-icon"></i> Hydrology</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  
+  <!-- MAIN CONTENT -->
+  <main id="main-content" class="main-content">
+    <div class="container">
+      <!-- Satellite Gallery Section -->
+      <section id="satellite-gallery" class="section gallery-section" aria-labelledby="gallery-heading">
+        <h2 id="gallery-heading" class="section-heading">Mining Sites Overview</h2>
+        <p class="section-description">Interactive map showing all mining sites with detailed information available by clicking on each location marker.</p>
+        <div class="map-container">
+          <div id="map" class="interactive-map" aria-label="Interactive map of mining locations" role="application"></div>
+          <div class="map-controls">
+            <button id="zoom-in" class="map-control-btn" aria-label="Zoom in"><i class="fas fa-plus map-control-icon"></i></button>
+            <button id="zoom-out" class="map-control-btn" aria-label="Zoom out"><i class="fas fa-minus map-control-icon"></i></button>
+            <button id="fullscreen" class="map-control-btn" aria-label="Toggle fullscreen"><i class="fas fa-expand map-control-icon"></i></button>
+            <button id="fit-bounds" class="map-control-btn" aria-label="Fit to sites"><i class="fas fa-bullseye map-control-icon"></i></button>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Precipitation Chart Section -->
+      <section id="precipitation-section" class="section" aria-labelledby="chart-heading">
+        <h2 id="chart-heading" class="section-heading">Annual Precipitation Data</h2>
+        <p class="section-description">Historical precipitation data for the region showing yearly variations in rainfall patterns.</p>
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3 class="chart-title">Precipitation (mm)</h3>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span class="legend-color" style="background: #3b82f6;"></span>
+                <span>Rainfall</span>
+              </div>
+            </div>
+          </div>
+          <canvas id="precipitationChart" width="400" height="200"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="main-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h4 class="footer-heading">About</h4>
+          <p>3D Visual Decision Support Tool for DAMS management and hydrogeological data visualization.</p>
+          <div class="footer-links">
+            <a href="#" class="footer-link"><i class="fas fa-info-circle footer-link-icon"></i> About Project</a>
+            <a href="#" class="footer-link"><i class="fas fa-book footer-link-icon"></i> Documentation</a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4 class="footer-heading">Resources</h4>
+          <div class="footer-links">
+            <a href="#" class="footer-link"><i class="fas fa-download footer-link-icon"></i> Downloads</a>
+            <a href="#" class="footer-link"><i class="fas fa-file-alt footer-link-icon"></i> Reports</a>
+            <a href="#" class="footer-link"><i class="fas fa-chart-bar footer-link-icon"></i> Data Visualizations</a>
+          </div>
+        </div>
+        <div class="footer-column">
+          <h4 class="footer-heading">Contact</h4>
+          <div class="footer-links">
+            <a href="#" class="footer-link"><i class="fas fa-envelope footer-link-icon"></i> Email Us</a>
+            <a href="#" class="footer-link"><i class="fas fa-phone-alt footer-link-icon"></i> Support</a>
+            <a href="#" class="footer-link"><i class="fas fa-map-marker-alt footer-link-icon"></i> Locations</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <div class="social-links">
+          <a href="#" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+        </div>
+        <p class="copyright">&copy; <span id="current-year">2024</span> DAMS Management Tool. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SITE DETAILS MODAL -->
+  <div id="infoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-overlay" tabindex="-1"></div>
+    <div class="modal-container">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modal-title" class="modal-title"><i class="fas fa-info-circle modal-title-icon"></i> Site Information</h2>
+          <button id="closeModal" class="close-btn" aria-label="Close modal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- Feature Grid -->
+          <ul class="feature-grid" role="list">
+            <li class="feature-item" role="listitem" data-feature="sourceWater">
+              <i class="fas fa-tint feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Source Water</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="dewatering">
+              <i class="fas fa-tint-slash feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Forages d'exploration</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="floodProtection">
+              <i class="fas fa-water feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Flood Protection</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="processWater">
+              <i class="fas fa-industry feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Process Water</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="waterQualityMonitoring">
+              <i class="fas fa-leaf feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Water Quality</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="waterReuse">
+              <i class="fas fa-recycle feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Water Reuse</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="fireProtection">
+              <i class="fas fa-fire-extinguisher feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Fire Protection</span>
+            </li>
+            <li class="feature-item" role="listitem" data-feature="climaticContext">
+              <i class="fas fa-cloud-sun feature-icon" aria-hidden="true"></i>
+              <span class="feature-label">Precipitation &amp; Temperature</span>
+            </li>
+          </ul>
+          <!-- Dynamic Feature Details Area -->
+          <div class="feature-details" id="siteDetailsContent">
+            <p>Please select a feature to view detailed information about this site.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- IMAGE LIGHTBOX -->
+  <div id="lightbox" class="lightbox" aria-hidden="true" hidden>
+    <button class="lightbox-close" aria-label="Close lightbox"><i class="fas fa-times"></i></button>
+    <img src="" alt="" class="lightbox-image" id="lightbox-image">
+  </div>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Proj4js for coordinate conversion -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+
+  <!-- Main JavaScript -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Update footer year
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+    
+      // Initialize all components
+      initMap();
+      initModal();
+      initLightbox();
+      initPrecipitationChart();
+      initWeatherPhotos();
+      initComponents();
+    
+      // Initialize the Leaflet map
+      function initMap() {
+        const locations = [
+          { name: "AGM", lat: 29.4662, lng: -8.7023, type: "Gold Mine" },
+          { name: "BLEIDA flottation", lat: 30.3667, lng: -6.4349, type: "Processing Facility" },
+          { name: "Hajjar", lat: 31.3755, lng: -8.0860, type: "Mine" },
+          { name: "Ouansimi", lat: 29.2847, lng: -9.3749, type: "Mine" },
+          { name: "BOU AZZER", lat: 30.5156, lng: -6.9162, type: "Cobalt Mine" },
+          { name: "SMI", lat: 31.3361, lng: -5.7192, type: "Silver Mine" },
+          { name: "TIZERT", lat: 30.2560, lng: -8.4571, type: "Copper Mine" },
+          { name: "GGM", lat: 31.3848, lng: -8.0654, type: "Gold Mine" }
+        ];
+        
+        // Set bounds for all locations
+        const bounds = L.latLngBounds(locations.map(loc => [loc.lat, loc.lng]));
+        
+        const map = L.map('map', {
+          zoomControl: false,
+          preferCanvas: true,
+          fadeAnimation: true,
+          zoomAnimation: true,
+          attributionControl: false
+        }).fitBounds(bounds, { padding: [50, 50] });
+        
+        // Add tile layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles © Esri',
+          maxZoom: 19,
+          errorTileUrl: '{{ url_for("static", filename="images/error-tile.png") }}'
+        }).addTo(map);
+        
+        L.control.attribution({
+          position: 'bottomleft',
+          prefix: '<a href="https://leafletjs.com/" target="_blank">Leaflet</a> | &copy; <a href="https://www.esri.com/" target="_blank">Esri</a>'
+        }).addTo(map);
+        
+        document.getElementById('zoom-in').addEventListener('click', () => map.zoomIn());
+        document.getElementById('zoom-out').addEventListener('click', () => map.zoomOut());
+        document.getElementById('fit-bounds').addEventListener('click', () => {
+          map.flyToBounds(bounds, { padding: [50, 50] });
+        });
+        document.getElementById('fullscreen').addEventListener('click', () => {
+          const mapContainer = document.querySelector('.map-container');
+          if (!document.fullscreenElement) {
+            mapContainer.requestFullscreen().catch(err => {
+              showError(`Error enabling fullscreen: ${err.message}`);
+            });
+          } else {
+            document.exitFullscreen();
+          }
+        });
+        
+        // Custom marker icon
+        const CustomIcon = L.DivIcon.extend({
+          options: {
+            html: '',
+            className: 'custom-marker',
+            iconSize: [32, 32]
+          }
+        });
+        
+        // Place markers and bind popups
+        locations.forEach(loc => {
+          const icon = new CustomIcon({
+            html: `<span>${loc.name.split(' ')[0]}</span>`
+          });
+          
+          const marker = L.marker([loc.lat, loc.lng], {
+            icon: icon,
+            title: loc.name,
+            alt: loc.name,
+            riseOnHover: true
+          }).addTo(map);
+          
+          marker.bindTooltip(
+            `<strong>${loc.name}</strong><br>${loc.type}`,
+            {
+              permanent: false,
+              direction: 'top',
+              className: 'map-tooltip',
+              offset: [0, -20]
+            }
+          );
+          
+          marker.bindPopup(`
+            <div class="popup-content">
+              <h3 style="margin: 0 0 10px 0; color: var(--primary);">${loc.name}</h3>
+              <p><strong>Type:</strong> ${loc.type}</p>
+              <p><strong>Coordinates:</strong> ${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}</p>
+              <button class="view-details-btn" onclick="openModal('${loc.name}')">
+                View Detailed Information
+              </button>
+            </div>
+          `);
+          
+          marker.on('click', () => {
+            openModal(loc.name);
+          });
+        });
+        
+        map.on('error', e => {
+          console.error('Map error:', e.message);
+          showError('Map loading failed. Please try again later.');
+        });
+      }
+    
+      // Initialize modal functionality
+      function initModal() {
+        const modal = document.getElementById('infoModal');
+        const closeBtn = document.getElementById('closeModal');
+        const modalOverlay = modal.querySelector('.modal-overlay');
+        
+        closeBtn.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', closeModal);
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+            closeModal();
+          }
+        });
+        
+        window.openModal = openModal;
+      }
+    
+      // Initialize image lightbox
+      function initLightbox() {
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImage = document.getElementById('lightbox-image');
+        const lightboxClose = lightbox.querySelector('.lightbox-close');
+        
+        lightboxClose.addEventListener('click', () => {
+          lightbox.setAttribute('aria-hidden', 'true');
+          lightbox.setAttribute('hidden', '');
+        });
+        
+        lightbox.addEventListener('click', (e) => {
+          if (e.target === lightbox) {
+            lightbox.setAttribute('aria-hidden', 'true');
+            lightbox.setAttribute('hidden', '');
+          }
+        });
+        
+        window.showLightbox = (src, alt) => {
+          lightboxImage.src = src;
+          lightboxImage.alt = alt || '';
+          lightbox.removeAttribute('hidden');
+          lightbox.setAttribute('aria-hidden', 'false');
+        };
+        
+        document.addEventListener('click', (e) => {
+          if (e.target.classList.contains('gallery-image')) {
+            showLightbox(e.target.src, e.target.alt);
+          }
+        });
+      }
+    
+      // Initialize precipitation chart using Chart.js
+      function initPrecipitationChart() {
+        try {
+          const data = [
+            { annee: 1981, precipitation_mm: 1699.3 },
+            { annee: 1982, precipitation_mm: 1656.01 },
+            { annee: 1983, precipitation_mm: 1111.81 },
+            { annee: 1984, precipitation_mm: 1284.83 },
+            { annee: 1985, precipitation_mm: 1419.88 },
+            { annee: 1986, precipitation_mm: 1663.69 },
+            { annee: 1987, precipitation_mm: 1256.3 },
+            { annee: 1988, precipitation_mm: 1344.4 },
+            { annee: 1989, precipitation_mm: 1451.11 },
+            { annee: 1990, precipitation_mm: 1155.92 },
+            { annee: 1991, precipitation_mm: 1291.6 },
+            { annee: 1992, precipitation_mm: 1408.88 },
+            { annee: 1993, precipitation_mm: 1192.11 },
+            { annee: 1994, precipitation_mm: 1447.47 },
+            { annee: 1995, precipitation_mm: 1273.09 },
+            { annee: 1996, precipitation_mm: 984.4 },
+            { annee: 1997, precipitation_mm: 1344.46 },
+            { annee: 1998, precipitation_mm: 1422.79 },
+            { annee: 1999, precipitation_mm: 1235.87 },
+            { annee: 2000, precipitation_mm: 840.61 },
+            { annee: 2001, precipitation_mm: 592.43 },
+            { annee: 2002, precipitation_mm: 615.49 },
+            { annee: 2003, precipitation_mm: 872.25 },
+            { annee: 2004, precipitation_mm: 1056.69 },
+            { annee: 2005, precipitation_mm: 931.57 },
+            { annee: 2006, precipitation_mm: 931.42 },
+            { annee: 2007, precipitation_mm: 908.42 },
+            { annee: 2008, precipitation_mm: 1520.52 },
+            { annee: 2009, precipitation_mm: 1652 },
+            { annee: 2010, precipitation_mm: 1455.71 },
+            { annee: 2011, precipitation_mm: 1195.34 },
+            { annee: 2012, precipitation_mm: 1601.43 },
+            { annee: 2013, precipitation_mm: 1466.43 },
+            { annee: 2014, precipitation_mm: 1508.69 },
+            { annee: 2015, precipitation_mm: 1558.82 },
+            { annee: 2016, precipitation_mm: 1772.53 },
+            { annee: 2017, precipitation_mm: 1448.33 },
+            { annee: 2018, precipitation_mm: 2102.61 },
+            { annee: 2019, precipitation_mm: 1330.18 },
+            { annee: 2020, precipitation_mm: 2007.78 },
+            { annee: 2021, precipitation_mm: 2694.99 },
+            { annee: 2022, precipitation_mm: 1942.47 }
+          ];
+    
+          const ctx = document.getElementById('precipitationChart').getContext('2d');
+          const years = data.map(item => item.annee);
+          const precipitation = data.map(item => item.precipitation_mm);
+    
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(30, 58, 138, 0.8)');
+          gradient.addColorStop(1, 'rgba(30, 58, 138, 0.2)');
+    
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: years,
+              datasets: [{
+                label: 'Precipitation (mm)',
+                data: precipitation,
+                backgroundColor: gradient,
+                borderColor: 'rgba(30, 58, 138, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: true,
+                  mode: 'index',
+                  intersect: false,
+                  backgroundColor: 'var(--dark-700)',
+                  titleColor: 'var(--primary-light)',
+                  bodyColor: 'var(--text-primary)',
+                  borderColor: 'var(--primary)',
+                  borderWidth: 1,
+                  padding: 12,
+                  callbacks: {
+                    label: function(context) {
+                      return ` ${context.dataset.label}: ${context.raw} mm`;
+                    }
+                  }
+                },
+                datalabels: { display: false }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                  ticks: { color: 'var(--text-tertiary)' },
+                  title: {
+                    display: true,
+                    text: 'Precipitation (mm)',
+                    color: 'var(--text-tertiary)',
+                    padding: { top: 10, bottom: 10 }
+                  }
+                },
+                x: {
+                  grid: { display: false },
+                  ticks: { color: 'var(--text-tertiary)' },
+                  title: {
+                    display: true,
+                    text: 'Year',
+                    color: 'var(--text-tertiary)',
+                    padding: { top: 10, bottom: 10 }
+                  }
+                }
+              },
+              animation: {
+                duration: 1000,
+                easing: 'easeOutQuart'
+              }
+            }
+          });
+        } catch (error) {
+          console.error('Chart initialization error:', error);
+          showError('Failed to load climate data visualization');
+          document.getElementById('precipitationChart').style.display = 'none';
+        }
+      }
+    
+      // Initialize weather photos for the precipitation section
+      function initWeatherPhotos() {
+        const section = document.getElementById('precipitation-section');
+        if (!section) return;
+    
+        const gallery = document.createElement('div');
+        gallery.className = 'weather-photos';
+        gallery.style.marginTop = '2rem';
+    
+        const precipitationBlock = document.createElement('div');
+        precipitationBlock.className = 'photo-gallery';
+        precipitationBlock.innerHTML = `
+          <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">Precipitation Photos</h4>
+          <div class="image-gallery">
+            <img src="static/images/precipitation1.png" alt="Heavy rainfall during storm" class="gallery-image">
+            <img src="static/images/precipitation2.png" alt="Raindrops on window" class="gallery-image">
+          </div>
+        `;
+    
+        gallery.appendChild(precipitationBlock);
+        section.appendChild(gallery);
+      }
+    
+      // Initialize additional components (feature item handlers, table styling, etc.)
+      function initComponents() {
+        document.querySelectorAll('.feature-item').forEach(item => {
+          item.addEventListener('click', function() {
+            const featureKey = this.getAttribute('data-feature');
+            updateFeatureContent(featureKey);
+          });
+        });
+        
+        const tables = document.querySelectorAll('.data-table');
+        tables.forEach(table => {
+          table.style.width = '100%';
+          table.style.borderCollapse = 'collapse';
+          table.style.marginTop = 'var(--space-4)';
+          table.querySelectorAll('th').forEach(th => {
+            th.style.backgroundColor = 'var(--primary-dark)';
+            th.style.color = 'white';
+            th.style.padding = 'var(--space-2) var(--space-4)';
+            th.style.textAlign = 'left';
+          });
+          table.querySelectorAll('td').forEach(td => {
+            td.style.padding = 'var(--space-2) var(--space-4)';
+            td.style.borderBottom = '1px solid var(--text-tertiary)';
+          });
+          table.querySelectorAll('tr').forEach((tr, index) => {
+            tr.style.backgroundColor = index % 2 === 0 ? 'var(--dark-700)' : 'var(--dark-600)';
+            tr.addEventListener('mouseenter', function() {
+              this.style.backgroundColor = 'var(--primary)';
+              this.style.color = 'white';
+            });
+            tr.addEventListener('mouseleave', function() {
+              this.style.backgroundColor = index % 2 === 0 ? 'var(--dark-700)' : 'var(--dark-600)';
+              this.style.color = 'var(--text-primary)';
+            });
+          });
+        });
+      }
+    
+      // Show error message
+      function showError(message) {
+        const existingError = document.querySelector('.error-message');
+        if (existingError) {
+          existingError.remove();
+        }
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.bottom = '20px';
+        errorDiv.style.left = '50%';
+        errorDiv.style.transform = 'translateX(-50%)';
+        errorDiv.style.backgroundColor = 'var(--error)';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = 'var(--space-3) var(--space-4)';
+        errorDiv.style.borderRadius = 'var(--radius-md)';
+        errorDiv.style.boxShadow = 'var(--shadow-lg)';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.style.display = 'flex';
+        errorDiv.style.alignItems = 'center';
+        errorDiv.style.gap = 'var(--space-2)';
+        
+        errorDiv.innerHTML = `
+          <i class="fas fa-exclamation-circle"></i>
+          <span>${message}</span>
+        `;
+        
+        errorDiv.setAttribute('role', 'alert');
+        errorDiv.setAttribute('aria-live', 'assertive');
+        
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+          errorDiv.style.opacity = '0';
+          setTimeout(() => { errorDiv.remove(); }, 300);
+        }, 5000);
+      }
+    
+      // Update button icon/aria-label on fullscreen change
+      document.addEventListener('fullscreenchange', () => {
+        const fullscreenBtn = document.getElementById('fullscreen');
+        if (document.fullscreenElement) {
+          fullscreenBtn.innerHTML = '<i class="fas fa-compress map-control-icon"></i>';
+          fullscreenBtn.setAttribute('aria-label', 'Exit fullscreen');
+        } else {
+          fullscreenBtn.innerHTML = '<i class="fas fa-expand map-control-icon"></i>';
+          fullscreenBtn.setAttribute('aria-label', 'Toggle fullscreen');
+        }
+      });
+    
+      /*****************************************************************
+       * SITE DATA AND MODAL FUNCTIONALITY
+       *****************************************************************/
+      const siteData = {
+        "AGM": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='AGM Water Source Map' style='width:100%'></div>",
+            "explanatory": "The water source for AGM comes from nearby wells and seasonal rainfall. The system was upgraded in 2022 to increase capacity by 30%.",
+            "data": "Average daily water intake: 8,500 m³/day<br>Peak capacity: 12,000 m³/day<br>Source: 3 groundwater wells + surface collection",
+            "graphs": "<div class='chart-container' style='height:200px;'><canvas id='agmWaterChart'></canvas></div>",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='AGM Water Source 1' class='gallery-image'><img src='static/images/water_source2.jpg' alt='AGM Water Source 2' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 29.4665, Longitude -8.7020",
+            "explanatory": "Dewatering operations at AGM focus on maintaining safe working conditions in underground mines while minimizing environmental impact. The system includes:<br>- 5 main dewatering pumps<br>- 12 km of drainage channels<br>- 3 sedimentation ponds",
+            "photos": "<div class='image-gallery'><img src='static/images/dewatering1.jpg' alt='AGM Dewatering System' class='gallery-image'><img src='static/images/dewatering2.jpg' alt='AGM Pump Station' class='gallery-image'></div>"
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Elevated drainage channels (8km total)<br>- Emergency overflow basins (3 locations)<br>- Real-time water level monitoring system",
+            "explanatory": "AGM has implemented comprehensive flood protection measures due to its location in a region prone to seasonal flash floods. The system is designed to handle 1-in-100-year flood events with redundant safety measures.",
+            "photos": "<div class='image-gallery'><img src='static/images/flood1.jpeg' alt='AGM Flood Protection' class='gallery-image'><img src='static/images/flood2.jpeg' alt='AGM Drainage System' class='gallery-image'><img src='static/images/flood3.jpeg' alt='AGM Overflow Basin' class='gallery-image'></div>"
+          },
+          "processWater": {
+            "report": "Water Management Report (2023):<br>- Closed-loop water system efficiency: 85%<br>- Freshwater intake reduced by 35% since 2020<br>- Advanced filtration systems installed in Q2 2022",
+            "photos": "<div class='image-gallery'><img src='static/images/process1.jpg' alt='AGM Water Processing' class='gallery-image'><img src='static/images/process2.jpg' alt='AGM Filtration System' class='gallery-image'></div>"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings (June 2024):<br>- pH: 7.4<br>- Turbidity: 3 NTU<br>- Heavy metals: Below detectable limits<br>- Conductivity: 450 µS/cm",
+            "explanatory": "AGM maintains rigorous water quality standards with automated monitoring stations throughout the site. Key features include:<br>- 12 continuous monitoring stations<br>- Real-time alerts for parameter deviations<br>- Monthly comprehensive lab analysis",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='agmQualityChart'></canvas></div>"
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 85%<br>- Process water recycling: 92%<br>- Non-process applications: 65%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='agmReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Fire Protection Infrastructure:<br>- 15 fire hydrants installed<br>- 4 water reservoirs (total capacity: 1,200 m³)<br>- 2 dedicated fire trucks<br>- Annual fire drill compliance: 100%",
+            "explanatory": "Fire protection at AGM meets international standards with regular drills and equipment maintenance. The system includes specialized foam suppression for chemical storage areas."
+          },
+          "climaticContext": {
+            "information": "Climate Data (10-year averages):<br>- Annual rainfall: 380mm<br>- Temperature range: 18°C to 35°C<br>- Dry season: May to September<br>- Wet season: October to April",
+            "explanatory": "Fire protection at AGM meets international standards with regular drills and equipment maintenance. The system includes specialized foam suppression for chemical storage areas.",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='agmClimateChart'></canvas></div>"
+          }
+        },
+        "BLEIDA flottation": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='BLEIDA Water Source Map' style='width:100%'></div>",
+            "explanatory": "BLEIDA's flotation plant sources water from a combination of groundwater and treated municipal supply. The water quality is carefully controlled for optimal flotation performance.",
+            "data": "Average daily water intake: 5,200 m³/day<br>Source ratio: 60% groundwater, 40% municipal",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='BLEIDA Water Source' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 30.3670, Longitude -6.4345",
+            "explanatory": "Specialized dewatering systems handle the unique requirements of the flotation process, including chemical treatment of discharged water."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Reinforced containment walls<br>- Rapid drainage pumps (3 units)<br>- Chemical spill containment systems",
+            "explanatory": "The flotation plant has specific flood protection needs due to chemical storage areas. The system is designed to prevent contamination during flood events."
+          },
+          "processWater": {
+            "report": "Process Water Report:<br>- Water chemistry is carefully controlled for optimal flotation performance<br>- pH maintained at 8.1 ± 0.2<br>- Daily quality checks at 6 control points"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 8.1<br>- Turbidity: 8 NTU<br>- Chemical oxygen demand: 45 mg/L",
+            "explanatory": "Continuous monitoring ensures process efficiency and environmental compliance at the flotation plant."
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 75%<br>- Process water recycling: 82%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='bleidaReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- Special chemical fire suppression systems installed<br>- 8 fire hydrants<br>- Monthly equipment checks"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 320mm<br>- Temperature range: 12°C to 28°C"
+          }
+        },
+        "Hajjar": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='Hajjar Water Source Map' style='width:100%'></div>",
+            "explanatory": "Hajjar mine utilizes a deep aquifer system with limited recharge capacity. Water conservation measures are strictly enforced.",
+            "data": "Average daily water intake: 2,800 m³/day<br>Source: 2 deep aquifer wells",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='Hajjar Water Source' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 31.3758, Longitude -8.0855",
+            "explanatory": "Dewatering is critical for maintaining stable pit walls and safe working conditions. The system includes 4 main pump stations."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Diversion channels (5km total)<br>- Emergency storage ponds (2 locations)<br>- Slope stabilization measures",
+            "explanatory": "The mine's location makes it vulnerable to flash floods during rare rain events. Protection focuses on diverting water away from active mining areas."
+          },
+          "processWater": {
+            "report": "Water Conservation Report:<br>- Water conservation measures have reduced consumption by 25% since 2020<br>- Implementation of dry stacking for tailings"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 7.8<br>- Turbidity: 12 NTU<br>- Total dissolved solids: 650 mg/L",
+            "explanatory": "Monitoring focuses on potential impacts from pit dewatering on local groundwater quality."
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 65%<br>- Main reuse applications: Dust suppression, equipment washing"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- 8 fire hydrants installed<br>- 2 water trucks available<br>- Quarterly fire drills"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 280mm<br>- Temperature range: 10°C to 32°C"
+          }
+        },
+        "Ouansimi": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='Ouansimi Water Source Map' style='width:100%'></div>",
+            "explanatory": "Ouansimi relies on seasonal water sources supplemented by groundwater during dry periods. The system is designed for minimal environmental impact.",
+            "data": "Average daily water intake: 1,800 m³/day<br>Source: Seasonal stream + 1 groundwater well",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='Ouansimi Water Source' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Dewatering system coordinates: Latitude 29.2850, Longitude -9.3745",
+            "explanatory": "Limited dewatering requirements due to the mine's geology and small scale operations."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Basic drainage improvements<br>- Slope monitoring system",
+            "explanatory": "Flood risk is relatively low but requires monitoring due to the site's proximity to a seasonal watercourse."
+          },
+          "processWater": {
+            "report": "Water Management Report:<br>- Simple water treatment meets operational needs<br>- Monthly quality checks"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 7.1<br>- Turbidity: 6 NTU<br>- Heavy metals: Below detection limits"
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 50%<br>- Main reuse application: Equipment washing"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- Basic fire protection measures in place<br>- 4 fire extinguishers<br>- Annual safety training"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 350mm<br>- Temperature range: 15°C to 30°C"
+          }
+        },
+        "BOU AZZER": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='BOU AZZER Water Source Map' style='width:100%'></div>",
+            "explanatory": "BOU AZZER's cobalt processing requires high-quality water sources with strict chemical parameters. The water treatment system includes advanced filtration.",
+            "data": "Average daily water intake: 6,200 m³/day<br>Source: 4 deep wells with iron removal systems",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='BOU AZZER Water Source' class='gallery-image'><img src='static/images/water_source2.jpg' alt='BOU AZZER Treatment Plant' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 30.5160, Longitude -6.9158",
+            "explanatory": "Complex dewatering system handles both mine and processing plant requirements, with separate circuits for clean and process water."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Comprehensive containment system for process chemicals<br>- Elevated process areas<br>- Emergency shutoff valves",
+            "explanatory": "Flood protection focuses on preventing contamination from process areas, with multiple containment barriers."
+          },
+          "processWater": {
+            "report": "Process Water Report:<br>- Advanced water treatment ensures cobalt recovery efficiency<br>- Automated pH control system<br>- Daily quality monitoring at 8 points"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 6.9<br>- Turbidity: 2 NTU<br>- Cobalt: <0.01 mg/L<br>- Nickel: 0.05 mg/L",
+            "explanatory": "Extensive monitoring network tracks water quality throughout the process chain and in discharge water."
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 90%<br>- Process water recycling: 95%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='bouazzerReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- Specialized fire suppression for cobalt processing areas<br>- 12 fire hydrants<br>- Foam suppression system"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 250mm<br>- Temperature range: 8°C to 38°C"
+          }
+        },
+        "SMI": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='SMI Water Source Map' style='width:100%'></div>",
+            "explanatory": "SMI's silver processing requires ultra-pure water for optimal recovery rates. The water treatment system includes reverse osmosis filtration.",
+            "data": "Average daily water intake: 4,800 m³/day<br>Source: Municipal supply + on-site treatment",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='SMI Water Source' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 31.3365, Longitude -5.7188",
+            "explanatory": "Dewatering systems are designed to handle both mine and processing needs, with silver recovery from process water."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Silver concentrate storage elevated above flood levels<br>- Waterproof electrical systems<br>- Backup power supply",
+            "explanatory": "Critical to protect high-value silver products from water damage during extreme weather events."
+          },
+          "processWater": {
+            "report": "Process Water Report:<br>- Water quality is tightly controlled to maximize silver recovery<br>- Conductivity maintained below 50 µS/cm<br>- Daily quality control checks"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 7.0<br>- Turbidity: 1 NTU<br>- Silver: <0.005 mg/L<br>- Cyanide: <0.01 mg/L",
+            "explanatory": "Continuous monitoring ensures process efficiency and environmental compliance at the silver processing plant."
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 88%<br>- Process water recycling: 92%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='smiReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- Special fire protection for silver refining areas<br>- 10 fire hydrants<br>- Chemical suppression systems"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 300mm<br>- Temperature range: 5°C to 35°C"
+          }
+        },
+        "TIZERT": {
+          "sourceWater": {
+            "map": "<div id='tizertWaterMap' style='height: 400px; width: 100%; border-radius: 8px;'></div>",
+            "explanatory": "Le 15 mai 2024, le pompage de l'eau du forage G5 vers la mine de Tizert a été mis en service. Cet événement a eu lieu en présence du client, MAA (Métallurgie de l'Anti Atlas), ainsi que du maître d'ouvrage délégué, REMINEX. Le pompage se fait avec un débit de 30m3/heure.",
+            "data": "Données actuelles:<br>- Débit moyen: 12,345 m³/jour<br>- Sources: Forage G5 + 2 puits annexes<br>- Capacité de stockage: 25,000 m³",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source2.jpg' alt='TIZERT Source Eau 1' class='gallery-image'><img src='static/images/water_source1.jpg' alt='TIZERT Source Eau 2' class='gallery-image'><img src='static/images/water_source3.jpeg' alt='TIZERT Forage G5' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Coordonnées du système principal: Latitude 30.2565, Longitude -8.4568",
+            "explanatory": "TIZERT's copper mine requires extensive dewatering to access deeper ore bodies. The system includes:<br>- 6 pompes principales<br>- 15 km de canalisations<br>- Système de traitement des eaux avant rejet",
+            "photos": "<div class='image-gallery'><img src='static/images/dewatering_map.png' alt='TIZERT Système de Déviation' class='gallery-image'><img src='static/images/dewatering2.jpg' alt='TIZERT Station de Pompage' class='gallery-image'></div>"
+          },
+          "floodProtection": {
+            "solutions": "Solutions Implementées:<br>- Systèmes de digues<br>- Drainage amélioré<br>- Bassins de rétention d'urgence",
+            "explanatory": "La gestion efficace des eaux pluviales revêt une importance cruciale dans le contexte minier, car elle influence non seulement la productivité opérationnelle, mais également les aspects environnementaux et sociaux de l'exploitation minière. Le plan de gestion des eaux pluviales est nécessaire pour contrôler les eaux de ruissellement provenant de la mine et des infrastructures associées, ainsi que pour empêcher toute eau contaminée de pénétrer dans les cours d'eau naturels.",
+            "photos": "<div class='image-gallery'><img src='static/images/flood4.jpg' alt='TIZERT Protection Contre les Inondations' class='gallery-image'><img src='static/images/flood2.jpeg' alt='TIZERT Système de Drainage' class='gallery-image'><img src='static/images/flood3.jpeg' alt='TIZERT Mesures Anti-Inondation' class='gallery-image'><img src='static/images/flood1.jpeg' alt='TIZERT Infrastructure Anti-Inondation' class='gallery-image'><img src='static/images/flood5.jpeg' alt='TIZERT Prévention des Inondations' class='gallery-image'></div>"
+          },
+          "processWater": {
+            "report": "Rapport de Gestion de l'Eau:<br>- Système en boucle fermée avec 85% de recyclage<br>- Nouveaux filtres installés en 2023<br>- Surveillance quotidienne de la qualité",
+            "photos": "<div class='image-gallery'><img src='static/images/process1.jpg' alt='TIZERT Traitement de lEau' class='gallery-image'><img src='static/images/process2.jpg' alt='TIZERT Système de Filtration' class='gallery-image'></div>"
+          },
+          "waterQualityMonitoring": {
+            "data": "Dernières Mesures (Juin 2024):<br>- pH: 7.2<br>- Turbidité: 5 NTU<br>- Cuivre: 0.02 mg/L<br>- Conductivité: 520 µS/cm",
+            "explanatory": "Ce paragraphe traite de la pureté de l'eau et des techniques de surveillance à la mine de cuivre de TIZERT. Le système comprend:<br>- 10 stations de surveillance continues<br>- Alertes en temps réel<br>- Analyses mensuelles en laboratoire",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='tizertQualityChart'></canvas></div>"
+          },
+          "waterReuse": {
+            "data": "Métriques de Réutilisation 2023:<br>- Efficacité globale: 60%<br>- Recyclage eau de procédé: 75%<br>- Applications non-procédé: 45%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='tizertReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Infrastructure de Protection Incendie:<br>- 10 bornes incendie installées<br>- 3 réservoirs dédiés (capacité totale: 900 m³)<br>- 2 véhicules incendie<br>- Exercices annuels: 100% conformité",
+            "explanatory": "Ce paragraphe détaille les mesures et équipements de protection incendie en place à TIZERT, y compris les systèmes spécialisés pour les zones de stockage de produits chimiques."
+          },
+          "climaticContext": {
+            "information": "Données Climatiques (Moyennes 10 ans):<br>- Précipitations annuelles: 450mm<br>- Plage de température: 15°C à 30°C<br>- Saison sèche: Mai à Septembre<br>- Saison humide: Octobre à Avril",
+            "explanatory": "Fire protection at Tizert meets international standards with regular drills and equipment maintenance. The system includes specialized foam suppression for chemical storage areas.",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='tizertClimateChart'></canvas></div>",
+            "photos": "<div class='image-gallery'><img src='static/images/precipitation1.png' alt='TIZERT Protection Contre les Inondations' class='gallery-image'><img src='static/images/precipitation2.png' alt='TIZERT Système de Drainage' class='gallery-image'><img src='static/images/precipitation3.png' alt='TIZERT Mesures Anti-Inondation' class='gallery-image'></div>"
+          }
+        },
+        "GGM": {
+          "sourceWater": {
+            "map": "<div class='feature-map'><img src='static/images/map-placeholder.jpg' alt='GGM Water Source Map' style='width:100%'></div>",
+            "explanatory": "GGM's gold processing plant uses a combination of surface water and groundwater sources. The water treatment includes cyanide destruction systems.",
+            "data": "Average daily water intake: 7,500 m³/day<br>Source ratio: 70% surface water, 30% groundwater",
+            "photos": "<div class='image-gallery'><img src='static/images/water_source1.jpg' alt='GGM Water Source' class='gallery-image'></div>"
+          },
+          "dewatering": {
+            "coordinates": "Main dewatering system coordinates: Latitude 31.3852, Longitude -8.0650",
+            "explanatory": "Dewatering is critical for both open pit and underground operations, with separate systems for each area."
+          },
+          "floodProtection": {
+            "solutions": "Implemented Solutions:<br>- Containment ponds for process water<br>- Emergency spillways<br>- Cyanide neutralization systems",
+            "explanatory": "Flood protection focuses on preventing cyanide solution releases, with multiple containment barriers and emergency response plans."
+          },
+          "processWater": {
+            "report": "Process Water Report:<br>- Water management is critical for gold leaching processes<br>- Cyanide levels strictly controlled<br>- Automated monitoring systems"
+          },
+          "waterQualityMonitoring": {
+            "data": "Latest Readings:<br>- pH: 10.2<br>- Turbidity: 4 NTU<br>- Cyanide: <0.05 mg/L<br>- Mercury: <0.001 mg/L",
+            "explanatory": "Extensive monitoring ensures process control and environmental safety at the gold processing plant."
+          },
+          "waterReuse": {
+            "data": "2023 Water Reuse Metrics:<br>- Overall efficiency: 92%<br>- Process water recycling: 95%",
+            "graphs": "<div class='chart-container' style='height:250px;'><canvas id='ggmReuseChart'></canvas></div>"
+          },
+          "fireProtection": {
+            "data": "Fire Protection:<br>- Special fire protection for gold refining areas<br>- 15 fire hydrants<br>- Foam suppression systems"
+          },
+          "climaticContext": {
+            "information": "Climate Data:<br>- Annual rainfall: 350mm<br>- Temperature range: 12°C to 33°C"
+          }
+        }
+      };
+    
+      let currentSite = "TIZERT";
+    
+      function openModal(siteName) {
+        currentSite = siteName;
+        const modal = document.getElementById('infoModal');
+        const modalTitle = document.getElementById('modal-title');
+        modalTitle.innerHTML = `<i class="fas fa-info-circle modal-title-icon"></i> ${siteName} - Site Details`;
+        document.getElementById('siteDetailsContent').innerHTML = `
+          <p>Select a feature to view detailed information about ${siteName}.</p>
+          <div class="feature-section">
+            <h4 class="feature-section-title"><i class="fas fa-info-circle feature-section-icon"></i> Site Overview</h4>
+            <p class="feature-text">${siteData[siteName]?.generalOverview || 'No general overview available for this site.'}</p>
+          </div>
+        `;
+        modal.setAttribute('aria-hidden', 'false');
+        modal.removeAttribute('hidden');
+        document.body.style.overflow = 'hidden';
+        
+        // Initialize Tizert water source map if needed
+        if (siteName === 'TIZERT') {
+          setTimeout(() => {
+            initTizertWaterMap();
+          }, 100);
+        }
+      }
+      
+      // Initialize Tizert water source map with specified coordinates
+      function initTizertWaterMap() {
+        const mapContainer = document.getElementById('tizertWaterMap');
+        if (!mapContainer) return;
+        
+        // Convert DMS to decimal degrees
+        function dmsToDecimal(degrees, minutes, seconds) {
+          return degrees + (minutes / 60) + (seconds / 3600);
+        }
+        
+        // Your exact coordinates in decimal degrees
+        //const latitude = dmsToDecimal(3, 18, 52.832);  //  30.28797947
+        //const longitude = dmsToDecimal(1, 53, 20.028); //  -8.41130323
+        // Your exact coordinates in decimal degrees
+        const latitude = 30.28797947;
+        const longitude = -8.41130323;
+        
+        const map = L.map('tizertWaterMap', {
+          zoomControl: true,
+          preferCanvas: true,
+          fadeAnimation: true,
+          zoomAnimation: true,
+          attributionControl: false,
+          // Disable zoom on map click
+          tap: false,
+          dragging: true
+        }).setView([latitude, longitude], 15); // Start at zoom level 15
+        
+        // Disable zoom on map click
+        map.touchZoom.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.boxZoom.disable();
+        map.keyboard.disable();
+        
+        // Add tile layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles © Esri',
+          maxZoom: 19
+        }).addTo(map);
+        
+        // Add marker at the specified coordinates
+        const marker = L.marker([latitude, longitude], {
+          title: 'TIZERT Water Source',
+          alt: 'TIZERT Water Source Location',
+          riseOnHover: true,
+          // Make marker more prominent
+          icon: L.divIcon({
+            className: 'tizert-water-marker',
+            html: '<div class="water-marker-pin"></div>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 30]
+          })
+        }).addTo(map);
+        
+        marker.bindPopup(`
+          <div class="popup-content">
+            <h3 style="margin: 0 0 10px 0; color: var(--primary);">TIZERT Water Source</h3>
+            <p><strong>Coordinates (DMS):</strong> 3°18'52.832"N, 1°53'20.028"E</p>
+            <p><strong>Coordinates (Decimal):</strong> ${latitude.toFixed(6)}, ${longitude.toFixed(6)}</p>
+          </div>
+        `);
+        
+        // ONLY zoom when clicking the marker, not the map
+        marker.on('click', function() {
+          map.setView([latitude, longitude], 18); // Zoom to level 18 (100%)
+        });
+        
+        // Add scale control
+        L.control.scale({ imperial: false }).addTo(map);
+        
+        // Add custom CSS for the marker
+        const style = document.createElement('style');
+        style.textContent = `
+          .tizert-water-marker .water-marker-pin {
+            width: 30px;
+            height: 30px;
+            background: #3388ff;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            position: absolute;
+            left: 0;
+            top: 0;
+            margin: -15px 0 0 -15px;
+          }
+          .tizert-water-marker .water-marker-pin:after {
+            content: '';
+            width: 24px;
+            height: 24px;
+            margin: 3px 0 0 3px;
+            background: #fff;
+            position: absolute;
+            border-radius: 50%;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    
+      function closeModal() {
+        const modal = document.getElementById('infoModal');
+        modal.setAttribute('aria-hidden', 'true');
+        modal.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+      }
+    
+      function updateFeatureContent(featureKey) {
+        const site = siteData[currentSite];
+        if (!site || !site[featureKey]) {
+          document.getElementById('siteDetailsContent').innerHTML = `
+            <div class="feature-section">
+              <h4 class="feature-section-title">
+                <i class="${document.querySelector(`[data-feature="${featureKey}"] .feature-icon`).className} feature-section-icon"></i>
+                ${document.querySelector(`[data-feature="${featureKey}"] .feature-label`).textContent}
+              </h4>
+              <p>No data available for this feature at ${currentSite}.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const feature = site[featureKey];
+        let contentHTML = `
+          <div class="feature-section">
+            <h4 class="feature-section-title">
+              <i class="${document.querySelector(`[data-feature="${featureKey}"] .feature-icon`).className} feature-section-icon"></i>
+              ${document.querySelector(`[data-feature="${featureKey}"] .feature-label`).textContent}
+            </h4>
+        `;
+        
+        if (feature.explanatory) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-align-left feature-section-icon"></i> Description</h5>
+              <p class="feature-text">${feature.explanatory.replace(/\n/g, '<br>')}</p>
+            </div>
+          `;
+        }
+        
+        if (feature.data) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-database feature-section-icon"></i> Data</h5>
+              <div class="feature-data">${feature.data.replace(/\n/g, '<br>')}</div>
+            </div>
+          `;
+        }
+        
+        if (feature.map) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-map-marked-alt feature-section-icon"></i> Map</h5>
+              ${feature.map}
+            </div>
+          `;
+        }
+        
+        if (feature.graphs) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-chart-line feature-section-icon"></i> Charts</h5>
+              ${feature.graphs}
+            </div>
+          `;
+        }
+        
+        if (feature.photos) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-camera feature-section-icon"></i> Photos</h5>
+              ${feature.photos}
+            </div>
+          `;
+        }
+        
+        if (feature.solutions) {
+          contentHTML += `
+            <div class="feature-section">
+              <h5 class="feature-section-title"><i class="fas fa-lightbulb feature-section-icon"></i> Solutions</h5>
+              <div class="feature-data">${feature.solutions.replace(/\n/g, '<br>')}</div>
+            </div>
+          `;
+        }
+        
+        contentHTML += `</div>`;
+        document.getElementById('siteDetailsContent').innerHTML = contentHTML;
+        
+        // Initialize Tizert water map if needed
+        if (currentSite === 'TIZERT' && featureKey === 'sourceWater') {
+          setTimeout(() => {
+            initTizertWaterMap();
+          }, 100);
+        }
+        
+        if (feature.graphs && feature.graphs.includes('canvas')) {
+          initFeatureCharts(currentSite, featureKey);
+        }
+      }
+    
+      function initFeatureCharts(siteName, featureKey) {
+        console.log(`Initializing charts for ${siteName} - ${featureKey}`);
+      }
+    
+      document.querySelectorAll('.feature-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const featureKey = this.getAttribute('data-feature');
+          updateFeatureContent(featureKey);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

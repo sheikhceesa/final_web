@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoVision Pro | Dashboard Minier Intelligent</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Map Libraries -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  
+  <style>
+    :root {
+      /* Light Theme */
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --secondary: #e11d48;
+      --accent: #f59e0b;
+      --dark: #1e293b;
+      --darker: #0f172a;
+      --light: #f1f5f9;
+      --lighter: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #334155;
+      --text-light: #64748b;
+      --card-bg: #ffffff;
+      --header-bg: rgba(255, 255, 255, 0.92);
+      --map-bg: #f8fafc;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      
+      /* Dark Theme Overrides */
+      .dark-mode {
+        --primary: #3b82f6;
+        --primary-light: #60a5fa;
+        --secondary: #f43f5e;
+        --accent: #f59e0b;
+        --dark: #f1f5f9;
+        --darker: #e2e8f0;
+        --light: #1e293b;
+        --lighter: #0f172a;
+        --text: #e2e8f0;
+        --text-light: #94a3b8;
+        --card-bg: #1e293b;
+        --header-bg: rgba(15, 23, 42, 0.92);
+        --map-bg: #0f172a;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background-color: var(--lighter);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Glassmorphism Header */
+    header {
+      background: var(--header-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      padding: 0.8rem 0;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-family: 'Roboto Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .logo img {
+      height: 36px;
+      margin-right: 12px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 1rem;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    nav a:hover, nav a.active {
+      background-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    nav a i {
+      margin-right: 8px;
+      font-size: 0.9rem;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: rotate(30deg) scale(1.1);
+      color: var(--accent);
+    }
+
+    /* Main Content */
+    .main-container {
+      max-width: 1400px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+      transform: rotate(30deg);
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto 1.5rem;
+      position: relative;
+      z-index: 1;
+      opacity: 0.9;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      background-color: white;
+      color: var(--primary);
+      padding: 0.8rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn i {
+      margin-left: 8px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+
+    .btn-outline:hover {
+      background: white;
+      color: var(--primary);
+    }
+
+    /* Dashboard Stats */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      border-top: 4px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    .stat-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      color: var(--success);
+    }
+
+    .stat-change.down {
+      color: var(--danger);
+    }
+
+    .stat-change i {
+      margin-right: 4px;
+    }
+
+    /* Map Section */
+    .map-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title i {
+      margin-right: 10px;
+      color: var(--primary);
+    }
+
+    .map-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .map-filter {
+      background: var(--light);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .map-container {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      background: var(--map-bg);
+    }
+
+    #africa-map {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Site Details Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 900px;
+      max-height: 90vh;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+
+    .modal-title i {
+      margin-right: 10px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .modal-close:hover {
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-light);
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-card {
+      background: var(--light);
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+
+    .info-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .image-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      aspect-ratio: 16/9;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+
+    .gallery-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--darker);
+      color: var(--text);
+      padding: 3rem 0;
+      margin-top: 3rem;
+    }
+
+    .footer-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .footer-col h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+      color: var(--dark);
+    }
+
+    .footer-col h3::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+      transform: translateX(5px);
+    }
+
+    .footer-links a i {
+      margin-right: 8px;
+      font-size: 0.8rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .social-links a:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    .footer-bottom {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .nav-right {
+        width: 100%;
+        justify-content: space-between;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .map-container {
+        height: 500px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .hero {
+        padding: 2rem 1rem;
+      }
+      
+      nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .map-container {
+        height: 400px;
+      }
+      
+      .modal {
+        width: 95%;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-container, .nav-container, .footer-container {
+        padding: 0 1rem;
+      }
+      
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Glass Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="{{ url_for('index') }}" class="logo">
+        <img src="https://www.dreamjob.ma/wp-content/uploads/2023/06/Managem-Emploi-Recrutement-1140x570.png" alt="Managem Logo">
+        GeoVision Pro
+      </a>
+      
+      <div class="nav-right">
+        <nav>
+          <ul>
+            <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> Accueil</a></li>
+            <li><a href="{{ url_for('dams') }}"><i class="fas fa-database"></i> Stockage</a></li>
+            <li><a href="{{ url_for('geotechnical') }}"><i class="fas fa-mountain"></i> Géotechnique</a></li>
+            <li><a href="{{ url_for('yearly') }}"><i class="fas fa-tint"></i> Hydrogéologie</a></li>
+          </ul>
+        </nav>
+        
+        <button class="theme-toggle" id="themeToggle">
+          <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Plateforme Intelligente de Gestion Minière</h1>
+      <p>Solution intégrée 3D pour la visualisation et l'analyse des données géotechniques et environnementales en temps réel</p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="#map-section" class="btn btn-outline">
+          Explorer la carte <i class="fas fa-map-marked-alt"></i>
+        </a>
+        <button class="btn" onclick="showDemoVideo()">
+          Voir la démo <i class="fas fa-play"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- Dashboard Stats -->
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-globe-africa"></i>
+          </div>
+          <div>
+            <div class="stat-title">Sites Actifs</div>
+            <div class="stat-value">7</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-up"></i> 2 nouveaux cette année
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-database"></i>
+          </div>
+          <div>
+            <div class="stat-title">employee</div>
+            <div class="stat-value">+ 2000</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-up"></i> 2% vs 2023
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <div class="stat-title">Production Annuelle</div>
+            <div class="stat-value">3.2 t/an</div>
+            <div class="stat-change">
+              <i class="fas fa-arrow-up"></i> 8% vs 2023
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-header">
+          <div class="stat-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <div class="stat-title">Sécurité</div>
+            <div class="stat-value">98.7%</div>
+            <div class="stat-change ">
+              <i class="fas fa-arrow-up"></i> 0.3% vs dernier trimestre
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Map Section -->
+    <section id="map-section" class="map-section">
+      <div class="section-header">
+        <h2 class="section-title"><i class="fas fa-map-marked-alt"></i> Carte Interactive des Sites</h2>
+        <div class="map-controls">
+          <select class="map-filter" id="countryFilter">
+            <option value="all">Tous les pays</option>
+            <option value="MAROC">Maroc</option>
+            <option value="GUINEE">Guinée</option>
+            <option value="SOUDAN">Soudan</option>
+            <option value="RDC">RDC</option>
+            <option value="GABON">Gabon</option>
+            <option value="SENEGAL">Sénégal</option>
+            <option value="COTE_DIVOIR">Côte d'Ivoire</option>
+          </select>
+          <select class="map-filter" id="resourceFilter">
+            <option value="all">Toutes ressources</option>
+            <option value="or">Or</option>
+            <option value="cuivre">Cuivre</option>
+            <option value="cobalt">Cobalt</option>
+            <option value="argent">Argent</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="map-container">
+        <img id="africa-map" src="https://www.managemgroup.com/themes/managem/images/AFMAP-Managem.png" 
+             usemap="#image-map" 
+             alt="Carte Interactive de l'Afrique">
+        <map name="image-map"></map>
+      </div>
+    </section>
+  </div>
+
+  <!-- Site Details Modal -->
+  <div class="modal-overlay" id="siteModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle"><i class="fas fa-info-circle"></i> Détails du Site</h3>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3>GeoVision Pro</h3>
+          <p>Plateforme intelligente pour la gestion des sites miniers du groupe Managem.</p>
+          <div class="social-links">
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Navigation</h3>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('index') }}"><i class="fas fa-chevron-right"></i> Accueil</a></li>
+            <li><a href="{{ url_for('dams') }}"><i class="fas fa-chevron-right"></i> Stockage Rejets</a></li>
+            <li><a href="{{ url_for('geotechnical') }}"><i class="fas fa-chevron-right"></i> Géotechnique</a></li>
+            <li><a href="{{ url_for('environmental') }}"><i class="fas fa-chevron-right"></i> Hydrogéologie</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Ressources</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Rapports Annuels</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Études Techniques</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Contact</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fas fa-chevron-right"></i> contact@managemgroup.com</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> +212 522 39 39 39</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Support Technique</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Demande d'Accès</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2025 Managem Group. Tous droits réservés. | Conçu avec <i class="fas fa-heart" style="color: var(--secondary);"></i> par l'équipe GeoVision</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/image-map-resizer/1.0.10/js/imageMapResizer.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Initialize theme toggle
+      const themeToggle = document.getElementById('themeToggle');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      
+      // Set initial theme
+      if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+        document.body.classList.add('dark-mode');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+      }
+      
+      // Theme toggle handler
+      themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        if (document.body.classList.contains('dark-mode')) {
+          localStorage.setItem('theme', 'dark');
+          themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+          localStorage.setItem('theme', 'light');
+          themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+      });
+      
+      // Initialize interactive map
+      initInteractiveMap();
+      
+      // Make the image map responsive
+      if (window.imageMapResize) {
+        imageMapResize();
+      }
+      
+      // Modal close handlers
+      document.getElementById('modalClose').addEventListener('click', closeModal);
+      document.getElementById('siteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+      });
+      
+      // Escape key to close modal
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+      });
+      
+      // Filter functionality
+      document.getElementById('countryFilter').addEventListener('change', filterMap);
+      document.getElementById('resourceFilter').addEventListener('change', filterMap);
+    });
+
+    // Region definitions
+    const regions = [
+      {
+        id: "rdc",
+        alt: "RDC",
+        title: "République Démocratique du Congo",
+        country: "RDC",
+        resources: ["cuivre", "cobalt"],
+        coords: "800,1408,809,1401,819,1401,830,1401,842,1395,849,1401,858,1399,869,1394,869,1383,881,1376,872,1353,876,1342,883,1334,883,1319,899,1307,911,1288,915,1256,925,1235,925,1212,945,1192,962,1205,975,1208,998,1208,1021,1203,1038,1196,1059,1194,1074,1192,1095,1199,1109,1201,1123,1217,1137,1214,1155,1214,1169,1222,1172,1235,1180,1252,1172,1270,1165,1281,1151,1291,1151,1302,1141,1319,1139,1334,1132,1348,1132,1357,1139,1367,1139,1378,1135,1390,1134,1404,1127,1420,1137,1427,1144,1436,1150,1457,1162,1470,1151,1482,1132,1482,1127,1489,1127,1503,1127,1517,1125,1531,1125,1545,1134,1563,1144,1563,1151,1574,1139,1586,1120,1568,1104,1556,1089,1560,1068,1556,1059,1537,1038,1540,1003,1535,989,1510,989,1485,985,1455,969,1457,954,1443,939,1451,939,1460,922,1471,886,1458,890,1441,878,1421,862,1421,848,1425,826,1421,811,1421,766,1366",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group en RDC</h4>
+            <p>Managem est un groupe minier marocain actif en RDC, principalement dans l'extraction du cuivre et du cobalt.</p>
+            <ul class="popup-list">
+              <li><strong>Projet Pumpi:</strong> Production démarrée en 2020</li>
+              <li>Contribution significative à la croissance du chiffre d'affaires en 2024</li>
+              <li>Commercialisation des métaux extraits</li>
+              <li>Aucune exploitation aurifère actuellement en RDC</li>
+            </ul>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">Actif</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Production Annuelle</div>
+                <div class="info-value">1.2M tonnes</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ressources Principales</div>
+                <div class="info-value">Cuivre, Cobalt</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Employés</div>
+                <div class="info-value">450</div>
+              </div>
+            </div>
+            <p>Le projet Pumpi en RDC représente l'un des investissements majeurs de Managem en Afrique subsaharienne. Avec des réserves importantes en cuivre et cobalt, ce site contribue significativement à la production du groupe.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Données Techniques</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Capacité de Stockage</div>
+                <div class="info-value">15.0 Mt</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Superficie</div>
+                <div class="info-value">96.0 Ha</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Volume Stocké</div>
+                <div class="info-value">2.5Mm3</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Revêtement</div>
+                <div class="info-value">Géomembrane</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/sudan.png') }}" alt="Vue aérienne">
+                <div class="gallery-caption">Vue aérienne du site</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/sudan_tech1.jpg') }}" alt="Installations techniques">
+                <div class="gallery-caption">Installations techniques</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Impact Environnemental</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Suivi Eau</div>
+                <div class="info-value">12 stations</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Qualité Air</div>
+                <div class="info-value">Normes OMS</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Revegetation</div>
+                <div class="info-value">85%</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Certifications</div>
+                <div class="info-value">ISO 14001</div>
+              </div>
+            </div>
+            <p>Le site met en œuvre un programme environnemental rigoureux avec surveillance continue de la qualité de l'eau et de l'air, ainsi que des initiatives de revegetation et de conservation de la biodiversité.</p>
+          `
+        }
+      },
+      {
+        id: "gabon",
+        alt: "GABON",
+        title: "Gabon",
+        country: "GABON",
+        resources: ["or"],
+        coords: "765,1373,752,1352,742,1335,733,1320,735,1305,745,1305,742,1289,759,1282,777,1282,784,1259,796,1253,807,1253,816,1253,814,1271,830,1267,835,1276,839,1285,828,1299,837,1303,844,1317,844,1326,844,1350,826,1352,818,1338,809,1347,793,1350,793,1359,784,1375",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group au Gabon</h4>
+            <p>Activités principales: Exploration aurifère</p>
+            <ul class="popup-list">
+              <li><strong>Projet Etéké:</strong> 80% participation</li>
+              <li>Localisation: Province de la Ngounié</li>
+              <li>Superficie: 810 km²</li>
+              <li>Phase: Étude de faisabilité</li>
+              <li>Objectif de production: 2 tonnes d'or/an</li>
+            </ul>
+            <p><strong>Filiale Techsub:</strong> Spécialisée dans les travaux de forage et miniers</p>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">Exploration</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ressources</div>
+                <div class="info-value">Or</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Superficie</div>
+                <div class="info-value">810 km²</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Participation</div>
+                <div class="info-value">80%</div>
+              </div>
+            </div>
+            <p>Le projet Etéké au Gabon représente un potentiel important pour la production aurifère de Managem en Afrique centrale. Actuellement en phase d'étude de faisabilité, ce projet vise une production de 2 tonnes d'or par an.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Données Techniques</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Ressources Estimées</div>
+                <div class="info-value">1.8M onces</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Teneur Moyenne</div>
+                <div class="info-value">1.6 g/t</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Méthode d'Extraction</div>
+                <div class="info-value">Ciel ouvert</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Durée de Vie</div>
+                <div class="info-value">8 ans</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/gabon_map.jpg') }}" alt="Carte du projet">
+                <div class="gallery-caption">Carte du projet Etéké</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/gabon_site.jpg') }}" alt="Site d'exploration">
+                <div class="gallery-caption">Site d'exploration</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Étude Environnementale</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Étude Impact</div>
+                <div class="info-value">En cours</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Zone Protégée</div>
+                <div class="info-value">Non</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Biodiversité</div>
+                <div class="info-value">Forêt tropicale</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Engagement Communautaire</div>
+                <div class="info-value">Actif</div>
+              </div>
+            </div>
+            <p>Le projet intègre dès la phase d'exploration une approche responsable avec des études d'impact environnemental approfondies et un dialogue continu avec les communautés locales.</p>
+          `
+        }
+      },
+      {
+        id: "soudan",
+        alt: "SOUDAN",
+        title: "Soudan",
+        country: "SOUDAN",
+        resources: ["or"],
+        coords: "1029,960,1033,868,1049,873,1052,825,1180,825,1190,818,1201,825,1222,825,1229,832,1238,827,1250,824,1257,811,1268,808,1282,811,1298,824,1305,836,1305,854,1308,875,1308,889,1319,896,1330,907,1335,917,1321,931,1310,944,1300,960,1292,974,1292,998,1284,1016,1264,1043,1255,1064,1250,1073,1236,1062,1229,1046,1225,1030,1208,1028,1208,1046,1197,1058,1181,1080,1150,1069,1144,1081,1116,1081,1079,1094,1056,1066,1040,1074,1031,1087,1008,1069,1003,1035,991,998,1005,990,1012,983",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group au Soudan</h4>
+            <button class="btn" onclick="showRegionDetails('soudan')" style="margin-top: 1rem; width: 100%;">
+              <i class="fas fa-info-circle"></i> Voir les détails du projet Tri-K
+            </button>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">Production</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Production Annuelle</div>
+                <div class="info-value">120K onces</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ressources</div>
+                <div class="info-value">Or</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Durée de Vie</div>
+                <div class="info-value">9 ans</div>
+              </div>
+            </div>
+            <p>Le projet Tri-K au Soudan est un fleuron de la production aurifère de Managem, avec des ressources importantes et une production stable. Le site emploie plus de 600 personnes et contribue significativement à l'économie locale.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Données Techniques</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Capacité Totale</div>
+                <div class="info-value">15.0 Mt</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Superficie</div>
+                <div class="info-value">96.0 Ha</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Volume Stocké</div>
+                <div class="info-value">2.5Mm3</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Revêtement</div>
+                <div class="info-value">Géomembrane</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/sudan.png') }}" alt="Installation de stockage">
+                <div class="gallery-caption">Installation de stockage</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/sudan_plant.jpg') }}" alt="Usine de traitement">
+                <div class="gallery-caption">Usine de traitement</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Gestion Environnementale</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Recyclage Eau</div>
+                <div class="info-value">85%</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Émissions CO2</div>
+                <div class="info-value">12% réduites</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Biodiversité</div>
+                <div class="info-value">Plan de gestion</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Certifications</div>
+                <div class="info-value">ISO 14001</div>
+              </div>
+            </div>
+            <p>Le site a mis en place un système de gestion environnementale complet avec un taux de recyclage de l'eau de 85%, une réduction des émissions de CO2 et un programme de préservation de la biodiversité.</p>
+          `
+        }
+      },
+      {
+        id: "maroc",
+        alt: "MAROC",
+        title: "Maroc",
+        country: "MAROC",
+        resources: ["or", "argent", "cobalt", "cuivre"],
+        coords: "426,513,445,525,454,525,479,529,488,529,500,534,509,548,509,557,511,573,519,583,523,596,509,601,493,601,480,608,465,617,456,633,442,636,438,645,426,650,406,657,390,666,360,686,360,739,295,742,295,797,270,813,272,843,189,844,233,763,239,749,255,737,262,714,269,707,281,700,286,691,297,689,339,647,332,619,341,599,355,578,375,576,394,562,413,530",
+
+        popupContent: function() {
+          const subregions = [
+            { id: "cmg", name: "CMG" },
+            { id: "bouazzer", name: "BOU AZZER" },
+            { id: "ouansimi", name: "OUANSIMI" },
+            { id: "agm", name: "AGM" },
+            { id: "somifer", name: "SOMIFER" },
+            { id: "cmo", name: "CMO" },
+            { id: "smi", name: "SMI" }
+          ];
+          return `
+            <div class="popup-section">
+              <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group au Maroc</h4>
+              <p>Sélectionnez un site pour voir les détails:</p>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; margin-top: 1rem;">
+                ${subregions.map(sub => `
+                  <button class="btn" onclick="showRegionDetails('${sub.id}')" style="padding: 0.5rem; font-size: 0.9rem;">
+                    ${sub.name}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        },
+        subregions: {
+          cmg: {
+            name: "CMG",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Draa Tafilalet</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Cuivre, Argent</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">15K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">320</div>
+                  </div>
+                </div>
+                <p>Le site CMG est l'un des plus anciens sites miniers de Managem au Maroc, spécialisé dans l'extraction de cuivre et d'argent. Il dispose de plusieurs installations de stockage modernes.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installations de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">TSF N°1</div>
+                    <div class="info-value">1.9 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">TSF N°2</div>
+                    <div class="info-value">2.9 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">TSF N°3</div>
+                    <div class="info-value">6.85 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">GGM N°4</div>
+                    <div class="info-value">170K m3</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/cmg1.png') }}" alt="TSF N°1">
+                    <div class="gallery-caption">TSF N°1 - 1.9 Mm3</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/cmg2.png') }}" alt="TSF N°2">
+                    <div class="gallery-caption">TSF N°2 - 2.9 Mm3</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/cmg3.png') }}" alt="TSF N°3">
+                    <div class="gallery-caption">TSF N°3 - 6.85 Mm3</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/GGM_4.png') }}" alt="GGM N°4">
+                    <div class="gallery-caption">GGM N°4 - 170K m3</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Performance Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Recyclage Eau</div>
+                    <div class="info-value">90%</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Émissions</div>
+                    <div class="info-value">Sous normes</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Surveillance</div>
+                    <div class="info-value">24/7</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>Le site CMG dispose d'un système de gestion environnementale avancé avec un taux de recyclage de l'eau de 90%, une surveillance continue des émissions et plusieurs certifications internationales.</p>
+              `
+            }
+          },
+          bouazzer: {
+            name: "BOU AZZER",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Ouarzazate</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Cobalt, Or</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">2K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">280</div>
+                  </div>
+                </div>
+                <p>Bou Azzer est unique en son genre comme étant la seule mine de cobalt en exploitation en Afrique. Le site produit également de l'or comme sous-produit.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installation de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">CTTB/TSF/N°4</div>
+                    <div class="info-value">3 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">10 ans</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Superficie</div>
+                    <div class="info-value">7.5 Ha</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revêtement</div>
+                    <div class="info-value">PRHP 1.5mm</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/CTTB1.png') }}" alt="Vue aérienne">
+                    <div class="gallery-caption">Vue aérienne de l'installation</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/CTTB1_1.png') }}" alt="Détails techniques">
+                    <div class="gallery-caption">Détails techniques</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Gestion Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Gestion Résidus</div>
+                    <div class="info-value">100% contrôlée</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Qualité Eau</div>
+                    <div class="info-value">Normes dépassées</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revegetation</div>
+                    <div class="info-value">Projet en cours</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>Le site de Bou Azzer met en œuvre des mesures environnementales strictes pour la gestion des résidus de cobalt, avec des résultats dépassant les normes requises pour la qualité de l'eau.</p>
+              `
+            }
+          },
+          ouansimi: {
+            name: "OUANSIMI",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Marrakech-Safi</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Or</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">1.5K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">180</div>
+                  </div>
+                </div>
+                <p>Le site d'Ouansimi est spécialisé dans l'extraction aurifère avec des installations modernes de traitement et de stockage des résidus.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installation de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">OUANSIMI/TSF/N°2</div>
+                    <div class="info-value">1.14 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">9 ans</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Superficie</div>
+                    <div class="info-value">6.6 ha</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revêtement</div>
+                    <div class="info-value">Géomembrane</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/ouansimi.png') }}" alt="Installation TSF">
+                    <div class="gallery-caption">Installation TSF</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/ouansimi_1.png') }}" alt="Détails techniques">
+                    <div class="gallery-caption">Détails techniques</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Performance Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Recyclage Eau</div>
+                    <div class="info-value">88%</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Surveillance</div>
+                    <div class="info-value">Quotidienne</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Biodiversité</div>
+                    <div class="info-value">Plan en place</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>Le site d'Ouansimi maintient un taux élevé de recyclage de l'eau et un programme actif de préservation de la biodiversité locale.</p>
+              `
+            }
+          },
+          agm: {
+            name: "AGM",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Drâa-Tafilalet</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Argent, Plomb</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">1.2K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">210</div>
+                  </div>
+                </div>
+                <p>L'AGM (Afrique Géologie et Mines) est spécialisée dans l'extraction d'argent et de plomb avec des installations modernes de traitement.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installations de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">AGM/TSF3 SETA</div>
+                    <div class="info-value">3.66 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">7.5 ans</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">AGM/TSF4 SETB</div>
+                    <div class="info-value">3.00 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">6 ans</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/AGMA_2.png') }}" alt="TSF3 SETA">
+                    <div class="gallery-caption">TSF3 SETA - 3.66 Mm3</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/AGMB_2.png') }}" alt="TSF4 SETB">
+                    <div class="gallery-caption">TSF4 SETB - 3.00 Mm3</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Gestion Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Traitement Eau</div>
+                    <div class="info-value">Système avancé</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Contrôle Pollution</div>
+                    <div class="info-value">Niveau 1</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revegetation</div>
+                    <div class="info-value">En cours</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>L'AGM dispose d'un système avancé de traitement des eaux et maintient un contrôle strict de la pollution, conformément aux normes internationales.</p>
+              `
+            }
+          },
+          somifer: {
+            name: "SOMIFER",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Oriental</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Fer</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">800K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">350</div>
+                  </div>
+                </div>
+                <p>La SOMIFER (Société Minière de Fer) est spécialisée dans l'extraction et le traitement du minerai de fer avec des installations à grande échelle.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installation de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">SOMIFER/TSF/N°3</div>
+                    <div class="info-value">12 Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">15 ans</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Superficie</div>
+                    <div class="info-value">42 ha</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Récupération</div>
+                    <div class="info-value">Conduites</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/SOMIFER_2.png') }}" alt="Vue aérienne">
+                    <div class="gallery-caption">Vue aérienne de l'installation</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/SOMIFER_1.png') }}" alt="Détails techniques">
+                    <div class="gallery-caption">Détails techniques</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Performance Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Gestion Poussière</div>
+                    <div class="info-value">Système avancé</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Recyclage</div>
+                    <div class="info-value">75%</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Biodiversité</div>
+                    <div class="info-value">Plan en place</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>La SOMIFER a mis en place des mesures strictes pour contrôler les poussières et recycle 75% de ses matériaux, tout en préservant la biodiversité locale.</p>
+              `
+            }
+          },
+          cmo: {
+            name: "CMO",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Marrakech-Safi</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Cuivre</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">1.8K t/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">240</div>
+                  </div>
+                </div>
+                <p>La CMO (Compagnie Minière d'Oumjrane) est spécialisée dans l'extraction de cuivre avec des installations modernes de traitement.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installation de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">SOMMIFER/TSF/N°1</div>
+                    <div class="info-value">15.0 Mt</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Superficie</div>
+                    <div class="info-value">96.0 Ha</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Volume Stocké</div>
+                    <div class="info-value">2.5Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revêtement</div>
+                    <div class="info-value">Standard</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/sommifer.png') }}" alt="Installation de stockage">
+                    <div class="gallery-caption">Installation de stockage</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Gestion Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Traitement Eau</div>
+                    <div class="info-value">Système complet</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Contrôle Qualité</div>
+                    <div class="info-value">Quotidien</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Revegetation</div>
+                    <div class="info-value">Programme actif</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>La CMO dispose d'un système complet de traitement des eaux et met en œuvre un programme actif de revegetation des zones exploitées.</p>
+              `
+            }
+          },
+          smi: {
+            name: "SMI",
+            details: {
+              overview: `
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Localisation</div>
+                    <div class="info-value">Drâa-Tafilalet</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Ressources</div>
+                    <div class="info-value">Or</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Production</div>
+                    <div class="info-value">120K oz/an</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Employés</div>
+                    <div class="info-value">380</div>
+                  </div>
+                </div>
+                <p>La SMI (Société Minière d'Imiter) est l'un des fleurons de la production aurifère de Managem au Maroc, avec des installations modernes et efficaces.</p>
+              `,
+              technical: `
+                <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Installations de Stockage</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">SMI/TSF CIL7</div>
+                    <div class="info-value">2 Mm3 + 0.7Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">6 + 5 ans</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">SMI/TSF CIL8</div>
+                    <div class="info-value">2.7Mm3</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Autonomie</div>
+                    <div class="info-value">10 ans</div>
+                  </div>
+                </div>
+                <div class="image-gallery">
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/SMI1_1.png') }}" alt="TSF CIL7">
+                    <div class="gallery-caption">TSF CIL7 - 2.7Mm3</div>
+                  </div>
+                  <div class="gallery-item">
+                    <img src="{{ url_for('static', filename='images/SMI2_1.png') }}" alt="TSF CIL8">
+                    <div class="gallery-caption">TSF CIL8 - 2.7Mm3</div>
+                  </div>
+                </div>
+              `,
+              environmental: `
+                <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Performance Environnementale</h4>
+                <div class="info-grid">
+                  <div class="info-card">
+                    <div class="info-label">Recyclage Eau</div>
+                    <div class="info-value">92%</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Émissions</div>
+                    <div class="info-value">Sous normes</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Biodiversité</div>
+                    <div class="info-value">Plan actif</div>
+                  </div>
+                  <div class="info-card">
+                    <div class="info-label">Certifications</div>
+                    <div class="info-value">ISO 14001</div>
+                  </div>
+                </div>
+                <p>La SMI maintient un taux de recyclage de l'eau de 92% et un programme actif de préservation de la biodiversité dans cette région sensible.</p>
+              `
+            }
+          }
+        }
+      },
+      {
+        id: "senegal",
+        alt: "SENEGAL",
+        title: "Sénégal",
+        country: "SENEGAL",
+        resources: ["or"],
+        coords: "191,961,202,961,219,956,235,947,244,954,251,961,262,961,269,968,274,980,277,989,283,996,281,1010,272,1030,256,1035,240,1039,219,1037,200,1030,195,1009,189,989",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group au Sénégal</h4>
+            <ul class="popup-list">
+              <li><strong>Projet Boto:</strong></li>
+              <li>Ressources: 31,5 millions de tonnes à 1,6 g/t</li>
+              <li>Phase: Construction</li>
+              <li>Commissioning prévu: 1er semestre 2025</li>
+              <li>Localisation actuelle: Boto</li>
+            </ul>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">En construction</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ressources</div>
+                <div class="info-value">31.5M tonnes</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Teneur</div>
+                <div class="info-value">1.6 g/t</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ouverture</div>
+                <div class="info-value">2025</div>
+              </div>
+            </div>
+            <p>Le projet Boto au Sénégal représente un investissement important pour Managem, avec des ressources importantes et un potentiel de production substantiel. Le site est actuellement en phase de construction.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Plan Technique</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Capacité Usine</div>
+                <div class="info-value">2M t/an</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Méthode Minière</div>
+                <div class="info-value">Ciel ouvert</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Traitement</div>
+                <div class="info-value">CIL</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Durée de Vie</div>
+                <div class="info-value">10+ ans</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/senegal_plan.jpg') }}" alt="Plan du projet">
+                <div class="gallery-caption">Plan du projet Boto</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/senegal_construction.jpg') }}" alt="Construction en cours">
+                <div class="gallery-caption">Construction en cours</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Plan Environnemental</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Étude Impact</div>
+                <div class="info-value">Complète</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Gestion Eau</div>
+                <div class="info-value">Circuit fermé</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Revegetation</div>
+                <div class="info-value">Plan intégré</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Communautés</div>
+                <div class="info-value">Programme actif</div>
+              </div>
+            </div>
+            <p>Le projet Boto intègre dès sa conception des mesures environnementales avancées, avec un système en circuit fermé pour la gestion de l'eau et un plan de revegetation progressif.</p>
+          `
+        }
+      },
+      {
+        id: "guinee",
+        alt: "GUINEE",
+        title: "Guinée",
+        country: "GUINEE",
+        resources: ["or"],
+        coords: "228,1073,246,1058,258,1037,290,986,315,979,330,979,348,979,348,1004,355,1055,353,1078,330,1097,297,1085,285,1099,274,1108,251,1090",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group en Guinée</h4>
+            <ul class="popup-list">
+              <li><strong>Projet Tri-K:</strong> Région de Mandiana</li>
+              <li>Ressources minérales: 2,3 millions d'onces</li>
+              <li>Réserves: 1,5 million d'onces</li>
+              <li>Teneur en or: 1,85 g/t</li>
+              <li>Durée de vie: 9 ans</li>
+              <li>Production annuelle: 120 000 onces</li>
+            </ul>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">Production</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Ressources</div>
+                <div class="info-value">2.3M onces</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Réserves</div>
+                <div class="info-value">1.5M onces</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Production</div>
+                <div class="info-value">120K oz/an</div>
+              </div>
+            </div>
+            <p>Le projet Tri-K en Guinée est un site de production majeur pour Managem, avec des ressources importantes et une production stable d'or. Le site emploie plus de 500 personnes et contribue significativement à l'économie locale.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Données Techniques</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Méthode Minière</div>
+                <div class="info-value">Ciel ouvert</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Traitement</div>
+                <div class="info-value">CIL</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Teneur</div>
+                <div class="info-value">1.85 g/t</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Récupération</div>
+                <div class="info-value">92%</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/guinee_mine.jpg') }}" alt="Mine à ciel ouvert">
+                <div class="gallery-caption">Mine à ciel ouvert</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/guinee_plant.jpg') }}" alt="Usine de traitement">
+                <div class="gallery-caption">Usine de traitement</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Gestion Environnementale</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Gestion Eau</div>
+                <div class="info-value">Circuit fermé</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Recyclage</div>
+                <div class="info-value">85%</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Biodiversité</div>
+                <div class="info-value">Plan actif</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Certifications</div>
+                <div class="info-value">ISO 14001</div>
+              </div>
+            </div>
+            <p>Le site Tri-K met en œuvre un système de gestion environnementale complet avec un circuit fermé pour l'eau, un taux de recyclage élevé et un programme actif de préservation de la biodiversité.</p>
+          `
+        }
+      },
+      {
+        id: "cote_divoir",
+        alt: "COTE D'IVOIR",
+        title: "Côte d'Ivoire",
+        country: "COTE_DIVOIR",
+        resources: ["or"],
+        coords: "385,1202,399,1202,413,1197,426,1195,445,1194,459,1194,473,1194,488,1194,480,1171,480,1155,488,1141,496,1125,488,1107,482,1095,459,1098,438,1091,431,1074,435,1040,406,1040,383,1047,371,1051,346,1065,343,1082,343,1107,350,1125,350,1141,353,1150,362,1141,369,1157,366,1167,375,1181,387,1181",
+        popupContent: `
+          <div class="popup-section">
+            <h4 class="popup-section-title"><i class="fas fa-info-circle"></i> Managem Group en Côte d'Ivoire</h4>
+            <p>Activités principales: Exploration aurifère</p>
+            <ul class="popup-list">
+              <li><strong>Permis d'exploration:</strong> Ceinture de Fétèkro</li>
+              <li>Sites: Dabakala, Brobo Nord, Brobo Sud, Zikisso</li>
+              <li>Superficie totale: 770 km²</li>
+            </ul>
+            <p><strong>Découvertes prometteuses:</strong></p>
+            <ul class="popup-list">
+              <li>Cible C10 à Dabakala</li>
+              <li>Tiébissou à Brobo Nord</li>
+            </ul>
+          </div>
+        `,
+        details: {
+          overview: `
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Statut</div>
+                <div class="info-value">Exploration</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Superficie</div>
+                <div class="info-value">770 km²</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Cibles</div>
+                <div class="info-value">Dabakala, Brobo</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Potentiel</div>
+                <div class="info-value">Élevé</div>
+              </div>
+            </div>
+            <p>Managem détient plusieurs permis d'exploration dans la ceinture aurifère de Fétèkro en Côte d'Ivoire, avec des découvertes prometteuses notamment à Dabakala et Brobo Nord.</p>
+          `,
+          technical: `
+            <h4 class="popup-section-title"><i class="fas fa-cogs"></i> Travaux d'Exploration</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Forages</div>
+                <div class="info-value">15,000m</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Échantillons</div>
+                <div class="info-value">5,000+</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Teneurs</div>
+                <div class="info-value">Jusqu'à 3.5 g/t</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Prochaine Phase</div>
+                <div class="info-value">Faisabilité</div>
+              </div>
+            </div>
+            <div class="image-gallery">
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/cdi_map.jpg') }}" alt="Carte des permis">
+                <div class="gallery-caption">Carte des permis d'exploration</div>
+              </div>
+              <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/cdi_drill.jpg') }}" alt="Carottes de forage">
+                <div class="gallery-caption">Carottes de forage prometteuses</div>
+              </div>
+            </div>
+          `,
+          environmental: `
+            <h4 class="popup-section-title"><i class="fas fa-leaf"></i> Approche Environnementale</h4>
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-label">Études Impact</div>
+                <div class="info-value">Preliminaires</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Protocole</div>
+                <div class="info-value">Strict</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Communautés</div>
+                <div class="info-value">Dialogue actif</div>
+              </div>
+              <div class="info-card">
+                <div class="info-label">Normes</div>
+                <div class="info-value">Internationales</div>
+              </div>
+            </div>
+            <p>Dès la phase d'exploration, Managem applique des protocoles environnementaux stricts et maintient un dialogue actif avec les communautés locales.</p>
+          `
+        }
+      }
+    ];
+
+    function initInteractiveMap() {
+      const mapContainer = document.querySelector('map[name="image-map"]');
+      
+      regions.forEach(function(region) {
+        const area = document.createElement("area");
+        area.alt = region.alt;
+        area.title = region.title;
+        area.coords = region.coords;
+        area.shape = "poly";
+        area.href = "#";
+        area.dataset.regionId = region.id;
+        area.dataset.country = region.country;
+        area.dataset.resources = region.resources.join(',');
+
+        // Hover effect to show basic info
+        area.addEventListener("mouseover", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const content = typeof region.popupContent === "function" 
+            ? region.popupContent() 
+            : region.popupContent;
+          showPopup(region.title, content);
+        });
+        
+        // Disable default click behavior
+        area.addEventListener("click", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+
+        mapContainer.appendChild(area);
+      });
+    }
+
+    // Filter map based on selections
+    function filterMap() {
+      const countryFilter = document.getElementById('countryFilter').value;
+      const resourceFilter = document.getElementById('resourceFilter').value;
+      
+      document.querySelectorAll('map[name="image-map"] area').forEach(area => {
+        const showCountry = countryFilter === 'all' || area.dataset.country === countryFilter;
+        const showResource = resourceFilter === 'all' || 
+          area.dataset.resources.split(',').includes(resourceFilter);
+        
+        if (showCountry && showResource) {
+          area.style.opacity = '1';
+          area.style.pointerEvents = 'auto';
+        } else {
+          area.style.opacity = '0.3';
+          area.style.pointerEvents = 'none';
+        }
+      });
+    }
+
+    // Show modal with site details
+    function showRegionDetails(regionId) {
+      let region;
+      
+      // Check if it's a main region
+      region = regions.find(r => r.id === regionId);
+      
+      // If not, check if it's a subregion of Morocco
+      if (!region && regionId in regions.find(r => r.id === 'maroc').subregions) {
+        region = {
+          ...regions.find(r => r.id === 'maroc').subregions[regionId],
+          id: regionId
+        };
+      }
+      
+      if (!region) {
+        console.error('Region not found:', regionId);
+        return;
+      }
+      
+      const modalTitle = region.name ? `${region.name}, ${region.country || 'Maroc'}` : region.title;
+      const details = region.details || (regions.find(r => r.id === 'maroc').subregions[regionId]?.details);
+      
+      if (!details) {
+        console.error('Details not found for region:', regionId);
+        return;
+      }
+      
+      document.getElementById('modalTitle').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${modalTitle}`;
+      
+      const modalContent = `
+        <div class="tab-container">
+          <div class="tab active" onclick="switchTab(this, 'overview')">Aperçu</div>
+          <div class="tab" onclick="switchTab(this, 'technical')">Technique</div>
+          <div class="tab" onclick="switchTab(this, 'environmental')">Environnement</div>
+        </div>
+        
+        <div id="overview" class="tab-content active">
+          ${details.overview}
+        </div>
+        
+        <div id="technical" class="tab-content">
+          ${details.technical}
+        </div>
+        
+        <div id="environmental" class="tab-content">
+          ${details.environmental}
+        </div>
+      `;
+      
+      document.getElementById('modalBody').innerHTML = modalContent;
+      document.getElementById('siteModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Close modal
+    function closeModal() {
+      document.getElementById('siteModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    // Switch between tabs
+    function switchTab(tabElement, tabId) {
+      // Update active tab
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      tabElement.classList.add('active');
+      
+      // Update active content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Show popup with title and content
+    function showPopup(title, content) {
+      document.getElementById('modalTitle').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${title}`;
+      document.getElementById('modalBody').innerHTML = content;
+      document.getElementById('siteModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Demo video function
+    function showDemoVideo() {
+      showPopup('Démo de GeoVision Pro', `
+        <div style="text-align: center;">
+          <div style="position: relative; padding-bottom: 56.25%; height: 0; margin-bottom: 1rem;">
+            <iframe 
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;" 
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+          <p>Découvrez les fonctionnalités avancées de GeoVision Pro à travers cette démonstration vidéo.</p>
+          <button class="btn" onclick="closeModal()" style="margin-top: 1rem;">
+            <i class="fas fa-times"></i> Fermer
+          </button>
+        </div>
+      `);
+    }
+  </script>
+</body>
+</html>

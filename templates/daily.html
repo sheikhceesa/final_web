@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrôle Quotidien - Outil de Support à la Décision en Visualisation 3D</title>
+    
+    <!-- CSS Libraries -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #60a5fa;
+            --secondary: #f43f5e;
+            --accent: #f59e0b;
+            --dark: #f1f5f9;
+            --darker: #e2e8f0;
+            --light: #1e293b;
+            --lighter: #0f172a;
+            --text: #e2e8f0;
+            --text-light: #94a3b8;
+            --card-bg: #1e293b;
+            --header-bg: rgba(15, 23, 42, 0.92);
+            --map-bg: #0f172a;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --gradient: linear-gradient(135deg, var(--lighter) 0%, var(--light) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--lighter);
+            color: var(--text);
+            line-height: 1.7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background: var(--header-bg);
+            backdrop-filter: blur(8px);
+            color: var(--text);
+            padding: 0.8rem 0;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        nav li {
+            margin: 0 0.5rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.7rem 1.2rem;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.05);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+        }
+
+        nav a:hover {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hdd {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text);
+            background: var(--gradient);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .hdd h1 {
+            font-size: 2.2rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Form Container */
+        .form-container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Form Styles */
+        #dailyForm {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+            align-content: start;
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group.required label::after {
+            content: " *";
+            color: var(--secondary);
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.2rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            background-color: var(--light);
+            color: var(--text);
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            background-color: var(--card-bg);
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 46px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            background-color: var(--light);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 46px;
+            padding-left: 12px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 44px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: var(--text) transparent transparent transparent;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            flex: 1;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 0.85rem 1.75rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        button[type="submit"] {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        button[type="submit"]:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        button[type="submit"]:disabled {
+            background-color: #334155;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            color: #64748b;
+        }
+
+        #toggleOptionalFields {
+            background-color: var(--light);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        #toggleOptionalFields:hover {
+            background-color: #334155;
+            transform: translateY(-2px);
+            color: var(--accent);
+        }
+
+        /* Optional Fields Section */
+        #optionalFields {
+            grid-column: 1 / -1;
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+        }
+
+        #optionalFields h3 {
+            grid-column: 1 / -1;
+            margin-top: 0;
+            color: var(--accent);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Full-width elements */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--header-bg);
+            color: var(--text);
+            text-align: center;
+            padding: 1.75rem;
+            margin-top: auto;
+            font-size: 0.95rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Loading indicator */
+        .loading {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(245, 158, 11, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .form-container {
+                padding: 0 1.5rem;
+            }
+            
+            #dailyForm {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 0.4rem;
+            }
+
+            nav a {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .hdd {
+                padding: 2.5rem 1rem;
+            }
+
+            .hdd h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-container {
+                padding: 0 1rem;
+                margin-bottom: 2rem;
+            }
+
+            #dailyForm {
+                padding: 1.75rem;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hdd {
+                padding: 2rem 1rem;
+            }
+
+            .hdd h1 {
+                font-size: 1.5rem;
+            }
+
+            #dailyForm {
+                grid-template-columns: 1fr;
+                padding: 1.5rem;
+                gap: 1.3rem;
+            }
+
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            textarea,
+            select {
+                padding: 0.8rem;
+            }
+
+            button {
+                padding: 0.8rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Indicator -->
+    <div class="loading" id="loadingIndicator">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- En-tête et Menu de Navigation -->
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> ACCUEIL</a></li>
+                <li><a href="{{ url_for('dams') }}"><i class="fas fa-industry"></i> INSTALLATION DE STOCKAGE</a></li>
+                <li><a href="{{ url_for('geotechnical') }}"><i class="fas fa-mountain"></i> VISUALISATION GÉOTECHNIQUE</a></li>
+                <li><a href="{{ url_for('environmental') }}"><i class="fas fa-tint"></i> HYDROGÉOLOGIE</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Titre de la Page -->
+        <div class="hdd">
+            <h1><i class="fas fa-calendar-day"></i> Entrez les Valeurs d'observation de la digue</h1>
+        </div>
+
+        <!-- Conteneur du Formulaire -->
+        <div class="form-container">
+            <form id="dailyForm" action="{{ url_for('daily') }}" method="post">
+                <!-- Champs de Saisie Utilisateur -->
+                <div class="form-group required">
+                    <label for="sites"><i class="fas fa-map-marker-alt"></i> Site :</label>
+                    <select id="sites" name="sites" required>
+                        <option value="">Sélectionnez un site</option>
+                        <option value="AGM TSFN°3">AGM TSFN°3</option>
+                        <option value="BLEIDA Flotation TSFN°4">BLEIDA Flotation TSFN°4</option>
+                        <option value="Hajjar TSFN°3">Hajjar TSFN°3</option>
+                        <option value="Ouansimi TSF N°3">Ouansimi TSF N°3</option>
+                        <option value="BOU AZZER">BOU AZZER</option>
+                        <option value="SMI C8">SMI C8</option>
+                        <option value="SMI C7">SMI C7</option>
+                        <option value="SMI D10 FLOTATION">SMI D10 FLOTATION</option>
+                        <option value="TIZERT TSF1">TIZERT TSF1</option>
+                        <option value="GGM TSF1">GGM TSF1</option>
+                    </select>
+                </div>
+
+                <div class="form-group required">
+                    <label for="date_of_actualisation"><i class="fas fa-calendar-alt"></i> Date d'Actualisation :</label>
+                    <input type="date" id="date_of_actualisation" name="date_of_actualisation" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="total_capacity"><i class="fas fa-boxes"></i> Capacité Totale (Mm³) :</label>
+                    <input type="number" id="total_capacity" name="total_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="stock_volume"><i class="fas fa-database"></i> Volume de Stock (Mm³) :</label>
+                    <input type="number" id="stock_volume" name="stock_volume" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="partial_capacity"><i class="fas fa-box-open"></i> Capacité Partielle (Mm³) :</label>
+                    <input type="number" id="partial_capacity" name="partial_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="ready_capacity"><i class="fas fa-check-circle"></i> Capacité Prête (Mm³) :</label>
+                    <input type="number" id="ready_capacity" name="ready_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="production_rate"><i class="fas fa-tachometer-alt"></i> Taux de Production (Mm³/an) :</label>
+                    <input type="number" id="production_rate" name="production_rate" step="any" min="0" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="comments"><i class="fas fa-comment"></i> Commentaires :</label>
+                    <textarea id="comments" name="comments" rows="4"></textarea>
+                </div>
+
+                <!-- Bouton pour Afficher les Champs Optionnels -->
+                <button type="button" id="toggleOptionalFields" class="full-width">
+                    <i class="fas fa-plus-circle"></i> Afficher les Champs Optionnels
+                </button>
+
+                <!-- Champs Optionnels (Initialement Cachés) -->
+                <div id="optionalFields">
+                    <h3><i class="fas fa-cog"></i> Champs Optionnels</h3>
+
+                    <div class="form-group">
+                        <label for="long_term_situation"><i class="fas fa-calendar-plus"></i> Situation à Long Terme :</label>
+                        <input type="text" id="long_term_situation" name="long_term_situation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="short_term_situation"><i class="fas fa-calendar-minus"></i> Situation à Court Terme :</label>
+                        <input type="text" id="short_term_situation" name="short_term_situation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commission_date"><i class="fas fa-play-circle"></i> Date de Mise en Service :</label>
+                        <input type="date" id="commission_date" name="commission_date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="complete_full_date"><i class="fas fa-stop-circle"></i> Date de Remplissage Complet :</label>
+                        <input type="date" id="complete_full_date" name="complete_full_date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stop_definitive_date"><i class="fas fa-power-off"></i> Date d'Arrêt Définitif :</label>
+                        <input type="date" id="stop_definitive_date" name="stop_definitive_date">
+                    </div>
+
+                    <!-- Champs CAPEX -->
+                    <div class="form-group">
+                        <label for="capex_2022"><i class="fas fa-money-bill-wave"></i> CAPEX 2022 (Mdh) :</label>
+                        <input type="number" id="capex_2022" name="capex_2022" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2023"><i class="fas fa-money-bill-wave"></i> CAPEX 2023 (Mdh) :</label>
+                        <input type="number" id="capex_2023" name="capex_2023" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2024"><i class="fas fa-money-bill-wave"></i> CAPEX 2024 (Mdh) :</label>
+                        <input type="number" id="capex_2024" name="capex_2024" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2025"><i class="fas fa-money-bill-wave"></i> CAPEX 2025 (Mdh) :</label>
+                        <input type="number" id="capex_2025" name="capex_2025" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2026"><i class="fas fa-money-bill-wave"></i> CAPEX 2026 (Mdh) :</label>
+                        <input type="number" id="capex_2026" name="capex_2026" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2027"><i class="fas fa-money-bill-wave"></i> CAPEX 2027 (Mdh) :</label>
+                        <input type="number" id="capex_2027" name="capex_2027" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2028"><i class="fas fa-money-bill-wave"></i> CAPEX 2028 (Mdh) :</label>
+                        <input type="number" id="capex_2028" name="capex_2028" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2029"><i class="fas fa-money-bill-wave"></i> CAPEX 2029 (Mdh) :</label>
+                        <input type="number" id="capex_2029" name="capex_2029" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2030"><i class="fas fa-money-bill-wave"></i> CAPEX 2030 (Mdh) :</label>
+                        <input type="number" id="capex_2030" name="capex_2030" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_autonomy"><i class="fas fa-clock"></i> Autonomie Totale :</label>
+                        <input type="number" id="total_autonomy" name="total_autonomy" step="any" min="0">
+                    </div>
+                </div>
+
+                <!-- Bouton de Soumission -->
+                <button type="submit" class="full-width" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Soumettre les Données
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Gestion des Installations de Stockage des Résidus</p>
+    </footer>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- JavaScript pour Gérer la Soumission du Formulaire et Récupérer les Données Précédentes -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Select2 for sites dropdown
+            $('#sites').select2({
+                placeholder: "Sélectionnez un site",
+                allowClear: false,
+                width: '100%',
+                theme: 'dark'
+            });
+
+            // Set today's date as default for date fields
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date_of_actualisation').value = today;
+            
+            // Toggle optional fields
+            const toggleBtn = document.getElementById('toggleOptionalFields');
+            const optionalFields = document.getElementById('optionalFields');
+            
+            // Initialize optional fields as hidden
+            optionalFields.style.display = 'none';
+            
+            toggleBtn.addEventListener('click', function() {
+                if (optionalFields.style.display === 'none' || optionalFields.style.display === '') {
+                    optionalFields.style.display = 'grid';
+                    toggleBtn.innerHTML = '<i class="fas fa-minus-circle"></i> Masquer les Champs Optionnels';
+                } else {
+                    optionalFields.style.display = 'none';
+                    toggleBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Afficher les Champs Optionnels';
+                }
+            });
+
+            // Form submission handling
+            const form = document.getElementById('dailyForm');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                
+                // Show loading indicator
+                document.getElementById('loadingIndicator').style.display = 'flex';
+                submitBtn.disabled = true;
+                
+                const formData = new FormData(form);
+                const site = formData.get('sites');
+                const optionalFields = [
+                    'long_term_situation', 'short_term_situation',
+                    'commission_date', 'complete_full_date', 'stop_definitive_date',
+                    'comments', 'total_autonomy',
+                    'capex_2022', 'capex_2023', 'capex_2024', 'capex_2025',
+                    'capex_2026', 'capex_2027', 'capex_2028', 'capex_2029', 'capex_2030'
+                ];
+
+                // Check for empty optional fields
+                const emptyFields = optionalFields.filter(field => {
+                    const value = formData.get(field);
+                    return !value || value.trim() === '';
+                });
+
+                if (emptyFields.length > 0) {
+                    // Fetch previous data if any optional fields are empty
+                    fetch(`/get_previous_data/${encodeURIComponent(site)}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Fill empty fields with previous values
+                            emptyFields.forEach(field => {
+                                if (data[field] !== undefined && data[field] !== null) {
+                                    const element = document.getElementById(field);
+                                    if (element) {
+                                        element.value = data[field];
+                                        formData.set(field, data[field]);
+                                    }
+                                }
+                            });
+                            
+                            // Submit the form
+                            return fetch(form.action, {
+                                method: 'POST',
+                                body: formData
+                            });
+                        })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Hide loading indicator
+                            document.getElementById('loadingIndicator').style.display = 'none';
+                            submitBtn.disabled = false;
+                            
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Succès',
+                                    text: 'Les données ont été enregistrées avec succès',
+                                    confirmButtonColor: '#3b82f6',
+                                    background: '#1e293b',
+                                    color: '#e2e8f0',
+                                    iconColor: '#3b82f6'
+                                }).then(() => {
+                                    form.reset();
+                                    // Reset the date to today
+                                    document.getElementById('date_of_actualisation').value = today;
+                                    // Reset the select2 dropdown
+                                    $('#sites').val('').trigger('change');
+                                });
+                            } else {
+                                throw new Error(data.message || 'Erreur inconnue');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('loadingIndicator').style.display = 'none';
+                            submitBtn.disabled = false;
+                        });
+                } else {
+                    // All fields are filled, submit immediately
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading indicator
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        submitBtn.disabled = false;
+                        
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Succès',
+                                text: 'Les données ont été enregistrées avec succès',
+                                confirmButtonColor: '#3b82f6',
+                                background: '#1e293b',
+                                color: '#e2e8f0',
+                                iconColor: '#3b82f6'
+                            }).then(() => {
+                                form.reset();
+                                // Reset the date to today
+                                document.getElementById('date_of_actualisation').value = today;
+                                // Reset the select2 dropdown
+                                $('#sites').val('').trigger('change');
+                            });
+                        } else {
+                            throw new Error(data.message || 'Erreur inconnue');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        submitBtn.disabled = false;
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

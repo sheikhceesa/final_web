@@ -1,0 +1,2650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de Bord - Installation de Stockage des Résidus</title>
+  
+  <!-- CSS Libraries -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  
+  <!-- JS Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.8.0/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io@4.5.4/client-dist/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.label@0.2.1/dist/leaflet.label.js"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --secondary: #e11d48;
+      --secondary-light: #f43f5e;
+      --secondary-dark: #be123c;
+      --accent: #f59e0b;
+      --accent-light: #fbbf24;
+      --accent-dark: #d97706;
+      --dark: #1e293b;
+      --darker: #0f172a;
+      --light: #f1f5f9;
+      --lighter: #f8fafc;
+      --text: #334155;
+      --text-light: #64748b;
+      --text-dark: #0f172a;
+      --card-bg: #ffffff;
+      --header-bg: rgba(255, 255, 255, 0.92);
+      --map-bg: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --transition: all 0.3s ease;
+      --sidebar-width: 250px;
+      --sidebar-collapsed-width: 70px;
+    }
+  
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light);
+      color: var(--text);
+      line-height: 1.6;
+      padding-top: 70px; /* Space for fixed header */
+    }
+  
+    /* Layout Structure */
+    .app-container {
+      display: grid;
+      grid-template-areas:
+          "header header"
+          "sidebar main"
+          "footer footer";
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: 70px 1fr auto;
+      min-height: 100vh;
+      transition: var(--transition);
+    }
+
+    /* Collapsed sidebar state */
+    .app-container.sidebar-collapsed {
+      grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+    }
+  
+    header {
+      grid-area: header;
+      background: var(--header-bg);
+      color: var(--text);
+      padding: 0;
+      box-shadow: var(--shadow-md);
+      z-index: 1000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      grid-area: sidebar;
+      background-color: var(--darker);
+      color: white;
+      position: fixed;
+      top: 70px; /* Below header */
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-width);
+      overflow-y: auto;
+      transition: var(--transition);
+      z-index: 900;
+      box-shadow: var(--shadow-md);
+    }
+
+    .sidebar-collapsed .sidebar {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    .sidebar-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar-title {
+      font-size: 1rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-collapsed .sidebar-title {
+      display: none;
+    }
+
+    .toggle-sidebar {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: var(--transition);
+    }
+
+    .sidebar-collapsed .toggle-sidebar {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0.5rem 0;
+    }
+
+    .sidebar-item {
+      margin: 0.25rem 0;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .sidebar-collapsed .sidebar-link span {
+      display: none;
+    }
+
+    .sidebar-link:hover {
+      background-color: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .sidebar-link.active {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .sidebar-link i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+
+    .sidebar-collapsed .sidebar-link i {
+      margin-right: 0;
+    }
+
+    /* Update panel styles */
+    .update-panel {
+      background-color: rgba(255,255,255,0.1);
+      padding: 1rem;
+      margin: 1rem;
+      border-radius: var(--radius-md);
+      display: none; /* Hidden by default */
+    }
+
+    .sidebar-collapsed .update-panel {
+      display: none !important;
+    }
+
+    .update-panel h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: white;
+    }
+
+    .update-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .update-form input,
+    .update-form select,
+    .update-form textarea {
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      background-color: rgba(255,255,255,0.9);
+      width: 100%;
+    }
+
+    .update-form button {
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      background-color: var(--primary);
+      color: white;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .update-form button:hover {
+      background-color: var(--primary-light);
+    }
+  
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+      height: 100%;
+    }
+  
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--primary);
+    }
+  
+    .logo i {
+      color: var(--accent);
+    }
+  
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      height: 100%;
+    }
+  
+    .nav-item {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+    }
+  
+    .nav-link {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      transition: var(--transition);
+    }
+  
+    .nav-link:hover, 
+    .nav-link.active {
+      background-color: rgba(0,0,0,0.05);
+      box-shadow: inset 0 -3px 0 var(--accent);
+    }
+  
+    .nav-link i {
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+    }
+  
+    /* Add a subtle animation to the active link */
+    .nav-link.active {
+      animation: pulse 2s infinite;
+    }
+  
+    @keyframes pulse {
+      0% { box-shadow: inset 0 -3px 0 var(--accent); }
+      50% { box-shadow: inset 0 -3px 0 rgba(245, 158, 11, 0.7); }
+      100% { box-shadow: inset 0 -3px 0 var(--accent); }
+    }
+  
+    main {
+      grid-area: main;
+      padding: 2rem;
+      background-color: var(--light);
+      margin-top: 20px; /* Additional space below fixed header */
+      margin-left: var(--sidebar-width);
+      transition: var(--transition);
+    }
+
+    .sidebar-collapsed main {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+  
+    footer {
+      grid-area: footer;
+      background: var(--header-bg);
+      color: var(--text);
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(0,0,0,0.1);
+      margin-left: var(--sidebar-width);
+      transition: var(--transition);
+    }
+
+    .sidebar-collapsed footer {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+  
+    /* Dashboard Components */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+  
+    .page-title {
+      font-size: 1.8rem;
+      color: var(--text);
+      font-weight: 600;
+    }
+  
+    .last-update {
+      background-color: var(--card-bg);
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      font-size: 0.9rem;
+      border-left: 3px solid var(--accent);
+    }
+  
+    .last-update span {
+      font-weight: 600;
+      color: var(--accent);
+    }
+  
+    /* Map Section */
+    .map-section {
+      margin-bottom: 2rem;
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.1);
+      position: relative;
+    }
+  
+    .map-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--lighter);
+      color: var(--text);
+    }
+  
+    .map-container {
+      height: 600px;
+      width: 100%;
+      background-color: var(--map-bg);
+    }
+  
+    /* Enhanced Leaflet Popup Styles */
+    .leaflet-popup-content-wrapper {
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--primary);
+      background-color: var(--card-bg);
+      color: var(--text);
+    }
+  
+    .leaflet-popup-content {
+      margin: 0.8rem;
+      min-width: 250px;
+    }
+  
+    .leaflet-popup-content h3 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding-bottom: 0.3rem;
+    }
+  
+    .popup-content {
+      font-size: 0.9rem;
+    }
+  
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 0.5rem 0;
+      padding: 0.3rem 0;
+      border-bottom: 1px dashed rgba(0,0,0,0.1);
+    }
+  
+    .popup-label {
+      font-weight: 500;
+      color: var(--primary-light);
+    }
+  
+    .popup-value {
+      color: var(--text);
+    }
+  
+    .popup-status {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+  
+    .status-good {
+      background-color: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+  
+    .status-warning {
+      background-color: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+  
+    .status-danger {
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+  
+    /* Leaflet Map Styles */
+    .leaflet-label {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--primary);
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-weight: bold;
+      color: var(--text);
+    }
+  
+    #zoom-out-btn {
+      position: absolute;
+      top: 80px;
+      right: 30px;
+      z-index: 1000;
+      padding: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      color: var(--text);
+    }
+  
+    #zoom-out-btn:hover {
+      background-color: var(--lighter);
+    }
+  
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+  
+    .kpi-card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      border-left: 4px solid var(--primary);
+      border-top: 1px solid rgba(0,0,0,0.1);
+      border-right: 1px solid rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+  
+    .kpi-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent);
+    }
+  
+    .kpi-card.warning {
+      border-left-color: var(--warning);
+    }
+  
+    .kpi-card.danger {
+      border-left-color: var(--danger);
+    }
+  
+    .kpi-card.success {
+      border-left-color: var(--success);
+    }
+  
+    .kpi-title {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  
+    .kpi-value {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+  
+    .kpi-trend {
+      display: flex;
+      align-items: center;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      color: var(--text-light);
+    }
+  
+    .trend-up {
+      color: var(--success);
+    }
+  
+    .trend-down {
+      color: var(--danger);
+    }
+  
+    /* Filters Section */
+    .filters-section {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+  
+    .filter-row {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+  
+    .filter-group {
+      flex: 1;
+      min-width: 250px;
+    }
+  
+    .filter-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+  
+    .site-filter {
+      width: 100%;
+      min-height: 150px;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      background-color: var(--lighter);
+      color: var(--text);
+    }
+  
+    .year-filter-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  
+    .year-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      background-color: var(--lighter);
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-sm);
+      color: var(--text);
+    }
+  
+    .filter-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+  
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+  
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      box-shadow: var(--shadow-sm);
+    }
+  
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+  
+    .btn-outline:hover {
+      background-color: rgba(37, 99, 235, 0.1);
+      box-shadow: var(--shadow-sm);
+    }
+  
+    /* Charts Section */
+    .charts-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+  
+    .chart-card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+  
+    .chart-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: var(--lighter);
+      color: var(--text);
+    }
+  
+    .chart-title {
+      font-weight: 600;
+      color: var(--text);
+    }
+  
+    .chart-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+  
+    .chart-container {
+      padding: 1rem;
+      height: 400px;
+      position: relative;
+      background-color: var(--card-bg);
+    }
+  
+    .chart-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  
+    /* Data Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-sm);
+    }
+  
+    .data-table th, 
+    .data-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+  
+    .data-table th {
+      background-color: var(--lighter);
+      color: var(--text);
+      font-weight: 500;
+    }
+  
+    .data-table tr:nth-child(even) {
+      background-color: rgba(0,0,0,0.03);
+    }
+  
+    .data-table tr:hover {
+      background-color: rgba(0,0,0,0.05);
+    }
+  
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+      .app-container {
+        grid-template-areas:
+          "header header"
+          "main main"
+          "footer footer";
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 1001;
+        width: 300px;
+      }
+
+      .sidebar.sidebar-mobile-open {
+        transform: translateX(0);
+      }
+
+      main, footer {
+        margin-left: 0 !important;
+      }
+
+      .sidebar-collapsed .sidebar {
+        width: 300px;
+      }
+
+      .sidebar-collapsed .sidebar-title {
+        display: block;
+      }
+
+      .sidebar-collapsed .sidebar-link span {
+        display: inline;
+      }
+
+      .mobile-menu-toggle {
+        display: block !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+          padding-top: 120px; /* More space for stacked header */
+      }
+      
+      header {
+          height: 120px;
+      }
+  
+      .navbar {
+          flex-direction: column;
+          padding: 0.5rem 1rem;
+          justify-content: center;
+      }
+  
+      .nav-menu {
+          width: 100%;
+          margin-top: 0.5rem;
+          height: auto;
+      }
+  
+      .nav-item {
+          height: auto;
+      }
+  
+      .nav-link {
+          padding: 0.5rem 1rem;
+          height: auto;
+      }
+  
+      .dashboard-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+      }
+  
+      .charts-section {
+          grid-template-columns: 1fr;
+      }
+  
+      .filter-row {
+          flex-direction: column;
+          gap: 1rem;
+      }
+    }
+  
+    /* Utility Classes */
+    .text-center {
+      text-align: center;
+    }
+  
+    .text-muted {
+      color: var(--text-light);
+    }
+  
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    .mb-3 { margin-bottom: 1.5rem; }
+  
+    /* Error Container */
+    #error-container {
+      padding: 1rem;
+      background-color: rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      margin: 1rem 0;
+      text-align: center;
+      display: none;
+      border-left: 4px solid var(--danger);
+    }
+  
+    /* Selected Site Indicator */
+    .selected-site-indicator {
+      background-color: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      display: inline-block;
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+    }
+  
+    .selected-site-indicator i {
+      margin-right: 0.5rem;
+    }
+
+    /* Mobile menu toggle button */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-right: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <nav class="navbar">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+          <i class="fas fa-chart-line"></i>
+          <span>MANAGEM ISR Dashboard</span>
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="{{ url_for('index') }}" class="nav-link active">
+              <i class="fas fa-home"></i> ACCUEIL
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('dams') }}" class="nav-link">
+              <i class="fas fa-industry"></i> INSTALLATION DE STOCKAGE DES RÉSIDUS
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('weekly') }}" class="nav-link">
+              <i class="fas fa-tasks"></i> CONTRÔLE OMS
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('daily') }}" class="nav-link">
+              <i class="fas fa-sync-alt"></i> MISE À JOUR DES DONNÉES
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h3 class="sidebar-title">Dashboard Navigation</h3>
+        <button class="toggle-sidebar" id="toggleSidebar">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link active" data-view="dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link" data-view="map">
+            <i class="fas fa-map-marked-alt"></i>
+            <span>Carte Géographique</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link" data-view="kpis">
+            <i class="fas fa-chart-bar"></i>
+            <span>Indicateurs Clés</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link" data-view="charts">
+            <i class="fas fa-chart-pie"></i>
+            <span>Graphiques</span>
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a href="#" class="sidebar-link" id="showUpdatePanel">
+            <i class="fas fa-upload"></i>
+            <span>Mise à Jour</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Update Data Panel -->
+      <div class="update-panel" id="updatePanel">
+        <h3>Mise à Jour des Données</h3>
+        <form class="update-form">
+          <select required>
+            <option value="">Sélectionner un site</option>
+            <option value="AGM TSFN°3">AGM TSFN°3</option>
+            <option value="BLEIDA flottation TSFN°4">BLEIDA flottation TSFN°4</option>
+            <option value="Hajjar TSFN°3">Hajjar TSFN°3</option>
+            <option value="Ouansimi TSF N°3">Ouansimi TSF N°3</option>
+            <option value="BOU AZZER">BOU AZZER</option>
+            <option value="SMI C8">SMI C8</option>
+            <option value="SMI C7">SMI C7</option>
+            <option value="SMI D10 FLOTATION">SMI D10 FLOTATION</option>
+            <option value="TIZERT TSF1">TIZERT TSF1</option>
+            <option value="GGM TSF1">GGM TSF1</option>
+          </select>
+          <input type="date" required>
+          <input type="number" placeholder="Capacité Totale (m³)" step="0.01" required>
+          <input type="number" placeholder="Volume de Stock (m³)" step="0.01" required>
+          <input type="number" placeholder="Taux de Remplissage (%)" step="0.01" min="0" max="100" required>
+          <textarea placeholder="Remarques"></textarea>
+          <button type="submit">
+            <i class="fas fa-save"></i> Enregistrer
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main>
+      <div class="dashboard-header">
+        <h1 class="page-title">
+          <i class="fas fa-water"></i> Visualisation des Données des Installations de Stockage
+        </h1>
+        <div class="last-update">
+          <i class="fas fa-sync-alt"></i> Dernière mise à jour: <span id="lastUpdate">Chargement...</span>
+        </div>
+      </div>
+
+      <div id="error-container"></div>
+
+      <!-- Selected Site Indicator -->
+      <div id="selectedSiteIndicator" class="selected-site-indicator" style="display: none;">
+        <i class="fas fa-map-marker-alt"></i>
+        <span id="selectedSiteName">Site Name</span>
+      </div>
+
+      <div class="map-section">
+        <div class="map-header">
+          <h2><i class="fas fa-map-marked-alt"></i> Carte Géographique des Installations</h2>
+          <button class="btn btn-outline" style="color: white; border-color: white;" id="zoom-out-btn" style="display: none;">
+            <i class="fas fa-search-minus"></i> Zoom Out
+          </button>
+        </div>
+        <div class="map-container" id="map"></div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">
+            <i class="fas fa-boxes"></i> Capacité Restante Totale
+          </div>
+          <div class="kpi-value" id="totalRemainingCapacity">--</div>
+          <div class="kpi-trend">
+            <i class="fas fa-arrow-up trend-up"></i> <span id="remainingCapacityTrend">--</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card warning">
+          <div class="kpi-title">
+            <i class="fas fa-clock"></i> Situation à Court Terme
+          </div>
+          <div class="kpi-value" id="shortTermSituation">--</div>
+          <div class="kpi-trend">
+            <i class="fas fa-arrow-up trend-up"></i> <span id="shortTermTrend">--</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-title">
+            <i class="fas fa-calendar-alt"></i> Situation à Long Terme
+          </div>
+          <div class="kpi-value" id="longTermSituation">--</div>
+          <div class="kpi-trend">
+            <i class="fas fa-arrow-up trend-up"></i> <span id="longTermTrend">--</span>
+          </div>
+        </div>
+        
+        <div class="kpi-card success">
+          <div class="kpi-title">
+            <i class="fas fa-tachometer-alt"></i> Taux de Production
+          </div>
+          <div class="kpi-value" id="productionRate">--</div>
+          <div class="kpi-trend">
+            <i class="fas fa-arrow-up trend-up"></i> <span id="productionRateTrend">--</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters-section">
+        <h2><i class="fas fa-filter"></i> Filtres</h2>
+        <div class="filter-row mt-2">
+          <div class="filter-group">
+            <label class="filter-label" for="siteFilter">
+              <i class="fas fa-industry"></i> Sites
+            </label>
+            <select id="siteFilter" class="site-filter" multiple></select>
+          </div>
+          
+          <div class="filter-group">
+            <label class="filter-label">
+              <i class="fas fa-calendar"></i> Période
+            </label>
+            <div class="year-filter-container" id="yearFilter"></div>
+          </div>
+        </div>
+        
+        <div class="filter-actions">
+          <button id="selectAllSitesBtn" class="btn btn-outline">
+            <i class="fas fa-check-square"></i> Tout sélectionner
+          </button>
+          <button id="selectAllYearsBtn" class="btn btn-outline">
+            <i class="fas fa-calendar-check"></i> Toutes les années
+          </button>
+          <button id="resetSelectionBtn" class="btn btn-outline">
+            <i class="fas fa-undo"></i> Réinitialiser
+          </button>
+          <button id="downloadPDFButton" class="btn btn-primary">
+            <i class="fas fa-file-pdf"></i> Exporter PDF
+          </button>
+        </div>
+      </div>
+
+      <div class="charts-section">
+        <!-- Chart 1 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-percentage"></i> Taux de Remplissage
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="fillRateChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Chart 2 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-chart-line"></i> Coût d'Investissement CAPEX
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="investmentCostChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Chart 3 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-clock"></i> Autonomie des Sites
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="totalAutonomyChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Chart 4 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-boxes"></i> Volume de Stock vs Capacité
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="stockVolumeChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Chart 5 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-balance-scale"></i> Ratio de Stockage
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="stockageRatioChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Chart 6 -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">
+              <i class="fas fa-money-bill-wave"></i> CAPEX Total par Site
+            </h3>
+            <div class="chart-actions">
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-table"></i>
+              </button>
+              <button class="btn btn-outline btn-sm" style="color: white; border-color: white;">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="capexTotalChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 MANAGEM - Tableau de Bord des Tailing Storage Facilities</p>
+      <p class="text-muted mt-1">Version 1.0.0 | Dernière mise à jour technique: 15/11/2023</p>
+    </footer>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Sidebar functionality
+      const toggleSidebar = document.getElementById('toggleSidebar');
+      const appContainer = document.querySelector('.app-container');
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const sidebar = document.getElementById('sidebar');
+      const showUpdatePanel = document.getElementById('showUpdatePanel');
+      const updatePanel = document.getElementById('updatePanel');
+
+      // Toggle sidebar collapse/expand
+      toggleSidebar.addEventListener('click', function() {
+        appContainer.classList.toggle('sidebar-collapsed');
+      });
+
+      // Toggle mobile menu
+      mobileMenuToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('sidebar-mobile-open');
+      });
+
+      // Show update panel
+      showUpdatePanel.addEventListener('click', function(e) {
+        e.preventDefault();
+        updatePanel.style.display = updatePanel.style.display === 'block' ? 'none' : 'block';
+        
+        // Set active state
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+          link.classList.remove('active');
+        });
+        this.classList.add('active');
+      });
+
+      // Handle view switching
+      document.querySelectorAll('.sidebar-link[data-view]').forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const view = this.getAttribute('data-view');
+          
+          // Set active state
+          document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.classList.remove('active');
+          });
+          this.classList.add('active');
+          
+          // Hide update panel if it's visible
+          if (updatePanel.style.display === 'block') {
+            updatePanel.style.display = 'none';
+          }
+          
+          // Scroll to the corresponding section
+          if (view === 'dashboard') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else if (view === 'map') {
+            document.querySelector('.map-section').scrollIntoView({ behavior: 'smooth' });
+          } else if (view === 'kpis') {
+            document.querySelector('.kpi-grid').scrollIntoView({ behavior: 'smooth' });
+          } else if (view === 'charts') {
+            document.querySelector('.charts-section').scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+
+      // Initialize the map
+      const map = L.map('map').setView([30.0, -7.0], 6); // Centered on Morocco
+
+      // Satellite layer (Esri World Imagery)
+      const satelliteLayer = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles © Esri'
+        }
+      ).addTo(map);
+
+      // Street layer (OpenStreetMap)
+      const streetLayer = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }
+      );
+
+      // Base layers toggle
+      const baseLayers = {
+        "Satellite": satelliteLayer,
+        "Street Map": streetLayer
+      };
+      L.control.layers(baseLayers).addTo(map);
+
+      // Sample data for TSF Dams (with additional properties for popups)
+      const tsfs = [
+      { 
+        name: "AGM TSFN°3", 
+        lat: 29.466230, 
+        lng: -8.702336, 
+        province: "Tiznit",
+        fill_rate: "65%",
+        date_de_realisation: "2022",
+        capacite_totale: "3,66 Mm³",
+        autonomie: "7,5 ans",
+        superficie: "57 ha",
+        revetement: "mur par géomembrane",
+        production: "0,5 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "BLEIDA flottation TSFN°4", 
+        lat: 30.366678, 
+        lng: -6.434869, 
+        province: "Ouarzazate",
+        fill_rate: "78%",
+        date_de_realisation: "2020",
+        capacite_totale: "7 Mm3",
+        autonomie: "10 ans",
+        superficie: "36 ha",
+        revetement: "mur et retenue par géomembrane",
+        production: "0,7 Mm3/ans",
+        status: "Warning"
+      },
+      { 
+        name: "Hajjar TSFN°3", 
+        lat: 31.375464, 
+        lng: -8.086031, 
+        province: "Marrakech",
+        fill_rate: "42%",
+        date_de_realisation: "2020",
+        capacite_totale: "7 Mm3",
+        autonomie: "10 ans",
+        superficie: "36 ha",
+        revetement: "mur et retenue par géomembrane",
+        production: "0,7 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "Ouansimi TSF N°3", 
+        lat: 29.284697, 
+        lng: -9.374869, 
+        province: "Tiznit",
+        fill_rate: "91%",
+        date_de_realisation: "2020",
+        capacite_totale: "1,14 Mm3",
+        autonomie: "9 ans",
+        superficie: "6,6 ha",
+        revetement: "mur par géomembrane",
+        production: "0,13 Mm3/ans",
+        status: "Critical"
+      },
+      { 
+        name: "BOU AZZER", 
+        lat: 30.515572, 
+        lng: -6.916178, 
+        province: "Ouarzazate",
+        fill_rate: "58%",
+        date_de_realisation: "2020",
+        capacite_totale: "7 Mm3",
+        autonomie: "10 ans",
+        superficie: "36 ha",
+        revetement: "mur et retenue par géomembrane",
+        production: "0,7 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "SMI C8", 
+        lat: 31.336106, 
+        lng: -5.719203, 
+        province: "Tinghir",
+        fill_rate: "35%",
+        date_de_realisation: "2020",
+        capacite_totale: "7 Mm3",
+        autonomie: "10 ans",
+        superficie: "36 ha",
+        revetement: "mur et retenue par géomembrane",
+        production: "0,7 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "SMI C7", 
+        lat: 31.354569, 
+        lng: -5.738636, 
+        province: "Tinghir",
+        fill_rate: "47%",
+        date_de_realisation: "2018 + extension de la durée de vie 2025",
+        capacite_totale: "2 Mm3 + extension de la durée de vie 0,7 Mm3",
+        autonomie: "6 ans + extension de la durée de vie de 5 ans",
+        superficie: "15,3 ha",
+        revetement: "mur par géomembrane",
+        production: "Actuel 0,15 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "SMI D10 FLOTATION", 
+        lat: 31.353278, 
+        lng: -5.754461, 
+        province: "Tinghir",
+        capacite_totale: "8.6 Mm³",
+        fill_rate: "82%",
+        date_de_realisation: "2018",
+        autonomie: "10 ans",
+        superficie: "40 ha",
+        type_de_surelevation: "Amont",
+        revetement: "pas de géomembrane",
+        production: "0,86 Mm3/ans",
+        status: "Warning"
+      },
+      { 
+        name: "TIZERT TSF1", 
+        lat: 30.255972, 
+        lng: -8.457100, 
+        province: "Taroudant",
+        capacite_totale: "1,100,000 m³",
+        fill_rate: "23%",
+        date_de_realisation: "2025",
+        autonomie: "10 ans",
+        superficie: "40 ha",
+        type_de_surelevation: "Amont",
+        revetement: "pas de géomembrane",
+        production: "0,86 Mm3/ans",
+        status: "Normal"
+      },
+      { 
+        name: "GGM TSF1", 
+        lat: 31.384775, 
+        lng: -8.065378, 
+        province: "Hajar",
+        capacite_totale: "170 000 m³",
+        
+        date_de_realisation: "Avril 2025",
+        autonomie: "10 ans",
+        superficie: "4.5 ha",
+        type_de_surelevation: "Amont",
+        revetement: "Avec géomembrane PEHD 2mm",
+        production: "23760 t/ans",
+        status: "Normal"
+      }
+    ];
+    
+    // Store markers for later reference
+    const markers = [];
+    let selectedSite = null;
+    
+    // Custom icon for selected marker
+    const selectedIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    
+    // Default icon
+    const defaultIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    
+    // Warning icon
+    const warningIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    
+    // Critical icon
+    const criticalIcon = L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
+    
+    // Function to get appropriate icon based on status
+    function getIconForStatus(status) {
+      switch(status.toLowerCase()) {
+        case 'critical': return criticalIcon;
+        case 'warning': return warningIcon;
+        default: return defaultIcon;
+      }
+    }
+    
+    // Function to create popup content
+    function createPopupContent(tsf) {
+      return `
+        <div class="popup-content">
+          <h3>${tsf.name}</h3>
+          <div class="popup-row">
+            <span class="popup-label">Province:</span>
+            <span class="popup-value">${tsf.province}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Capacité:</span>
+            <span class="popup-value">${tsf.capacite_totale || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Taux de Remplissage:</span>
+            <span class="popup-value">${tsf.fill_rate || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Autonomie:</span>
+            <span class="popup-value">${tsf.autonomie || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Date de réalisation:</span>
+            <span class="popup-value">${tsf.date_de_realisation || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Superficie:</span>
+            <span class="popup-value">${tsf.superficie || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Revêtement:</span>
+            <span class="popup-value">${tsf.revetement || 'N/A'}</span>
+          </div>
+          <div class="popup-row">
+            <span class="popup-label">Production:</span>
+            <span class="popup-value">${tsf.production || 'N/A'}</span>
+          </div>
+          <div class="popup-status ${getStatusClass(tsf.status)}">
+            ${tsf.status || 'Normal'}
+          </div>
+        </div>
+      `;
+    }
+    
+    // Function to get status class
+    function getStatusClass(status) {
+      switch((status || 'normal').toLowerCase()) {
+        case 'critical': return 'status-danger';
+        case 'warning': return 'status-warning';
+        default: return 'status-good';
+      }
+    }
+
+      // Add markers with enhanced popups
+      tsfs.forEach(tsf => {
+        const marker = L.marker([tsf.lat, tsf.lng], { 
+          title: tsf.name,
+          icon: getIconForStatus(tsf.status)
+        })
+          .addTo(map)
+          .bindPopup(createPopupContent(tsf), {
+            maxWidth: 300,
+            minWidth: 250,
+            className: 'custom-popup'
+          })
+          .on('click', function(e) {
+            // Zoom to the marker
+            map.setView([tsf.lat, tsf.lng], 18); // Zoom to max level (18)
+            document.getElementById('zoom-out-btn').style.display = 'block';
+            
+            // Update selected site
+            selectSite(tsf.name);
+            
+            // Highlight the selected marker
+            markers.forEach(m => {
+              if (m.options.title === tsf.name) {
+                m.setIcon(selectedIcon);
+              } else {
+                m.setIcon(getIconForStatus(tsf.status));
+              }
+            });
+          });
+
+        // Add a LABEL with the TSF name (permanently visible)
+        marker.bindTooltip(tsf.name, {
+          permanent: true,  // Always show the label
+          direction: 'top', // Position above the marker
+          className: 'leaflet-label' // Custom CSS class
+        }).openTooltip();
+
+        markers.push(marker);
+      });
+
+      // Function to select a site and update the dashboard
+      function selectSite(siteName) {
+        selectedSite = siteName;
+        
+        // Show the selected site indicator
+        const indicator = document.getElementById('selectedSiteIndicator');
+        const siteNameElement = document.getElementById('selectedSiteName');
+        
+        indicator.style.display = 'inline-block';
+        siteNameElement.textContent = siteName;
+        
+        // Find the site data
+        const siteData = allSiteData.find(item => item.sites === siteName);
+        
+        if (siteData) {
+          // Update KPIs for the selected site only
+          updateSiteKPIs(siteData);
+        }
+      }
+
+      // Update KPIs for a specific site
+      function updateSiteKPIs(siteData) {
+        document.getElementById('totalRemainingCapacity').textContent = 
+          siteData.total_remaining_capacity !== null ? siteData.total_remaining_capacity.toFixed(1) + ' m³' : 'N/A';
+        
+        document.getElementById('shortTermSituation').textContent = 
+          siteData.short_term_situation !== null ? siteData.short_term_situation  : 'N/A';
+        
+        document.getElementById('longTermSituation').textContent = 
+          siteData.long_term_situation !== null ? siteData.long_term_situation  : 'N/A';
+        
+        document.getElementById('productionRate').textContent = 
+          siteData.production_rate !== null ? siteData.production_rate.toFixed(1) + '%' : 'N/A';
+        
+        // Update trends (example values - replace with your actual trend data)
+        document.getElementById('remainingCapacityTrend').textContent = '12% vs mois dernier';
+        document.getElementById('shortTermTrend').textContent = '5% vs mois dernier';
+        document.getElementById('longTermTrend').textContent = '8% vs mois dernier';
+        document.getElementById('productionRateTrend').textContent = '15% vs mois dernier';
+      }
+
+      // Update KPIs with aggregated data
+      function updateKPIs(data) {
+        if (!data || !data.length) return;
+        
+        // Calculate aggregated values
+        const totalRemainingCapacity = data.reduce((sum, item) => sum + (item.total_remaining_capacity || 0), 0);
+        const avgShortTermSituation = data.reduce((sum, item) => sum + (item.short_term_situation || 0), 0) / data.length;
+        const avgLongTermSituation = data.reduce((sum, item) => sum + (item.long_term_situation || 0), 0) / data.length;
+        const avgProductionRate = data.reduce((sum, item) => sum + (item.production_rate || 0), 0) / data.length;
+        
+        // Update KPI cards
+        document.getElementById('totalRemainingCapacity').textContent = 
+          totalRemainingCapacity.toFixed(1) + ' m³';
+        
+        document.getElementById('shortTermSituation').textContent = 
+          avgShortTermSituation.toFixed(1) + ' ans';
+        
+        document.getElementById('longTermSituation').textContent = 
+          avgLongTermSituation.toFixed(1) + ' ans';
+        
+        document.getElementById('productionRate').textContent = 
+          avgProductionRate.toFixed(1) + '%';
+        
+        // Update trends (example values - replace with your actual trend data)
+        document.getElementById('remainingCapacityTrend').textContent = '12% vs mois dernier';
+        document.getElementById('shortTermTrend').textContent = '5% vs mois dernier';
+        document.getElementById('longTermTrend').textContent = '8% vs mois dernier';
+        document.getElementById('productionRateTrend').textContent = '15% vs mois dernier';
+      }
+
+      // Zoom-out button functionality
+      document.getElementById('zoom-out-btn').addEventListener('click', function() {
+        map.setView([30.0, -7.0], 6); // Reset to default view
+        this.style.display = 'none'; // Hide the button
+        
+        // Reset marker icons
+        markers.forEach(m => {
+          const tsf = tsfs.find(t => t.name === m.options.title);
+          m.setIcon(getIconForStatus(tsf.status));
+        });
+      });
+
+      // Reset selection button
+      document.getElementById('resetSelectionBtn').addEventListener('click', function() {
+        // Hide the selected site indicator
+        document.getElementById('selectedSiteIndicator').style.display = 'none';
+        selectedSite = null;
+        
+        // Reset marker icons
+        markers.forEach(m => {
+          const tsf = tsfs.find(t => t.name === m.options.title);
+          m.setIcon(getIconForStatus(tsf.status));
+        });
+        
+        // Reset KPIs to aggregated values
+        updateKPIs(allSiteData);
+      });
+
+      // Initialize all charts and functionality
+      console.log("Dashboard initialized");
+      
+      // Sample initialization - replace with your actual code
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+      
+      // Highlight current page in navigation
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+
+      // Connect to Socket.IO server
+      const socket = io();
+
+      // Main chart variables
+      let fillRateChart,
+          investmentCostChart,
+          totalAutonomyChart,
+          stockVolumeChart,
+          stockageRatioChart,
+          capexTotalChart;
+
+      let allSiteData = [];
+
+      // Enhanced color palette with dark blue theme
+      const colorPalette = [
+        '#1a237e', '#303f9f', '#3f51b5', '#5c6bc0',
+        '#7986cb', '#9fa8da', '#c5cae9', '#e8eaf6',
+        '#1976d2', '#2196f3', '#64b5f6', '#bbdefb',
+        '#0d47a1', '#1565c0', '#1976d2', '#1e88e5'
+      ];
+      
+      function getColor(index) {
+        return colorPalette[index % colorPalette.length];
+      }
+
+      // Register Data Labels plugin globally (disabled in datasets)
+      Chart.register(ChartDataLabels);
+
+      // Populate the site filter dropdown
+      function populateSiteFilter(sites) {
+        const siteFilter = document.getElementById('siteFilter');
+        siteFilter.innerHTML = '';
+        sites.forEach((site, index) => {
+          const option = document.createElement('option');
+          option.value = index;
+          option.text = site;
+          option.selected = true;
+          siteFilter.appendChild(option);
+        });
+      }
+
+      // Populate the year filter checkboxes
+      function populateYearFilter(years) {
+        const yearFilter = document.getElementById('yearFilter');
+        yearFilter.innerHTML = '';
+        years.forEach(year => {
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = 'year_' + year;
+          checkbox.value = year;
+          checkbox.checked = true;
+          
+          const label = document.createElement('label');
+          label.htmlFor = 'year_' + year;
+          label.textContent = year;
+          
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('year-checkbox');
+          wrapper.appendChild(checkbox);
+          wrapper.appendChild(label);
+          
+          yearFilter.appendChild(wrapper);
+        });
+      }
+
+      // Event Listeners for Filters
+      document.getElementById('selectAllSitesBtn').addEventListener('click', selectAllSites);
+      document.getElementById('selectAllYearsBtn').addEventListener('click', selectAllYears);
+      document.getElementById('siteFilter').addEventListener('change', updateCharts);
+      document.getElementById('yearFilter').addEventListener('change', updateCharts);
+
+      // PDF Download: Hide non-graph elements and capture high-res image (scale 4)
+      document.getElementById('downloadPDFButton').addEventListener('click', function() {
+        // Hide non-graph elements temporarily
+        const elementsToHide = document.querySelectorAll('header, .filters-section, .map-container, .kpi-grid, .update-info, #downloadPDFButton, #selectedSiteIndicator');
+        const previousStyles = [];
+        
+        elementsToHide.forEach((el, i) => {
+          previousStyles[i] = el.style.display;
+          el.style.display = 'none';
+        });
+
+        // Set the container background to white for better print quality
+        const container = document.querySelector('.container');
+        const prevContainerBG = container.style.backgroundColor;
+        container.style.backgroundColor = '#fff';
+
+        // Wait for all charts to finish rendering
+        const charts = [fillRateChart, investmentCostChart, totalAutonomyChart, stockVolumeChart, stockageRatioChart, capexTotalChart];
+        let chartsRendered = 0;
+
+        charts.forEach(chart => {
+          if (chart) {
+            chart.options.animation = false; // Disable animations for rendering
+            chart.update('none'); // Update charts without animations
+            chart.options.animation = true; // Re-enable animations
+            chartsRendered++;
+          }
+        });
+
+        // Wait for charts to finish rendering
+        setTimeout(() => {
+          // Use html2canvas to capture the container
+          html2canvas(container, {
+            scale: 4, // Increase scale for higher resolution
+            useCORS: true, // Allow cross-origin images
+            logging: true, // Enable logging for debugging
+            allowTaint: true, // Allow tainted canvases
+            backgroundColor: null, // Ensure no background color covers the graphs
+            windowWidth: container.scrollWidth, // Capture the full width
+            windowHeight: container.scrollHeight // Capture the full height
+          }).then(function(canvas) {
+            // Restore hidden elements and container background
+            elementsToHide.forEach((el, i) => {
+              el.style.display = previousStyles[i];
+            });
+            container.style.backgroundColor = prevContainerBG;
+
+            // Convert canvas to image
+            const imgData = canvas.toDataURL('image/png', 1.0); // Highest quality
+
+            // Create a PDF
+            const pdf = new jspdf.jsPDF('p', 'pt', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const ratio = canvas.width / pdfWidth;
+            const imgHeight = canvas.height / ratio;
+
+            // Split the image into multiple pages if it's too tall
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            // Add the first page
+            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            heightLeft -= pdfHeight;
+
+            // Add additional pages if needed
+            while (heightLeft > 0) {
+              position = heightLeft - imgHeight;
+              pdf.addPage();
+              pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+              heightLeft -= pdfHeight;
+            }
+
+            // Save the PDF
+            pdf.save('dam_data_visualization.pdf');
+          }).catch(function(error) {
+            console.error('Error generating PDF:', error);
+            // Restore hidden elements and container background in case of error
+            elementsToHide.forEach((el, i) => {
+              el.style.display = previousStyles[i];
+            });
+            container.style.backgroundColor = prevContainerBG;
+          });
+        }, 500); // Wait 500ms for charts to render
+      });
+
+      function selectAllSites() {
+        const siteFilterElement = document.getElementById('siteFilter');
+        Array.from(siteFilterElement.options).forEach(option => option.selected = true);
+        updateCharts();
+      }
+
+      function selectAllYears() {
+        document.querySelectorAll('#yearFilter input').forEach(input => input.checked = true);
+        updateCharts();
+      }
+
+      function createOrUpdateCharts(newData) {
+        if (!newData || !newData.length) {
+          document.getElementById('error-container').textContent = 'Aucune donnée disponible.';
+          document.getElementById('error-container').style.display = 'block';
+          return;
+        }
+        
+        const now = new Date();
+        document.getElementById('lastUpdate').textContent = now.toLocaleString();
+        
+        newData.forEach(newItem => {
+          const idx = allSiteData.findIndex(item => item.sites === newItem.sites);
+          if (idx !== -1) {
+            allSiteData[idx] = newItem;
+          } else {
+            allSiteData.push(newItem);
+          }
+        });
+        
+        populateSiteFilter(allSiteData.map(item => item.sites || 'Site inconnu'));
+        populateYearFilter(['2022','2023','2024','2025','2026','2027','2028','2029','2030']);
+        
+        // Update KPIs with aggregated data
+        updateKPIs(allSiteData);
+        
+        updateCharts();
+      }
+
+      function updateCharts() {
+        const siteFilterElement = document.getElementById('siteFilter');
+        const selectedSiteIndices = Array.from(siteFilterElement.selectedOptions).map(option => parseInt(option.value));
+        
+        if (!selectedSiteIndices.length) {
+          document.getElementById('error-container').textContent = 'Aucun site sélectionné.';
+          document.getElementById('error-container').style.display = 'block';
+          clearCharts();
+          return;
+        }
+        
+        document.getElementById('error-container').style.display = 'none';
+        const filteredData = selectedSiteIndices.map(index => allSiteData[index]);
+        const selectedYears = Array.from(document.querySelectorAll('#yearFilter input:checked')).map(input => input.value);
+        
+        if (!selectedYears.length) {
+          document.getElementById('error-container').textContent = 'Aucune année sélectionnée.';
+          document.getElementById('error-container').style.display = 'block';
+          clearCharts();
+          return;
+        }
+        
+        document.getElementById('error-container').style.display = 'none';
+
+        // Replace null values with 0 in the dataset
+        const replaceNullWithZero = value => value === null ? 0 : value;
+        const sites = filteredData.map(item => item.sites || 'Site inconnu');
+        const totalCapacity  = filteredData.map(item => replaceNullWithZero(item.total_capacity));
+        const stockVolume    = filteredData.map(item => replaceNullWithZero(item.stock_volume));
+        const globalFillRate = filteredData.map(item => replaceNullWithZero(item.global_fill_rate));
+        const partialFillRate = filteredData.map(item => replaceNullWithZero(item.partial_fill_rate));
+        const totalAutonomy  = filteredData.map(item => replaceNullWithZero(item.total_autonomy));
+        const partialAutonomy = filteredData.map(item => replaceNullWithZero(item.partial_autonomy));
+        const stockageRatio  = filteredData.map(item => replaceNullWithZero(item.stockage_ratio));
+        
+        // CAPEX Investment Cost datasets for Chart 2
+        const capexDatasets = filteredData.map((siteData, index) => {
+          const capexValues = selectedYears.map(year => {
+            const field = 'capex_' + year;
+            return replaceNullWithZero(siteData[field]);
+          });
+          return {
+            label: siteData.sites || 'Site inconnu',
+            data: capexValues,
+            borderColor: getColor(index),
+            backgroundColor: 'rgba(0,0,0,0)',
+            borderWidth: 3,
+            fill: false,
+            tension: 0.3,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: getColor(index),
+            pointHoverRadius: 6,
+            pointHoverBorderWidth: 2,
+            hidden: false,
+            datalabels: { display: false }
+          };
+        });
+        
+        // For Chart 6: Total CAPEX, use field total_capex
+        const totalCapexData = filteredData.map(siteData => replaceNullWithZero(siteData.total_capex));
+
+        // Compute scaling values for main charts
+        const maxFillRate = Math.max(...globalFillRate.concat(partialFillRate));
+        const fillRateMaxScale = maxFillRate + (maxFillRate * 0.1);
+        const maxTotalAutonomy = Math.max(...totalAutonomy);
+        const autonomyMaxScale = maxTotalAutonomy + (maxTotalAutonomy * 0.1);
+        const maxStockageRatio = Math.max(...stockageRatio);
+        const stockageRatioMaxScale = maxStockageRatio + (maxStockageRatio * 0.1);
+
+        // ---------------- Main Charts ----------------
+
+        // Chart 1: Global and Partial Fill Rate (Radar Chart)
+        if (fillRateChart) {
+          fillRateChart.data.labels = sites;
+          fillRateChart.data.datasets[0].data = globalFillRate;
+          fillRateChart.data.datasets[1].data = partialFillRate;
+          fillRateChart.options.scales.r.max = fillRateMaxScale;
+          fillRateChart.update();
+        } else {
+          const ctx = document.getElementById('fillRateChart').getContext('2d');
+          fillRateChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+              labels: sites,
+              datasets: [
+                { 
+                  label: 'Taux de Remplissage Global (%)', 
+                  data: globalFillRate, 
+                  backgroundColor: 'rgba(26, 35, 126, 0.4)', 
+                  borderColor: 'rgba(26, 35, 126, 1)', 
+                  borderWidth: 2,
+                  pointBackgroundColor: 'rgba(26, 35, 126, 1)',
+                  pointBorderColor: '#fff',
+                  pointHoverBackgroundColor: '#fff',
+                  pointHoverBorderColor: 'rgba(26, 35, 126, 1)',
+                  pointRadius: 4,
+                  pointHoverRadius: 6,
+                  datalabels: { display: false }
+                },
+                { 
+                  label: 'Taux de Remplissage Partiel (%)', 
+                  data: partialFillRate, 
+                  backgroundColor: 'rgba(48, 63, 159, 0.4)', 
+                  borderColor: 'rgba(48, 63, 159, 1)', 
+                  borderWidth: 2,
+                  pointBackgroundColor: 'rgba(48, 63, 159, 1)',
+                  pointBorderColor: '#fff',
+                  pointHoverBackgroundColor: '#fff',
+                  pointHoverBorderColor: 'rgba(48, 63, 159, 1)',
+                  pointRadius: 4,
+                  pointHoverRadius: 6,
+                  datalabels: { display: false }
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: { 
+                  beginAtZero: true, 
+                  max: fillRateMaxScale, 
+                  pointLabels: { 
+                    font: { 
+                      size: 12,
+                      family: "'Poppins', sans-serif"
+                    } 
+                  },
+                  angleLines: { 
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    lineWidth: 1
+                  },
+                  grid: { 
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    circular: true
+                  },
+                  ticks: {
+                    backdropColor: 'rgba(255, 255, 255, 0.75)',
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                }
+              },
+              plugins: {
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: { 
+                    label: context => `${context.dataset.label}: ${context.parsed.r.toFixed(1)}%` 
+                  }
+                },
+                legend: {
+                  position: 'top',
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  },
+                  onClick: function(e, legendItem) {
+                    const index = legendItem.datasetIndex;
+                    const meta = this.chart.getDatasetMeta(index);
+                    meta.hidden = meta.hidden === null ? !this.chart.data.datasets[index].hidden : null;
+                    this.chart.update();
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // Chart 2: CAPEX Investment Cost per Site (Line Chart)
+        if (investmentCostChart) {
+          investmentCostChart.data.labels = selectedYears;
+          investmentCostChart.data.datasets = capexDatasets;
+          investmentCostChart.update();
+        } else {
+          const ctx = document.getElementById('investmentCostChart').getContext('2d');
+          investmentCostChart = new Chart(ctx, {
+            type: 'line',
+            data: { 
+              labels: selectedYears, 
+              datasets: capexDatasets 
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                datalabels: { display: false },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: {
+                    title: context => 'Année: ' + context[0].label,
+                    label: context => {
+                      let label = context.dataset.label || '';
+                      if (label) label += ': ';
+                      label += '$' + context.parsed.y.toFixed(1) + ' MM';
+                      return label;
+                    }
+                  }
+                },
+                legend: {
+                  position: 'top',
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  },
+                  onClick: function(e, legendItem) {
+                    const index = legendItem.datasetIndex;
+                    const meta = this.chart.getDatasetMeta(index);
+                    meta.hidden = meta.hidden === null ? !this.chart.data.datasets[index].hidden : null;
+                    this.chart.update();
+                  }
+                }
+              },
+              scales: {
+                y: { 
+                  beginAtZero: true, 
+                  title: { 
+                    display: true, 
+                    text: 'Coût d\'Investissement (MM$)' ,
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                },
+                x: { 
+                  title: { 
+                    display: true, 
+                    text: 'Année',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // Chart 3: Total and Partial Autonomy (Horizontal Stacked Bar Chart)
+        if (totalAutonomyChart) {
+          totalAutonomyChart.data.labels = sites;
+          totalAutonomyChart.data.datasets[0].data = totalAutonomy;
+          totalAutonomyChart.data.datasets[1].data = partialAutonomy;
+          totalAutonomyChart.options.scales.x.max = autonomyMaxScale;
+          totalAutonomyChart.update();
+        } else {
+          const ctx = document.getElementById('totalAutonomyChart').getContext('2d');
+          totalAutonomyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: sites,
+              datasets: [
+                {
+                  label: 'Autonomie Totale (Années)',
+                  data: totalAutonomy,
+                  backgroundColor: 'rgba(26, 35, 126, 0.8)',
+                  borderColor: 'rgba(26, 35, 126, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  datalabels: { display: false }
+                },
+                {
+                  label: 'Autonomie Partielle (Années)',
+                  data: partialAutonomy,
+                  backgroundColor: 'rgba(63, 81, 181, 0.8)',
+                  borderColor: 'rgba(63, 81, 181, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  datalabels: { display: false }
+                }
+              ]
+            },
+            options: {
+              indexAxis: 'y', // Horizontal bars
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { 
+                  stacked: true, // Stacked bars
+                  beginAtZero: true, 
+                  max: autonomyMaxScale, 
+                  title: { 
+                    display: true, 
+                    text: 'Autonomie (Années)',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                },
+                y: { 
+                  stacked: true, // Stacked bars
+                  title: { 
+                    display: true, 
+                    text: 'Sites',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: { 
+                  position: 'top',
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded'
+                  }
+                },
+                tooltip: { 
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: { 
+                    label: context => `${context.dataset.label}: ${context.parsed.x.toFixed(1)} ans` 
+                  } 
+                },
+                datalabels: { display: false }
+              }
+            }
+          });
+        }
+
+        // Chart 4: Stock Volume vs. Remaining Capacity (Stacked Bar Chart)
+        if (stockVolumeChart) {
+          stockVolumeChart.data.labels = sites;
+          stockVolumeChart.data.datasets[0].data = stockVolume;
+          stockVolumeChart.data.datasets[1].data = totalCapacity.map((cap, i) => cap - stockVolume[i]);
+          stockVolumeChart.update();
+        } else {
+          const ctx = document.getElementById('stockVolumeChart').getContext('2d');
+          stockVolumeChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: sites,
+              datasets: [
+                {
+                  label: 'Volume de Stock (m³)',
+                  data: stockVolume,
+                  backgroundColor: 'rgba(63, 81, 181, 0.8)',
+                  borderColor: 'rgba(63, 81, 181, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  datalabels: { display: false }
+                },
+                {
+                  label: 'Capacité Restante (m³)',
+                  data: totalCapacity.map((cap, i) => cap - stockVolume[i]),
+                  backgroundColor: 'rgba(159, 168, 218, 0.8)',
+                  borderColor: 'rgba(159, 168, 218, 1)',
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  datalabels: { display: false }
+                }
+              ]
+            },
+            options: {
+              indexAxis: 'y', // Horizontal bars
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { 
+                  stacked: true, // Stacked bars
+                  beginAtZero: true, 
+                  title: { 
+                    display: true, 
+                    text: 'Volume (m³)',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                },
+                y: { 
+                  stacked: true, // Stacked bars
+                  title: { 
+                    display: true, 
+                    text: 'Sites',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                }
+              },
+              plugins: {
+                tooltip: { 
+                  mode: 'index', 
+                  intersect: false,
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: {
+                    label: context => {
+                      const label = context.dataset.label || '';
+                      const value = context.parsed.x;
+                      return `${label}: ${value.toFixed(1)} m³`;
+                    }
+                  }
+                },
+                legend: {
+                  position: 'top',
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'rectRounded'
+                  },
+                  onClick: function(e, legendItem) {
+                    const index = legendItem.datasetIndex;
+                    const meta = this.chart.getDatasetMeta(index);
+                    meta.hidden = meta.hidden === null ? !this.chart.data.datasets[index].hidden : null;
+                    this.chart.update();
+                  }
+                },
+                datalabels: { display: false }
+              }
+            }
+          });
+        }
+
+        // Chart 5: Stockage Ratio (Horizontal Bar Chart)
+        if (stockageRatioChart) {
+          stockageRatioChart.data.labels = sites;
+          stockageRatioChart.data.datasets[0].data = stockageRatio;
+          stockageRatioChart.options.scales.x.max = stockageRatioMaxScale;
+          stockageRatioChart.update();
+        } else {
+          const ctx = document.getElementById('stockageRatioChart').getContext('2d');
+          stockageRatioChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: sites,
+              datasets: [
+                {
+                  label: 'Ratio de Stockage',
+                  data: stockageRatio,
+                  backgroundColor: sites.map((site, i) => getColor(i)),
+                  borderColor: sites.map((site, i) => getColor(i)),
+                  borderWidth: 1,
+                  borderRadius: 4,
+                  hoverBackgroundColor: sites.map((site, i) => colorPalette[(i + 4) % colorPalette.length]),
+                  datalabels: { 
+                    display: true,
+                    color: '#fff',
+                    font: {
+                      weight: 'bold',
+                      size: 10
+                    },
+                    anchor: 'end',
+                    align: 'right',
+                    offset: 5
+                  }
+                }
+              ]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: { 
+                  beginAtZero: true, 
+                  max: stockageRatioMaxScale, 
+                  title: { 
+                    display: true, 
+                    text: 'Ratio de Stockage',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: {
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  }
+                },
+                y: { 
+                  title: { 
+                    display: true, 
+                    text: 'Sites',
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12,
+                      weight: 'bold'
+                    }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                  },
+                  ticks: { 
+                    autoSkip: false,
+                    font: {
+                      family: "'Poppins', sans-serif"
+                    }
+                  } 
+                }
+              },
+              plugins: {
+                tooltip: { 
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: { 
+                    label: context => `${context.dataset.label}: ${context.parsed.x.toFixed(1)}` 
+                  } 
+                },
+                legend: { display: false },
+                datalabels: { 
+                  display: true,
+                  formatter: (value, context) => value.toFixed(1),
+                  color: '#fff',
+                  font: {
+                    weight: 'bold',
+                    size: 10
+                  },
+                  anchor: 'end',
+                  align: 'right',
+                  offset: 5
+                }
+              }
+            }
+          });
+        }
+
+        // Chart 6: Total CAPEX per Site (Doughnut Chart with Values)
+        if (capexTotalChart) {
+          capexTotalChart.data.labels = sites;
+          capexTotalChart.data.datasets[0].data = totalCapexData;
+          capexTotalChart.update();
+        } else {
+          const ctx = document.getElementById('capexTotalChart').getContext('2d');
+          capexTotalChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+              labels: sites,
+              datasets: [{
+                label: 'CAPEX Total (MM$)',
+                data: totalCapexData,
+                backgroundColor: sites.map((site, i) => getColor(i)),
+                borderColor: sites.map((site, i) => '#fff'),
+                borderWidth: 2,
+                hoverOffset: 10,
+                datalabels: { 
+                  display: true,
+                  formatter: (value, context) => '$' + value.toFixed(1) + ' MM',
+                  color: '#fff',
+                  font: { 
+                    weight: 'bold',
+                    size: 10
+                  }
+                }
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '65%',
+              plugins: {
+                legend: { 
+                  position: 'right',
+                  labels: {
+                    font: {
+                      family: "'Poppins', sans-serif",
+                      size: 12
+                    },
+                    padding: 20,
+                    usePointStyle: true,
+                    pointStyle: 'circle'
+                  }
+                },
+                tooltip: { 
+                  backgroundColor: 'rgba(0,0,0,0.8)',
+                  titleFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 14
+                  },
+                  bodyFont: {
+                    family: "'Poppins', sans-serif",
+                    size: 12
+                  },
+                  callbacks: { 
+                    label: context => context.label + ': $' + context.parsed.toFixed(1) + ' MM' 
+                  } 
+                },
+                datalabels: { 
+                  display: true,
+                  formatter: (value, context) => '$' + value.toFixed(1) + ' MM',
+                  color: '#fff',
+                  font: { 
+                    weight: 'bold',
+                    size: 10
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+
+      function clearCharts() {
+        [fillRateChart, investmentCostChart, totalAutonomyChart,
+         stockVolumeChart, stockageRatioChart, capexTotalChart].forEach(chart => {
+          if (chart) chart.destroy();
+        });
+        fillRateChart = investmentCostChart = totalAutonomyChart = stockVolumeChart = stockageRatioChart = capexTotalChart = null;
+      }
+
+      socket.on('update_data', function(data) {
+        console.log('Received data:', data);
+        createOrUpdateCharts(data);
+      });
+
+      // Request initial update when page is loaded
+      socket.emit('requestUpdate');
+    });
+  </script>
+</body>
+</html>

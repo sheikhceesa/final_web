@@ -1,0 +1,159 @@
+/* ================== Form Styles ================== */
+.form-container {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto 50px auto;
+    background-color: #c9c9b3;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+}
+
+.form-container form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+}
+
+.form-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-container input[type="text"],
+.form-container input[type="number"],
+.form-container input[type="date"],
+.form-container select,
+.form-container textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: #fff;
+    transition: border-color 0.3s ease;
+}
+
+.form-container textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-container input:focus,
+.form-container select:focus,
+.form-container textarea:focus {
+    outline: none;
+    border-color: #80bdff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+}
+
+.form-container button {
+    padding: 14px 20px;
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: start;
+}
+
+.form-container button:hover {
+    background-color: #0056b3;
+}
+
+/* Show Optional Fields Button */
+#toggleOptionalFields {
+    background-color: #6c757d;
+}
+
+#toggleOptionalFields:hover {
+    background-color: #5a6268;
+}
+
+/* Full Width Elements */
+.form-container select,
+.form-container #comments,
+.form-container #toggleOptionalFields,
+.form-container button[type="submit"] {
+    grid-column: span 2;
+}
+
+/* Optional Fields */
+#optionalFields {
+    display: none;
+    grid-column: span 2;
+}
+
+#optionalFields h3 {
+    margin-bottom: 20px;
+    color: #343a40;
+    font-size: 1.8rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-container form {
+        grid-template-columns: 1fr;
+    }
+
+    .hdd h1 {
+        font-size: 2rem;
+        padding: 0 15px;
+    }
+
+    .form-container {
+        padding: 30px 20px;
+    }
+
+    /* Mobile Menu Adjustments */
+    nav .menu {
+        top: 60px; /* Adjust according to your header's height */
+    }
+}
+
+@media (max-width: 576px) {
+    .hdd h1 {
+        font-size: 1.8rem;
+    }
+
+    .form-container button {
+        font-size: 0.9rem;
+    }
+}
+
+/* ================== Additional Styles ================== */
+/* Scrollbar Styling (Optional) */
+body {
+    scrollbar-width: thin;
+    scrollbar-color: #007bff transparent;
+}
+
+body::-webkit-scrollbar {
+    width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: #007bff;
+    border-radius: 4px;
+}
+
+/* Accessibility Focus States */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}

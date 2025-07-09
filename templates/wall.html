@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Visual Decision Support Tool - Wall Dashboard</title>
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Socket.IO client library -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #3b82f6;
+      --secondary: #e11d48;
+      --accent: #f59e0b;
+      --dark: #1e293b;
+      --darker: #0f172a;
+      --light: #f1f5f9;
+      --lighter: #f8fafc;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #334155;
+      --text-light: #64748b;
+      --card-bg: #ffffff;
+      --header-bg: rgba(255, 255, 255, 0.92);
+      --map-bg: #f8fafc;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --border-radius: 6px;
+      --transition: all 0.2s ease;
+  }
+  
+  /* General Body Styling */
+  body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--lighter);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+  }
+  
+  /* Header and Navigation Styling */
+  header {
+      background-color: var(--header-bg);
+      color: var(--text);
+      padding: 12px 20px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+  }
+  
+  .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+  }
+  
+  .main-nav {
+      display: flex;
+      gap: 15px;
+  }
+  
+  nav ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      gap: 5px;
+  }
+  
+  nav ul li {
+      margin: 0;
+  }
+  
+  nav ul li a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 8px 15px;
+      border-radius: 4px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+  
+  nav ul li a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--accent);
+  }
+  
+  nav ul li a i {
+      font-size: 0.9em;
+  }
+  
+  /* Mobile menu button */
+  .menu-button {
+      display: none;
+      cursor: pointer;
+      padding: 8px;
+  }
+  
+  .menu-button span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background-color: var(--text);
+      margin: 5px 0;
+      transition: var(--transition);
+  }
+  
+  /* Main Content Styling */
+  main {
+      flex: 1;
+      padding: 25px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+  }
+  
+  h1, h2, h3 {
+      color: var(--dark);
+      margin-bottom: 20px;
+      font-weight: 600;
+  }
+  
+  h1 {
+      font-size: 2rem;
+      text-align: center;
+      margin: 15px 0 25px;
+      position: relative;
+  }
+  
+  h1::after {
+      content: '';
+      display: block;
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      margin: 15px auto;
+      border-radius: 3px;
+  }
+  
+  h2 {
+      font-size: 1.5rem;
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 30px;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Dashboard Section */
+  .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+  }
+  
+  .dashboard-card {
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .dashboard-card h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+  
+  .dashboard-card h3 i {
+      font-size: 1.1em;
+  }
+  
+  .stat-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 10px 0;
+      color: var(--dark);
+  }
+  
+  .stat-label {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      margin-bottom: 5px;
+  }
+  
+  .stat-comparison {
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-light);
+  }
+  
+  .stat-comparison.positive {
+      color: var(--success);
+  }
+  
+  .stat-comparison.negative {
+      color: var(--danger);
+  }
+  
+  .chart-container {
+      position: relative;
+      height: 200px;
+      width: 100%;
+  }
+  
+  .severity-indicator {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+  }
+  
+  .severity-bar {
+      height: 8px;
+      border-radius: 4px;
+      margin-right: 10px;
+      flex-grow: 1;
+  }
+  
+  .severity-low {
+      background-color: var(--success);
+  }
+  
+  .severity-medium {
+      background-color: var(--warning);
+  }
+  
+  .severity-high {
+      background-color: var(--danger);
+  }
+  
+  .severity-label {
+      min-width: 70px;
+      font-size: 0.85rem;
+  }
+  
+  /* Filter Section */
+  .filter-section {
+      background-color: var(--card-bg);
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      max-width: 800px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .filter-section form {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+      justify-content: center;
+  }
+  
+  .filter-section label {
+      font-weight: 600;
+      color: var(--text);
+      margin-right: 8px;
+      font-size: 0.95rem;
+  }
+  
+  .filter-section select {
+      padding: 8px 15px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: var(--border-radius);
+      background-color: var(--light);
+      color: var(--text);
+      font-size: 0.95rem;
+      min-width: 200px;
+      transition: var(--transition);
+  }
+  
+  .filter-section select:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+  }
+  
+  /* Section Styling */
+  section {
+      margin: 30px 0;
+      padding: 25px;
+      background-color: var(--card-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Button Styling */
+  .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: var(--transition);
+      text-decoration: none;
+  }
+  
+  .btn-primary {
+      background-color: var(--primary);
+      color: white;
+  }
+  
+  .btn-primary:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-1px);
+  }
+  
+  .btn-secondary {
+      background-color: var(--light);
+      color: var(--text);
+      border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  .btn-secondary:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      transform: translateY(-1px);
+  }
+  
+  .btn-accent {
+      background-color: var(--accent);
+      color: white;
+  }
+  
+  .btn-accent:hover {
+      background-color: #e69008;
+      transform: translateY(-1px);
+  }
+  
+  .btn-danger {
+      background-color: var(--secondary);
+      color: white;
+  }
+  
+  .btn-danger:hover {
+      background-color: #e11d48;
+      transform: translateY(-1px);
+  }
+  
+  /* Add Record Dropdown */
+  .add-record-dropdown {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 25px;
+  }
+  
+  .add-record-btn {
+      background-color: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+  }
+  
+  .add-record-btn:hover {
+      background-color: #e69008;
+      transform: translateY(-1px);
+  }
+  
+  .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: var(--card-bg);
+      min-width: 220px;
+      box-shadow: var(--shadow);
+      z-index: 100;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .dropdown-content a {
+      color: var(--text);
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .dropdown-content a:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--accent);
+  }
+  
+  .dropdown-content a i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+  }
+  
+  .show {
+      display: block;
+      animation: fadeIn 0.2s;
+  }
+  
+  @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Form Styling */
+  form {
+      background-color: var(--card-bg);
+      padding: 25px;
+      margin: 25px auto;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+  }
+  
+  .form-group {
+      margin-bottom: 15px;
+  }
+  
+  form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 0.9rem;
+  }
+  
+  form input[type="text"],
+  form input[type="date"],
+  form input[type="time"],
+  form input[type="number"],
+  form input[type="email"],
+  form input[type="password"],
+  form select,
+  form textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: var(--border-radius);
+      font-size: 0.95rem;
+      transition: var(--transition);
+      background-color: var(--light);
+      color: var(--text);
+  }
+  
+  form input:focus,
+  form select:focus,
+  form textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+      background-color: var(--card-bg);
+  }
+  
+  form textarea {
+      min-height: 100px;
+      resize: vertical;
+  }
+  
+  .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 15px;
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Table Styling */
+  .table-responsive {
+      overflow-x: auto;
+      margin: 25px 0;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--card-bg);
+  }
+  
+  table th,
+  table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      font-size: 0.9rem;
+  }
+  
+  table th {
+      background-color: var(--light);
+      color: var(--text);
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+  }
+  
+  table tr:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+  }
+  
+  .status-low {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+  }
+  
+  .status-medium {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+  }
+  
+  .status-high {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+  }
+  
+  /* Hidden Class for Forms */
+  .hidden {
+      display: none;
+  }
+  
+  /* Modal for Detailed View */
+  .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+  }
+  
+  .modal.show {
+      opacity: 1;
+      visibility: visible;
+  }
+  
+  .modal-content {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--border-radius);
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal.show .modal-content {
+      transform: translateY(0);
+  }
+  
+  .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--text);
+  }
+  
+  .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: var(--transition);
+  }
+  
+  .close-modal:hover {
+      color: var(--secondary);
+  }
+  
+  /* Utility Classes */
+  .text-center {
+      text-align: center;
+  }
+  
+  .text-right {
+      text-align: right;
+  }
+  
+  .mt-20 {
+      margin-top: 20px;
+  }
+  
+  .mb-20 {
+      margin-bottom: 20px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 992px) {
+      h1 {
+          font-size: 1.8rem;
+      }
+      
+      h2 {
+          font-size: 1.3rem;
+      }
+      
+      .form-grid {
+          grid-template-columns: 1fr;
+      }
+  }
+  
+  @media (max-width: 768px) {
+      /* Hamburger Menu for Small Screens */
+      .main-nav {
+          display: none;
+      }
+      
+      .menu-button {
+          display: block;
+      }
+  
+      nav ul {
+          display: none;
+          flex-direction: column;
+          width: 100%;
+          gap: 0;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          background-color: var(--header-bg);
+          box-shadow: var(--shadow);
+          z-index: 999;
+      }
+  
+      nav ul li {
+          width: 100%;
+          text-align: center;
+      }
+  
+      nav ul li a {
+          display: block;
+          padding: 12px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          border-radius: 0;
+          justify-content: center;
+      }
+  
+      #menu-toggle:checked ~ .main-nav {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+      }
+  
+      #menu-toggle:checked ~ .menu-button span:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+      }
+  
+      #menu-toggle:checked ~ .menu-button span:nth-child(2) {
+          opacity: 0;
+      }
+  
+      #menu-toggle:checked ~ .menu-button span:nth-child(3) {
+          transform: rotate(-45deg) translate(7px, -6px);
+      }
+  
+      /* Adjust padding for mobile */
+      main {
+          padding: 15px;
+      }
+      
+      section {
+          padding: 20px;
+      }
+      
+      /* Stack filter elements on mobile */
+      .filter-section form {
+          flex-direction: column;
+          align-items: stretch;
+      }
+      
+      .filter-section label {
+          margin-bottom: 5px;
+      }
+  
+      /* Adjust dropdown for mobile */
+      .dropdown-content {
+          position: static;
+          width: 100%;
+      }
+  
+      .modal-content {
+          padding: 20px;
+      }
+  }
+  
+  @media (max-width: 480px) {
+      /* Further Adjustments for Very Small Screens */
+      body {
+          font-size: 14px;
+      }
+  
+      h1 {
+          font-size: 1.5rem;
+      }
+      
+      h2 {
+          font-size: 1.2rem;
+      }
+  
+      table th,
+      table td {
+          padding: 10px 12px;
+          font-size: 0.85rem;
+      }
+      
+      .btn {
+          padding: 8px 12px;
+          font-size: 0.85rem;
+      }
+      
+      form {
+          padding: 20px;
+      }
+  
+      .form-actions {
+          flex-direction: column;
+          gap: 10px;
+      }
+  
+      .form-actions .btn {
+          width: 100%;
+      }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="nav-container">
+      <input id="menu-toggle" type="checkbox" />
+      <label class="menu-button" for="menu-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> ACCUEIL</a></li>
+          <li><a href="{{ url_for('dams') }}"><i class="fas fa-database"></i> INSTALLATION DE STOCKAGE DES RÉSIDUS</a></li>
+          <li><a href="{{ url_for('weekly') }}"><i class="fas fa-chart-line"></i> CONTRÔLE OMS</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <h1>Wall Dashboard: Filter by Site</h1>
+    
+    <!-- Global Filter Form -->
+    <div class="filter-section">
+      <form method="GET" action="{{ url_for('wall') }}">
+        <label for="site">Filter by Site:</label>
+        <select name="site" id="site" onchange="updateDashboard()">
+          <option value="" {% if not request.args.get('site') %}selected{% endif %}>All Sites</option>
+          {% for s in sites %}
+            <option value="{{ s }}" {% if request.args.get('site') == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Apply Filter</button>
+        {% if request.args.get('site') %}
+          <a href="{{ url_for('wall') }}" class="btn btn-secondary">Clear Filter</a>
+        {% endif %}
+      </form>
+    </div>
+    
+    <!-- Dynamic Dashboard Section -->
+    <section id="dashboard">
+      <h2><i class="fas fa-chart-pie"></i> Wall Monitoring Dashboard</h2>
+      
+      <div class="dashboard">
+        <!-- Total Issues Card -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-exclamation-triangle"></i> Total Issues</h3>
+          <div class="stat-value" id="total-issues">0</div>
+          <div class="stat-label">Across all categories</div>
+          <div class="stat-comparison">
+            <i class="fas fa-arrow-up"></i> <span id="issues-trend">0%</span> from last month
+          </div>
+        </div>
+        
+        <!-- Severity Distribution Card -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-thermometer-half"></i> Severity Distribution</h3>
+          <div class="severity-indicator">
+            <div class="severity-bar severity-low" id="low-severity-bar"></div>
+            <span class="severity-label"><span id="low-severity-count">0</span> Low</span>
+          </div>
+          <div class="severity-indicator">
+            <div class="severity-bar severity-medium" id="medium-severity-bar"></div>
+            <span class="severity-label"><span id="medium-severity-count">0</span> Medium</span>
+          </div>
+          <div class="severity-indicator">
+            <div class="severity-bar severity-high" id="high-severity-bar"></div>
+            <span class="severity-label"><span id="high-severity-count">0</span> High</span>
+          </div>
+        </div>
+        
+        <!-- Issues by Type Chart -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-chart-bar"></i> Issues by Type</h3>
+          <div class="chart-container">
+            <canvas id="issuesByTypeChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Recent Activity Card -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+          <div id="recent-activity">
+            <p>No recent activity</p>
+          </div>
+        </div>
+        
+        <!-- Surface Affected Card -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-ruler-combined"></i> Surface Affected</h3>
+          <div class="stat-value" id="total-surface">0 m²</div>
+          <div class="stat-label">Total affected area</div>
+          <div class="chart-container">
+            <canvas id="surfaceTrendChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- Repair Status Card -->
+        <div class="dashboard-card">
+          <h3><i class="fas fa-tools"></i> Repair Status</h3>
+          <div class="chart-container">
+            <canvas id="repairStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Combined Add Record Dropdown -->
+    <div class="add-record-dropdown">
+      <button onclick="toggleDropdown()" class="add-record-btn">
+        <i class="fas fa-plus"></i> Add New Record
+      </button>
+      <div id="addRecordDropdown" class="dropdown-content">
+        <a href="#" onclick="toggleForm('suintementForm'); toggleDropdown(); return false;">
+          <i class="fas fa-tint"></i> Add Suintement Record
+        </a>
+        <a href="#" onclick="toggleForm('tuyauterieForm'); toggleDropdown(); return false;">
+          <i class="fas fa-pipe"></i> Add Tuyauterie Record
+        </a>
+        <a href="#" onclick="toggleForm('erosionForm'); toggleDropdown(); return false;">
+          <i class="fas fa-mountain"></i> Add Erosion Record
+        </a>
+        <a href="#" onclick="toggleForm('fissurationForm'); toggleDropdown(); return false;">
+          <i class="fas fa-crack"></i> Add Fissuration Record
+        </a>
+      </div>
+    </div>
+    
+    <!-- ========================================================= -->
+    <!-- Section: Preuve Suintement -->
+    <!-- ========================================================= -->
+    <section id="suintement">
+      <h2><i class="fas fa-tint"></i> Preuve Suintement Records</h2>
+      
+      <div id="suintementForm" class="hidden">
+        <form action="{{ url_for('insert_suintement') }}" method="POST" class="form-grid">
+          <div class="form-group">
+            <label for="suintement_date">Date:</label>
+            <input type="date" id="suintement_date" name="suintement_date" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_heure">Heure:</label>
+            <input type="time" id="suintement_heure" name="suintement_heure" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_emplacement">Emplacement:</label>
+            <input type="text" id="suintement_emplacement" name="suintement_emplacement" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_site">Site:</label>
+            <input type="text" id="suintement_site" name="suintement_site" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_surface">Surface affectée (m²):</label>
+            <input type="number" step="0.01" id="suintement_surface" name="suintement_surface" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_debit">Débit estimé (l/min):</label>
+            <input type="number" step="0.01" id="suintement_debit" name="suintement_debit" required>
+          </div>
+          <div class="form-group">
+            <label for="suintement_couleur">Couleur de l'eau:</label>
+            <select id="suintement_couleur" name="suintement_couleur" required>
+              <option value="Clair">Clair</option>
+              <option value="Boueux">Boueux</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="suintement_gravite">Gravité:</label>
+            <select id="suintement_gravite" name="suintement_gravite" required>
+              <option value="Faible">Faible</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Élevée">Élevée</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="suintement_action">Action corrective:</label>
+            <textarea id="suintement_action" name="suintement_action" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="suintement_responsable">Responsable:</label>
+            <input type="text" id="suintement_responsable" name="suintement_responsable" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="suintement_commentaires">Commentaires:</label>
+            <textarea id="suintement_commentaires" name="suintement_commentaires"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="suintement_date_reparation">Date réparation:</label>
+            <input type="date" id="suintement_date_reparation" required name="suintement_date_reparation">
+          </div>
+          <div class="form-actions" style="grid-column: span 2;">
+            <button type="submit" class="btn btn-primary">Insert Record</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm('suintementForm')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Emplacement</th>
+              <th>Site</th>
+              <th>Surface</th>
+              <th>Débit</th>
+              <th>Gravité</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in suintement_records %}
+              {% if not request.args.get('site') or record.site == request.args.get('site') %}
+                <tr>
+                  <td>{{ record.id }}</td>
+                  <td>{{ record.date }} {{ record.heure }}</td>
+                  <td>{{ record.emplacement }}</td>
+                  <td>{{ record.site }}</td>
+                  <td>{{ record.surface_affectee_m2 }} m²</td>
+                  <td>{{ record.debit_estime_lmin }} l/min</td>
+                  <td>
+                    <span class="status-badge 
+                      {% if record.gravite == 'Faible' %}status-low
+                      {% elif record.gravite == 'Moyenne' %}status-medium
+                      {% else %}status-high{% endif %}">
+                      {{ record.gravite }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" onclick="showDetails('suintement', {{ record.id }})">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              {% endif %}
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center">No records found</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================================= -->
+    <!-- Section: Preuve Tuyauterie -->
+    <!-- ========================================================= -->
+    <section id="tuyauterie">
+      <h2><i class="fas fa-pipe"></i> Preuve Tuyauterie Records</h2>
+      
+      <div id="tuyauterieForm" class="hidden">
+        <form action="{{ url_for('insert_tuyauterie') }}" method="POST" class="form-grid">
+          <div class="form-group">
+            <label for="tuyauterie_date">Date:</label>
+            <input type="date" id="tuyauterie_date" name="tuyauterie_date" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_heure">Heure:</label>
+            <input type="time" id="tuyauterie_heure" name="tuyauterie_heure" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_emplacement">Emplacement:</label>
+            <input type="text" id="tuyauterie_emplacement" name="tuyauterie_emplacement" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_site">Site:</label>
+            <input type="text" id="tuyauterie_site" name="tuyauterie_site" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_type">Type de Tuyauterie:</label>
+            <select id="tuyauterie_type" name="tuyauterie_type" required>
+              <option value="Verticale">Verticale</option>
+              <option value="Horizontale">Horizontale</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_profondeur">Profondeur estimée (cm):</label>
+            <input type="number" step="0.01" id="tuyauterie_profondeur" name="tuyauterie_profondeur" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_diametre">Diamètre (mm):</label>
+            <input type="number" step="0.01" id="tuyauterie_diametre" name="tuyauterie_diametre" required>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_gravite">Gravité:</label>
+            <select id="tuyauterie_gravite" name="tuyauterie_gravite" required>
+              <option value="Faible">Faible</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Élevée">Élevée</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="tuyauterie_action">Action corrective:</label>
+            <textarea id="tuyauterie_action" name="tuyauterie_action" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="tuyauterie_responsable">Responsable:</label>
+            <input type="text" id="tuyauterie_responsable" name="tuyauterie_responsable" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="tuyauterie_commentaires">Commentaires:</label>
+            <textarea id="tuyauterie_commentaires" name="tuyauterie_commentaires"></textarea>
+          </div>
+          <div class="form-actions" style="grid-column: span 2;">
+            <button type="submit" class="btn btn-primary">Insert Record</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm('tuyauterieForm')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Emplacement</th>
+              <th>Site</th>
+              <th>Type</th>
+              <th>Profondeur</th>
+              <th>Diamètre</th>
+              <th>Gravité</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in tuyauterie_records %}
+              {% if not request.args.get('site') or record.site == request.args.get('site') %}
+                <tr>
+                  <td>{{ record.id }}</td>
+                  <td>{{ record.date }} {{ record.heure }}</td>
+                  <td>{{ record.emplacement }}</td>
+                  <td>{{ record.site }}</td>
+                  <td>{{ record.type_tuyauterie }}</td>
+                  <td>{{ record.profondeur_estimee_cm }} cm</td>
+                  <td>{{ record.diametre_mm }} mm</td>
+                  <td>
+                    <span class="status-badge 
+                      {% if record.gravite == 'Faible' %}status-low
+                      {% elif record.gravite == 'Moyenne' %}status-medium
+                      {% else %}status-high{% endif %}">
+                      {{ record.gravite }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" onclick="showDetails('tuyauterie', {{ record.id }})">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              {% endif %}
+            {% else %}
+              <tr>
+                <td colspan="9" class="text-center">No records found</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================================= -->
+    <!-- Section: Preuve Erosion -->
+    <!-- ========================================================= -->
+    <section id="erosion">
+      <h2><i class="fas fa-mountain"></i> Preuve Erosion Records</h2>
+      
+      <div id="erosionForm" class="hidden">
+        <form action="{{ url_for('insert_erosion') }}" method="POST" class="form-grid">
+          <div class="form-group">
+            <label for="erosion_date">Date:</label>
+            <input type="date" id="erosion_date" name="erosion_date" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_heure">Heure:</label>
+            <input type="time" id="erosion_heure" name="erosion_heure" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_emplacement">Emplacement:</label>
+            <input type="text" id="erosion_emplacement" name="erosion_emplacement" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_site">Site:</label>
+            <input type="text" id="erosion_site" name="erosion_site" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_zone">Zone érodée (m²):</label>
+            <input type="number" step="0.01" id="erosion_zone" name="erosion_zone" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_profondeur">Profondeur érosion (cm):</label>
+            <input type="number" step="0.01" id="erosion_profondeur" name="erosion_profondeur" required>
+          </div>
+          <div class="form-group">
+            <label for="erosion_type">Type d'érosion:</label>
+            <select id="erosion_type" name="erosion_type" required>
+              <option value="Pluviale">Pluviale</option>
+              <option value="Éolienne">Éolienne</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="erosion_gravite">Gravité:</label>
+            <select id="erosion_gravite" name="erosion_gravite" required>
+              <option value="Faible">Faible</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Élevée">Élevée</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="erosion_action">Action corrective:</label>
+            <textarea id="erosion_action" name="erosion_action" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="erosion_responsable">Responsable:</label>
+            <input type="text" id="erosion_responsable" name="erosion_responsable" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="erosion_commentaires">Commentaires:</label>
+            <textarea id="erosion_commentaires" name="erosion_commentaires"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="erosion_statut">Statut:</label>
+            <input type="text" id="erosion_statut" name="erosion_statut">
+          </div>
+          <div class="form-group">
+            <label for="erosion_date_reparation">Date réparation:</label>
+            <input type="date" id="erosion_date_reparation" name="erosion_date_reparation">
+          </div>
+          <div class="form-actions" style="grid-column: span 2;">
+            <button type="submit" class="btn btn-primary">Insert Record</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm('erosionForm')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Emplacement</th>
+              <th>Site</th>
+              <th>Zone érodée</th>
+              <th>Profondeur</th>
+              <th>Type</th>
+              <th>Gravité</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in erosion_records %}
+              {% if not request.args.get('site') or record.site == request.args.get('site') %}
+                <tr>
+                  <td>{{ record.id }}</td>
+                  <td>{{ record.date }} {{ record.heure }}</td>
+                  <td>{{ record.emplacement }}</td>
+                  <td>{{ record.site }}</td>
+                  <td>{{ record.zone_erodee_m2 }} m²</td>
+                  <td>{{ record.profondeur_erosion_cm }} cm</td>
+                  <td>{{ record.type_erosion }}</td>
+                  <td>
+                    <span class="status-badge 
+                      {% if record.gravite == 'Faible' %}status-low
+                      {% elif record.gravite == 'Moyenne' %}status-medium
+                      {% else %}status-high{% endif %}">
+                      {{ record.gravite }}
+                    </span>
+                  </td>
+                  <td>{{ record.statut }}</td>
+                  <td>
+                    <button class="btn btn-secondary" onclick="showDetails('erosion', {{ record.id }})">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              {% endif %}
+            {% else %}
+              <tr>
+                <td colspan="10" class="text-center">No records found</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========================================================= -->
+    <!-- Section: Preuve Fissuration Glissement -->
+    <!-- ========================================================= -->
+    <section id="fissuration">
+      <h2><i class="fas fa-crack"></i> Preuve Fissuration Glissement Records</h2>
+      
+      <div id="fissurationForm" class="hidden">
+        <form action="{{ url_for('insert_fissuration') }}" method="POST" class="form-grid">
+          <div class="form-group">
+            <label for="fissuration_date">Date:</label>
+            <input type="date" id="fissuration_date" name="fissuration_date" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_heure">Heure:</label>
+            <input type="time" id="fissuration_heure" name="fissuration_heure" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_emplacement">Emplacement:</label>
+            <input type="text" id="fissuration_emplacement" name="fissuration_emplacement" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_site">Site:</label>
+            <input type="text" id="fissuration_site" name="fissuration_site" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_type_fissure">Type de Fissure:</label>
+            <input type="text" id="fissuration_type_fissure" name="fissuration_type_fissure" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_longueur">Longueur (m):</label>
+            <input type="number" step="0.01" id="fissuration_longueur" name="fissuration_longueur" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_largeur">Largeur (mm):</label>
+            <input type="number" step="0.01" id="fissuration_largeur" name="fissuration_largeur" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_profondeur">Profondeur (cm):</label>
+            <input type="number" step="0.01" id="fissuration_profondeur" name="fissuration_profondeur" required>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_signes">Signes de Glissement:</label>
+            <input type="checkbox" id="fissuration_signes" name="fissuration_signes">
+          </div>
+          <div class="form-group">
+            <label for="fissuration_gravite">Gravité:</label>
+            <select id="fissuration_gravite" name="fissuration_gravite" required>
+              <option value="Faible">Faible</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Élevée">Élevée</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="fissuration_action">Action corrective:</label>
+            <textarea id="fissuration_action" name="fissuration_action" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="fissuration_responsable">Responsable:</label>
+            <input type="text" id="fissuration_responsable" name="fissuration_responsable" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label for="fissuration_commentaires">Commentaires:</label>
+            <textarea id="fissuration_commentaires" name="fissuration_commentaires"></textarea>
+          </div>
+          <div class="form-actions" style="grid-column: span 2;">
+            <button type="submit" class="btn btn-primary">Insert Record</button>
+            <button type="button" class="btn btn-secondary" onclick="toggleForm('fissurationForm')">Cancel</button>
+          </div>
+        </form>
+      </div>
+    
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Emplacement</th>
+              <th>Site</th>
+              <th>Type</th>
+              <th>Dimensions</th>
+              <th>Glissement</th>
+              <th>Gravité</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in fissuration_records %}
+              {% if not request.args.get('site') or record.site == request.args.get('site') %}
+                <tr>
+                  <td>{{ record.id }}</td>
+                  <td>{{ record.date }} {{ record.heure }}</td>
+                  <td>{{ record.emplacement }}</td>
+                  <td>{{ record.site }}</td>
+                  <td>{{ record.type_fissure }}</td>
+                  <td>{{ record.longueur_m }}m × {{ record.largeur_mm }}mm × {{ record.profondeur_cm }}cm</td>
+                  <td>{{ 'Oui' if record.signes_glissement else 'Non' }}</td>
+                  <td>
+                    <span class="status-badge 
+                      {% if record.gravite == 'Faible' %}status-low
+                      {% elif record.gravite == 'Moyenne' %}status-medium
+                      {% else %}status-high{% endif %}">
+                      {{ record.gravite }}
+                    </span>
+                  </td>
+                  <td>
+                    <button class="btn btn-secondary" onclick="showDetails('fissuration', {{ record.id }})">
+                      <i class="fas fa-eye"></i> View
+                    </button>
+                  </td>
+                </tr>
+              {% endif %}
+            {% else %}
+              <tr>
+                <td colspan="9" class="text-center">No records found</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal for Detailed View -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle"></h2>
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // Chart instances
+    let issuesByTypeChart, surfaceTrendChart, repairStatusChart;
+    
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateDashboard();
+      
+      // Set today's date as default for new records
+      const today = new Date().toISOString().split('T')[0];
+      document.querySelectorAll('input[type="date"]').forEach(input => {
+        if (!input.value) input.value = today;
+      });
+      
+      // Set current time as default for new records
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      document.querySelectorAll('input[type="time"]').forEach(input => {
+        if (!input.value) input.value = `${hours}:${minutes}`;
+      });
+    });
+    
+    // Helper function to toggle the display of insert forms.
+    function toggleForm(formId) {
+      var form = document.getElementById(formId);
+      form.classList.toggle("hidden");
+      
+      // Scroll to the form
+      if (!form.classList.contains("hidden")) {
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+    
+    // Function to toggle the add record dropdown
+    function toggleDropdown() {
+      document.getElementById("addRecordDropdown").classList.toggle("show");
+    }
+    
+    // Close the dropdown if clicked outside
+    document.addEventListener('click', function(event) {
+      var dropdowns = document.getElementsByClassName("dropdown-content");
+      for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show') && !event.target.matches('.add-record-btn')) {
+          openDropdown.classList.remove('show');
+        }
+      }
+    });
+    
+    // Function to show record details in a modal
+    function showDetails(type, id) {
+      document.getElementById('modalTitle').textContent = `${type} Record #${id} Details`;
+      
+      // Create a simple details display
+      let content = `
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: var(--text); margin-top: 0;">Record Information</h3>
+          <p><strong>ID:</strong> ${id}</p>
+          <p><strong>Type:</strong> ${type}</p>
+          <p>This would show all the detailed information about the record.</p>
+          <p>In a real implementation, this would fetch the complete record data from the server.</p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-primary" onclick="editRecord('${type}', ${id})">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-danger" onclick="deleteRecord('${type}', ${id})">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('modalContent').innerHTML = content;
+      document.getElementById('detailModal').classList.add('show');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+    }
+    
+    function closeModal() {
+      document.getElementById('detailModal').classList.remove('show');
+      document.body.style.overflow = ''; // Re-enable scrolling
+    }
+    
+    function editRecord(type, id) {
+      alert(`Edit ${type} record ${id} - This would open an edit form in a real implementation`);
+    }
+    
+    function deleteRecord(type, id) {
+      if (confirm(`Are you sure you want to delete this ${type} record?`)) {
+        alert(`Delete ${type} record ${id} - This would send a delete request to the server in a real implementation`);
+        closeModal();
+      }
+    }
+    
+    // Close modal when clicking outside modal content
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeModal();
+      }
+    });
+    
+    // Update dashboard with current data
+    function updateDashboard() {
+      const siteFilter = document.getElementById('site').value;
+      
+      // In a real implementation, you would fetch this data from the server
+      // For this example, we'll calculate from the visible table data
+      
+      // Calculate totals from each table
+      const suintementRecords = document.querySelectorAll('#suintement tbody tr:not(.hidden)');
+      const tuyauterieRecords = document.querySelectorAll('#tuyauterie tbody tr:not(.hidden)');
+      const erosionRecords = document.querySelectorAll('#erosion tbody tr:not(.hidden)');
+      const fissurationRecords = document.querySelectorAll('#fissuration tbody tr:not(.hidden)');
+      
+      const totalIssues = suintementRecords.length + tuyauterieRecords.length + 
+                         erosionRecords.length + fissurationRecords.length;
+      
+      // Update total issues count
+      document.getElementById('total-issues').textContent = totalIssues;
+      document.getElementById('issues-trend').textContent = '5%'; // Example trend
+      
+      // Calculate severity distribution
+      let lowCount = 0, mediumCount = 0, highCount = 0;
+      
+      // Count severity from each table
+      document.querySelectorAll('.status-badge').forEach(badge => {
+        if (badge.classList.contains('status-low')) lowCount++;
+        else if (badge.classList.contains('status-medium')) mediumCount++;
+        else if (badge.classList.contains('status-high')) highCount++;
+      });
+      
+      const totalSeverity = lowCount + mediumCount + highCount;
+      
+      // Update severity counts
+      document.getElementById('low-severity-count').textContent = lowCount;
+      document.getElementById('medium-severity-count').textContent = mediumCount;
+      document.getElementById('high-severity-count').textContent = highCount;
+      
+      // Update severity bars
+      document.getElementById('low-severity-bar').style.width = 
+        totalSeverity > 0 ? `${(lowCount / totalSeverity) * 100}%` : '0%';
+      document.getElementById('medium-severity-bar').style.width = 
+        totalSeverity > 0 ? `${(mediumCount / totalSeverity) * 100}%` : '0%';
+      document.getElementById('high-severity-bar').style.width = 
+        totalSeverity > 0 ? `${(highCount / totalSeverity) * 100}%` : '0%';
+      
+      // Calculate surface affected (from suintement and erosion records)
+      let totalSurface = 0;
+      suintementRecords.forEach(row => {
+        const surfaceCell = row.querySelector('td:nth-child(5)');
+        if (surfaceCell) {
+          const surface = parseFloat(surfaceCell.textContent.split(' ')[0]);
+          if (!isNaN(surface)) totalSurface += surface;
+        }
+      });
+      
+      erosionRecords.forEach(row => {
+        const surfaceCell = row.querySelector('td:nth-child(5)');
+        if (surfaceCell) {
+          const surface = parseFloat(surfaceCell.textContent.split(' ')[0]);
+          if (!isNaN(surface)) totalSurface += surface;
+        }
+      });
+      
+      document.getElementById('total-surface').textContent = totalSurface.toFixed(2) + ' m²';
+      
+      // Update recent activity
+      updateRecentActivity();
+      
+      // Update charts
+      updateCharts();
+    }
+    
+    function updateRecentActivity() {
+      // In a real implementation, fetch recent records from server
+      const recentActivity = [
+        { type: 'suintement', id: 123, date: '2023-06-15', action: 'New record added' },
+        { type: 'erosion', id: 45, date: '2023-06-14', action: 'Repair completed' },
+        { type: 'tuyauterie', id: 78, date: '2023-06-13', action: 'High severity issue detected' },
+        { type: 'fissuration', id: 92, date: '2023-06-12', action: 'New record added' }
+      ];
+      
+      let activityHtml = '';
+      recentActivity.forEach(activity => {
+        activityHtml += `
+          <div style="padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; justify-content: space-between;">
+              <strong>${activity.type}</strong>
+              <span style="color: var(--text-light); font-size: 0.8rem;">${activity.date}</span>
+            </div>
+            <div style="font-size: 0.9rem;">${activity.action}</div>
+          </div>
+        `;
+      });
+      
+      document.getElementById('recent-activity').innerHTML = activityHtml || '<p>No recent activity</p>';
+    }
+    
+    function updateCharts() {
+      // Destroy existing charts if they exist
+      if (issuesByTypeChart) issuesByTypeChart.destroy();
+      if (surfaceTrendChart) surfaceTrendChart.destroy();
+      if (repairStatusChart) repairStatusChart.destroy();
+      
+      // Issues by Type Chart
+      const issuesByTypeCtx = document.getElementById('issuesByTypeChart').getContext('2d');
+      issuesByTypeChart = new Chart(issuesByTypeCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Suintement', 'Tuyauterie', 'Erosion', 'Fissuration'],
+          datasets: [{
+            label: 'Number of Issues',
+            data: [
+              document.querySelectorAll('#suintement tbody tr:not(.hidden)').length,
+              document.querySelectorAll('#tuyauterie tbody tr:not(.hidden)').length,
+              document.querySelectorAll('#erosion tbody tr:not(.hidden)').length,
+              document.querySelectorAll('#fissuration tbody tr:not(.hidden)').length
+            ],
+            backgroundColor: [
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(244, 63, 94, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(34, 197, 94, 0.7)'
+            ],
+            borderColor: [
+              'rgba(59, 130, 246, 1)',
+              'rgba(244, 63, 94, 1)',
+              'rgba(245, 158, 11, 1)',
+              'rgba(34, 197, 94, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'var(--text-light)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: 'var(--text-light)'
+              }
+            }
+          }
+        }
+      });
+      
+      // Surface Trend Chart (example data)
+      const surfaceTrendCtx = document.getElementById('surfaceTrendChart').getContext('2d');
+      surfaceTrendChart = new Chart(surfaceTrendCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Surface Affected (m²)',
+            data: [12, 19, 15, 25, 22, 30],
+            fill: false,
+            borderColor: 'rgba(245, 158, 11, 1)',
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'var(--text-light)'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: 'var(--text-light)'
+              }
+            }
+          }
+        }
+      });
+      
+      // Repair Status Chart (example data)
+      const repairStatusCtx = document.getElementById('repairStatusChart').getContext('2d');
+      repairStatusChart = new Chart(repairStatusCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Repaired', 'Pending', 'Not Started'],
+          datasets: [{
+            data: [15, 8, 12],
+            backgroundColor: [
+              'rgba(34, 197, 94, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(244, 63, 94, 0.7)'
+            ],
+            borderColor: [
+              'rgba(34, 197, 94, 1)',
+              'rgba(245, 158, 11, 1)',
+              'rgba(244, 63, 94, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: 'var(--text-light)'
+              }
+            }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+    
+    // Socket.IO integration (optional)
+    var socket = io();
+    socket.on('update_table', function(data) {
+      console.log("Update received for table:", data.table);
+      updateDashboard(); // Refresh dashboard when updates are received
+    });
+  </script>
+</body>
+</html>
