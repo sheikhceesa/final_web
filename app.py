@@ -105,7 +105,7 @@ app.secret_key = os.environ['SECRET_KEY']  # Will raise error if not set
 db_config = {
     'dbname': os.environ.get('DB_NAME', 'railway'),
     'user': os.environ.get('DB_USER', 'postgres'),
-    'password': os.environ.get('DB_PASSWORD', ''),
+    'password': os.environ.get('DB_PASSWORD', 'rrmqEaDpPExUAWstQdCUsxctBrrUYhTd'),
     'host': os.environ.get('DB_HOST', 'metro.proxy.rlwy.net'),
     'port': os.environ.get('DB_PORT', '15070')
 }
