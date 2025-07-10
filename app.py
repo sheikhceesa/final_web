@@ -1,5 +1,5 @@
 # Core Flask
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Database
@@ -20,11 +20,15 @@ from flask_socketio import SocketIO
 # Configuration
 from dotenv import load_dotenv
 import os
+
+# Date/Time
 from datetime import datetime, time
+
 
 # Debugging
 import traceback
 import logging
+
 
 # CORS
 from flask_cors import CORS
@@ -51,15 +55,15 @@ CORS(app)
 # Configuration
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
 
+
 # Database configuration
 db_config = {
-    'dbname': os.getenv('DB_NAME', 'railway'),
-    'user': os.getenv('DB_USER', 'postgres'),
-    'password': os.getenv('DB_PASSWORD', ''),
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': os.getenv('DB_PORT', '5432')
+    'dbname': 'railway',
+    'user': 'postgres',
+    'password': 'rrmqEaDpPExUAWstQdCUsxctBrrUYhTd',
+    'host': 'metro.proxy.rlwy.net',
+    'port': '15070'
 }
-
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
@@ -84,13 +88,9 @@ def get_db_connection():
     try:
         conn = psycopg2.connect(**db_config)
         conn.autocommit = False
-        logger.info("Database connection established successfully")
         return conn
-    except psycopg2.OperationalError as e:
-        logger.error(f"Operational error connecting to database: {e}")
-        return None
     except psycopg2.Error as e:
-        logger.error(f"Database connection error: {e}")
+        logger.error(f"Error connecting to the database: {e}")
         return None
 
 # Login required decorator
@@ -127,12 +127,6 @@ def internal_server_error(e):
 def forbidden(e):
     return render_template('403.html'), 403
 
-# Favicon route
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                              'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
 # Routes
 @app.route('/')
 def home():
@@ -161,10 +155,6 @@ def login():
         cur = None
         try:
             conn = get_db_connection()
-            if conn is None:
-                flash('Database connection error', 'danger')
-                return render_template('login.html')
-                
             cur = conn.cursor()
             
             cur.execute(
@@ -269,10 +259,6 @@ def register():
                                 role=role)
             
         conn = get_db_connection()
-        if conn is None:
-            flash('Database connection error', 'danger')
-            return render_template('register.html')
-            
         cur = conn.cursor()
         
         try:
@@ -1164,8 +1150,7 @@ def pipes():
             if not conn:
                 raise Exception("Database connection failed.")
                 
-            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
+            cur = conn.cursor()
             insert_query = """
                 INSERT INTO condition_pipe_valve
                 (date, time, segment, visual_status, zone, problem_detected,
@@ -1178,7 +1163,6 @@ def pipes():
                 measured_pressure, compliance, corrective_action, operator, comments, sites
             ))
 
-            # Commit the transaction
             new_record = cur.fetchone()
             conn.commit()
             
@@ -2078,18 +2062,10 @@ def handle_disconnect():
     logger.info('Client disconnected')
 
 if __name__ == '__main__':
-    # Check if required templates exist
-    required_templates = ['404.html', '403.html', '500.html', 'base.html', 'login.html', 'register.html']
-    for template in required_templates:
-        template_path = os.path.join(app.template_folder, template)
-        if not os.path.exists(template_path):
-            logger.error(f"Missing required template: {template}")
-            raise FileNotFoundError(f"Template {template} not found in {app.template_folder}")
-
     socketio.run(
-        app,
-        host='0.0.0.0',
-        port=int(os.environ.get('PORT', 5000)),
-        debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'),
-        allow_unsafe_werkzeug=True
-    )
+    app,
+    host='0.0.0.0',
+    port=int(os.environ.get('PORT', 5000)),
+    debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'),
+    allow_unsafe_werkzeug=True
+)
