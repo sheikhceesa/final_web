@@ -24,9 +24,11 @@ import os
 # Date/Time
 from datetime import datetime, time
 
+
 # Debugging
 import traceback
 import logging
+
 
 # CORS
 from flask_cors import CORS
@@ -47,11 +49,12 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='eventlet')
 CORS(app)
 
 # Configuration
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
+
 
 # Database configuration
 db_config = {
@@ -61,7 +64,6 @@ db_config = {
     'host': 'metro.proxy.rlwy.net',
     'port': '15070'
 }
-
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
@@ -2058,7 +2060,6 @@ def water_recovery():
 @socketio.on('disconnect')
 def handle_disconnect():
     logger.info('Client disconnected')
-
 
 if __name__ == '__main__':
     socketio.run(
