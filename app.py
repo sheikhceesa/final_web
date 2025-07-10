@@ -1,5 +1,5 @@
 # Core Flask
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Database
@@ -23,12 +23,16 @@ import os
 
 # Date/Time
 from datetime import datetime, time
-
+from dateutil import parser
 
 # Debugging
 import traceback
 import logging
 
+# Security
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 
 # CORS
 from flask_cors import CORS
@@ -52,18 +56,60 @@ app = Flask(__name__)
 socketio = SocketIO(app, async_mode='eventlet')
 CORS(app)
 
-# Configuration
-app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
+# Security Headers
+csp = {
+    'default-src': "'self'",
+    'script-src': [
+        "'self'",
+        "'unsafe-inline'",
+        'cdn.jsdelivr.net',
+        'cdn.datatables.net'
+    ],
+    'style-src': [
+        "'self'",
+        "'unsafe-inline'",
+        'cdn.jsdelivr.net',
+        'cdn.datatables.net',
+        'fonts.googleapis.com'
+    ],
+    'font-src': [
+        "'self'",
+        'fonts.gstatic.com'
+    ],
+    'img-src': [
+        "'self'",
+        'data:'
+    ]
+}
 
+Talisman(
+    app,
+    content_security_policy=csp,
+    force_https=True,
+    strict_transport_security=True,
+    session_cookie_secure=True,
+    session_cookie_http_only=True
+)
+
+# Rate Limiting
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# Configuration - No hardcoded secrets!
+app.secret_key = os.environ['SECRET_KEY']  # Will raise error if not set
 
 # Database configuration
 db_config = {
-    'dbname': 'railway',
-    'user': 'postgres',
-    'password': 'rrmqEaDpPExUAWstQdCUsxctBrrUYhTd',
-    'host': 'metro.proxy.rlwy.net',
-    'port': '15070'
+    'dbname': os.environ.get('DB_NAME', 'railway'),
+    'user': os.environ.get('DB_USER', 'postgres'),
+    'password': os.environ.get('DB_PASSWORD', ''),
+    'host': os.environ.get('DB_HOST', 'metro.proxy.rlwy.net'),
+    'port': os.environ.get('DB_PORT', '15070')
 }
+
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
@@ -117,15 +163,19 @@ def role_required(roles):
 # Error handlers
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html'), 404
+    return render_template('errors/404.html'), 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
-    return render_template('500.html'), 500
+    return render_template('errors/500.html'), 500
 
 @app.errorhandler(403)
 def forbidden(e):
-    return render_template('403.html'), 403
+    return render_template('errors/403.html'), 403
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template('errors/429.html'), 429
 
 # Routes
 @app.route('/')
@@ -142,6 +192,7 @@ def test_db():
         return f"❌ Connection failed: {e}"
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
@@ -149,7 +200,7 @@ def login():
         
         if not email or not password:
             flash('Both email and password are required', 'danger')
-            return render_template('login.html')
+            return render_template('auth/login.html')
         
         conn = None
         cur = None
@@ -165,11 +216,11 @@ def login():
             
             if not user:
                 flash('Invalid email or password', 'danger')
-                return render_template('login.html')
+                return render_template('auth/login.html')
                 
             if not user[4]:  # is_active
                 flash('Account is inactive. Please contact support.', 'warning')
-                return render_template('login.html')
+                return render_template('auth/login.html')
                 
             if check_password_hash(user[2], password):
                 session['user_id'] = user[0]
@@ -204,9 +255,10 @@ def login():
             if conn:
                 conn.close()
     
-    return render_template('login.html')
+    return render_template('auth/login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def register():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -253,7 +305,7 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('register.html', 
+            return render_template('auth/register.html', 
                                 username=username, 
                                 email=email,
                                 role=role)
@@ -269,7 +321,7 @@ def register():
             )
             if cur.fetchone():
                 flash('Email or username already exists', 'danger')
-                return render_template('register.html',
+                return render_template('auth/register.html',
                                     username=username,
                                     email=email,
                                     role=role)
@@ -308,7 +360,7 @@ def register():
             conn.rollback()
             flash('Registration failed. Please try again.', 'danger')
             logger.error(f"Registration error for {email}: {e}", exc_info=True)
-            return render_template('register.html',
+            return render_template('auth/register.html',
                                 username=username,
                                 email=email,
                                 role=role)
@@ -316,9 +368,10 @@ def register():
             cur.close()
             conn.close()
     
-    return render_template('register.html')
+    return render_template('auth/register.html')
 
 @app.route('/logout')
+@login_required
 def logout():
     session.clear()
     flash('You have been logged out', 'info')
@@ -327,7 +380,7 @@ def logout():
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html')
+    return render_template('dashboard/index.html')
 
 @app.route('/dams')
 @login_required
