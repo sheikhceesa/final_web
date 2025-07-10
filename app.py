@@ -56,7 +56,9 @@ CORS(app)
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
 
 
-# Database configuration
+
+
+# Manual DB configuration fallback
 db_config = {
     'dbname': 'railway',
     'user': 'postgres',
@@ -64,14 +66,17 @@ db_config = {
     'host': 'metro.proxy.rlwy.net',
     'port': '15070'
 }
+
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
     f"@{db_config['host']}:{db_config['port']}/{db_config['dbname']}"
 )
 
-# Use DATABASE_URL environment variable if set, else fallback to built connection string
+# Use DATABASE_URL from env if it exists, else fallback
 db_uri = os.getenv('DATABASE_URL', default_db_uri).replace('postgres://', 'postgresql://')
+
+# Flask SQLAlchemy configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -79,6 +84,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     'pool_recycle': 300,
     'pool_pre_ping': True
 }
+
 
 db = SQLAlchemy(app)
 
