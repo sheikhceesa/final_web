@@ -1,5 +1,5 @@
 # Core Flask
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 
 # Database
@@ -24,11 +24,9 @@ import os
 # Date/Time
 from datetime import datetime, time
 
-
 # Debugging
 import traceback
 import logging
-
 
 # CORS
 from flask_cors import CORS
@@ -55,7 +53,6 @@ CORS(app)
 # Configuration
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
 
-
 # Database configuration
 db_config = {
     'dbname': 'railway',
@@ -64,6 +61,7 @@ db_config = {
     'host': 'metro.proxy.rlwy.net',
     'port': '15070'
 }
+
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
@@ -1150,7 +1148,8 @@ def pipes():
             if not conn:
                 raise Exception("Database connection failed.")
                 
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
             insert_query = """
                 INSERT INTO condition_pipe_valve
                 (date, time, segment, visual_status, zone, problem_detected,
@@ -1163,6 +1162,7 @@ def pipes():
                 measured_pressure, compliance, corrective_action, operator, comments, sites
             ))
 
+            # Commit the transaction
             new_record = cur.fetchone()
             conn.commit()
             
@@ -2063,9 +2063,9 @@ def handle_disconnect():
 
 if __name__ == '__main__':
     socketio.run(
-    app,
-    host='0.0.0.0',
-    port=int(os.environ.get('PORT', 5000)),
-    debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'),
-    allow_unsafe_werkzeug=True
-)
+        app,
+        host='0.0.0.0',
+        port=int(os.environ.get('PORT', 5000)),
+        debug=os.environ.get('FLASK_DEBUG', 'False').lower() in ('true', '1', 't'),
+        allow_unsafe_werkzeug=True
+    )
