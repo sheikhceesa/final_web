@@ -61,9 +61,10 @@ db_config = {
     'dbname': 'railway',
     'user': 'postgres',
     'password': 'wuDgFAPkMstfrYjNHluOnyquQknRTzPq',
-    'host': 'metro.proxy.rlwy.net',
-    'port': '15070'
+    'host': 'crossover.proxy.rlwy.net',
+    'port': '17089'
 }
+
 
 # Build connection string
 default_db_uri = (
