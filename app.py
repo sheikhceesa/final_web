@@ -60,10 +60,11 @@ app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key-please-change')
 db_config = {
     'dbname': 'railway',
     'user': 'postgres',
-    'password': 'aZCRvokKmcxNHQPqNIDBfVLAyyKLXpmj',
+    'password': 'wuDgFAPkMstfrYjNHluOnyquQknRTzPq',
     'host': 'metro.proxy.rlwy.net',
     'port': '15070'
 }
+
 # Build connection string
 default_db_uri = (
     f"postgresql://{db_config['user']}:{db_config['password']}"
