@@ -2,98 +2,38 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Control - 3D Visualization Decision Support Tool</title>
+    <title>Contrôle Quotidien - Outil de Support à la Décision en Visualisation 3D</title>
     
     <!-- CSS Libraries -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
-            /* Color System */
             --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --primary-light: #dbeafe;
-            --secondary: #e11d48;
-            --secondary-light: #fecdd3;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-            
-            /* Neutral Colors */
+            --primary-light: #3b82f6;
+            --primary-lighter: #93c5fd;
+            --secondary: #dc2626;
+            --accent: #d97706;
             --white: #ffffff;
-            --gray-50: #f8fafc;
-            --gray-100: #f1f5f9;
-            --gray-200: #e2e8f0;
-            --gray-300: #cbd5e1;
-            --gray-400: #94a3b8;
-            --gray-500: #64748b;
-            --gray-600: #475569;
-            --gray-700: #334155;
-            --gray-800: #1e293b;
-            --gray-900: #0f172a;
-            --black: #000000;
-            
-            /* Text Colors */
-            --text-primary: var(--gray-900);
-            --text-secondary: var(--gray-600);
-            --text-muted: var(--gray-500);
-            
-            /* Background Colors */
-            --bg-primary: var(--white);
-            --bg-secondary: var(--gray-50);
-            --bg-tertiary: var(--gray-100);
-            
-            /* Border Colors */
-            --border-light: var(--gray-200);
-            --border-medium: var(--gray-300);
-            --border-dark: var(--gray-400);
-            
-            /* Shadows */
-            --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            
-            /* Spacing */
-            --space-xs: 0.25rem;
-            --space-sm: 0.5rem;
-            --space-md: 1rem;
-            --space-lg: 1.5rem;
-            --space-xl: 2rem;
-            --space-2xl: 3rem;
-            
-            /* Typography */
-            --text-xs: 0.75rem;
-            --text-sm: 0.875rem;
-            --text-base: 1rem;
-            --text-lg: 1.125rem;
-            --text-xl: 1.25rem;
-            --text-2xl: 1.5rem;
-            --text-3xl: 1.875rem;
-            --text-4xl: 2.25rem;
-            
-            /* Border Radius */
-            --radius-sm: 0.25rem;
-            --radius-md: 0.375rem;
-            --radius-lg: 0.5rem;
-            --radius-xl: 0.75rem;
-            --radius-full: 9999px;
-            
-            /* Transitions */
-            --transition-fast: 150ms ease;
-            --transition-normal: 300ms ease;
-            --transition-slow: 500ms ease;
-            
-            /* Layout */
-            --max-width: 1200px;
-            --header-height: 64px;
-            --sidebar-width: 280px;
+            --light-gray: #f8fafc;
+            --gray: #e2e8f0;
+            --medium-gray: #94a3b8;
+            --dark-gray: #64748b;
+            --darker-gray: #334155;
+            --text: #1e293b;
+            --text-light: #475569;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -108,11 +48,10 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-secondary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text);
+            line-height: 1.7;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -120,66 +59,56 @@
 
         /* Header Styles */
         header {
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            padding: 0 var(--space-lg);
-            box-shadow: var(--shadow-sm);
+            background: var(--header-bg);
+            color: var(--text);
+            padding: 0.8rem 0;
+            box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 1000;
-            height: var(--header-height);
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .header-container {
-            width: 100%;
-            max-width: var(--max-width);
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-weight: 700;
-            font-size: var(--text-xl);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-            text-decoration: none;
+            border-bottom: 1px solid var(--gray);
         }
 
         nav ul {
             display: flex;
             list-style: none;
-            gap: var(--space-sm);
+            justify-content: center;
+            padding: 0;
+            margin: 0;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        nav li {
+            margin: 0 0.5rem;
         }
 
         nav a {
-            color: var(--text-secondary);
+            color: var(--text);
             text-decoration: none;
             font-weight: 500;
-            padding: var(--space-sm) var(--space-md);
-            border-radius: var(--radius-md);
-            transition: var(--transition-fast);
+            padding: 0.7rem 1.2rem;
+            border-radius: var(--radius-sm);
+            background: transparent;
+            transition: var(--transition);
             display: flex;
             align-items: center;
-            gap: var(--space-sm);
-            font-size: var(--text-sm);
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
         }
 
         nav a:hover {
             color: var(--primary);
-            background-color: var(--primary-light);
+            border-color: var(--primary-lighter);
+            background-color: rgba(59, 130, 246, 0.05);
         }
 
         nav a.active {
             color: var(--primary);
-            background-color: var(--primary-light);
-            font-weight: 600;
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary-lighter);
         }
 
         /* Main Content Styles */
@@ -189,157 +118,87 @@
             flex-direction: column;
         }
 
-        .page-header {
-            padding: var(--space-2xl) var(--space-lg);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
-            color: white;
-            margin-bottom: var(--space-xl);
+        .hdd {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text);
+            background: var(--white);
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--gray);
+            box-shadow: var(--shadow);
         }
 
-        .page-header-container {
-            max-width: var(--max-width);
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .page-header h1 {
-            font-size: var(--text-3xl);
-            font-weight: 700;
-            margin-bottom: var(--space-sm);
+        .hdd h1 {
+            font-size: 2.2rem;
+            margin: 0;
             display: flex;
             align-items: center;
-            gap: var(--space-md);
-        }
-
-        .page-header p {
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 700px;
+            justify-content: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: var(--darker-gray);
         }
 
         /* Form Container */
         .form-container {
             flex: 1;
             width: 100%;
-            max-width: var(--max-width);
-            margin: 0 auto var(--space-2xl);
-            padding: 0 var(--space-lg);
-        }
-
-        /* Card Component */
-        .card {
-            background-color: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-light);
-            overflow: hidden;
-        }
-
-        .card-header {
-            padding: var(--space-md) var(--space-xl);
-            border-bottom: 1px solid var(--border-light);
-            background-color: var(--bg-tertiary);
-        }
-
-        .card-header h2 {
-            font-size: var(--text-lg);
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .card-body {
-            padding: var(--space-xl);
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Form Styles */
-        .form-grid {
+        #dailyForm {
+            flex: 1;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-xl);
-        }
-
-        .form-section {
-            display: flex;
-            flex-direction: column;
-            gap: var(--space-md);
-        }
-
-        .form-section-header {
-            margin-bottom: var(--space-sm);
-            padding-bottom: var(--space-sm);
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .form-section-header h3 {
-            font-size: var(--text-base);
-            font-weight: 600;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
+            align-content: start;
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray);
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: var(--space-xs);
+            gap: 0.4rem;
         }
 
         .form-group.required label::after {
             content: " *";
-            color: var(--danger);
+            color: var(--secondary);
         }
 
         label {
-            font-size: var(--text-sm);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.2rem;
             font-weight: 500;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: var(--space-sm);
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: var(--space-md);
-            color: var(--text-muted);
+            color: var(--text);
+            font-size: 0.95rem;
         }
 
         input[type="text"],
         input[type="number"],
         input[type="date"],
-        input[type="email"],
-        input[type="tel"],
-        input[type="password"],
         textarea,
         select {
             width: 100%;
-            padding: var(--space-md) var(--space-md);
-            padding-left: calc(var(--space-md) * 2 + 16px);
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-md);
-            font-family: inherit;
-            font-size: var(--text-sm);
-            transition: var(--transition-fast);
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-        }
-
-        input:not([type="checkbox"], [type="radio"]),
-        select,
-        textarea {
-            min-height: 44px; /* Accessibility minimum touch target */
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            padding-left: var(--space-md);
+            padding: 0.85rem;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            background-color: var(--white);
+            color: var(--text);
         }
 
         input[type="text"]:focus,
@@ -349,111 +208,127 @@
         select:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+            background-color: var(--white);
         }
 
         .select2-container--default .select2-selection--single {
-            height: 44px;
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius-md);
-            background-color: var(--bg-primary);
+            height: 46px;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-sm);
+            background-color: var(--white);
         }
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 44px;
-            padding-left: var(--space-md);
-            font-family: inherit;
-            color: var(--text-primary);
-            font-size: var(--text-sm);
+            line-height: 46px;
+            padding-left: 12px;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text);
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 42px;
-            right: var(--space-md);
+            height: 44px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow b {
+            border-color: var(--dark-gray) transparent transparent transparent;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            flex: 1;
         }
 
         /* Button Styles */
-        .btn {
+        button {
+            padding: 0.85rem 1.75rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: var(--space-sm);
-            padding: var(--space-md) var(--space-lg);
-            border-radius: var(--radius-md);
-            font-weight: 500;
-            font-size: var(--text-sm);
-            cursor: pointer;
-            transition: var(--transition-fast);
-            border: 1px solid transparent;
-            white-space: nowrap;
-            user-select: none;
-            -webkit-user-select: none;
+            gap: 0.6rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
         }
 
-        .btn-primary {
+        button[type="submit"] {
             background-color: var(--primary);
             color: white;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow);
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
+        button[type="submit"]:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
             box-shadow: var(--shadow-md);
         }
 
-        .btn-secondary {
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border-color: var(--border-medium);
-        }
-
-        .btn-secondary:hover {
-            background-color: var(--gray-200);
-            color: var(--text-primary);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
+        button[type="submit"]:disabled {
+            background-color: var(--medium-gray);
             cursor: not-allowed;
+            transform: none;
             box-shadow: none;
+            color: var(--white);
         }
 
-        .btn-full {
-            width: 100%;
+        #toggleOptionalFields {
+            background-color: var(--white);
+            color: var(--text);
+            border: 1px solid var(--gray);
+            box-shadow: var(--shadow);
+        }
+
+        #toggleOptionalFields:hover {
+            background-color: var(--light-gray);
+            transform: translateY(-2px);
+            color: var(--accent);
+            border-color: var(--accent);
         }
 
         /* Optional Fields Section */
-        .optional-fields {
+        #optionalFields {
             grid-column: 1 / -1;
-            margin-top: var(--space-md);
-            padding-top: var(--space-lg);
-            border-top: 1px solid var(--border-light);
             display: none;
-        }
-
-        .optional-fields.active {
+            margin-top: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--space-xl);
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.8rem;
         }
 
-        /* CAPEX Grid */
-        .grid-cols-3 {
+        #optionalFields h3 {
             grid-column: 1 / -1;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: var(--space-md);
+            margin-top: 0;
+            color: var(--accent);
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Full-width elements */
+        .full-width {
+            grid-column: 1 / -1;
         }
 
         /* Footer */
         footer {
-            background: var(--bg-primary);
-            color: var(--text-muted);
+            background: var(--white);
+            color: var(--text);
             text-align: center;
-            padding: var(--space-lg);
+            padding: 1.75rem;
             margin-top: auto;
-            font-size: var(--text-sm);
-            border-top: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            border-top: 1px solid var(--gray);
         }
 
         /* Loading indicator */
@@ -466,7 +341,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(15, 23, 42, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(4px);
             z-index: 9999;
         }
@@ -474,9 +349,9 @@
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
+            border: 4px solid rgba(217, 119, 6, 0.2);
             border-radius: 50%;
-            border-top-color: var(--primary);
+            border-top-color: var(--accent);
             animation: spin 1s ease-in-out infinite;
         }
 
@@ -484,113 +359,71 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: var(--space-lg);
-            right: var(--space-lg);
-            background-color: var(--gray-800);
-            color: white;
-            padding: var(--space-md) var(--space-lg);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: var(--space-md);
-            z-index: 999;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: var(--transition-normal);
-            max-width: 400px;
-        }
-
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background-color: var(--success);
-        }
-
-        .toast.error {
-            background-color: var(--danger);
-        }
-
-        .toast.warning {
-            background-color: var(--warning);
-        }
-
         /* Responsive Adjustments */
         @media (max-width: 992px) {
             .form-container {
-                padding: 0 var(--space-md);
+                padding: 0 1.5rem;
             }
             
-            .card-body {
-                padding: var(--space-lg);
+            #dailyForm {
+                padding: 2rem;
             }
         }
 
         @media (max-width: 768px) {
-            .page-header {
-                padding: var(--space-xl) var(--space-md);
-            }
-            
-            .page-header h1 {
-                font-size: var(--text-2xl);
-            }
-            
             nav ul {
-                gap: var(--space-xs);
+                gap: 0.4rem;
             }
 
             nav a {
-                padding: var(--space-xs) var(--space-sm);
-                font-size: var(--text-xs);
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
             }
 
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: var(--space-lg);
+            .hdd {
+                padding: 2.5rem 1rem;
             }
-            
-            .grid-cols-3 {
-                grid-template-columns: 1fr 1fr;
+
+            .hdd h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-container {
+                padding: 0 1rem;
+                margin-bottom: 2rem;
+            }
+
+            #dailyForm {
+                padding: 1.75rem;
+                gap: 1.5rem;
             }
         }
 
         @media (max-width: 576px) {
-            .page-header {
-                padding: var(--space-lg) var(--space-md);
-                margin-bottom: var(--space-lg);
+            .hdd {
+                padding: 2rem 1rem;
             }
-            
-            .page-header h1 {
-                font-size: var(--text-xl);
+
+            .hdd h1 {
+                font-size: 1.5rem;
             }
-            
-            .header-container {
-                flex-direction: column;
-                gap: var(--space-sm);
-                padding: var(--space-sm) 0;
-            }
-            
-            .card-body {
-                padding: var(--space-md);
-            }
-            
-            .grid-cols-3 {
+
+            #dailyForm {
                 grid-template-columns: 1fr;
+                padding: 1.5rem;
+                gap: 1.3rem;
             }
-            
+
             input[type="text"],
             input[type="number"],
             input[type="date"],
             textarea,
             select {
-                padding: var(--space-sm) var(--space-md);
-                padding-left: calc(var(--space-md) + 16px);
+                padding: 0.8rem;
+            }
+
+            button {
+                padding: 0.8rem 1.5rem;
             }
         }
     </style>
@@ -601,288 +434,177 @@
         <div class="spinner"></div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toastNotification">
-        <i class="fas fa-check-circle"></i>
-        <span id="toastMessage">Operation completed successfully</span>
-    </div>
-
-    <!-- Header -->
+    <!-- En-tête et Menu de Navigation -->
     <header>
-        <div class="header-container">
-            <a href="{{ url_for('index') }}" class="logo">
-                <i class="fas fa-database"></i>
-                <span>DamControl</span>
-            </a>
-            <nav>
-                <ul>
-                    <li><a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="{{ url_for('dams') }}"><i class="fas fa-industry"></i> Storage</a></li>
-                    <li><a href="{{ url_for('geotechnical') }}" class="active"><i class="fas fa-mountain"></i> Geotechnical</a></li>
-                    <li><a href="{{ url_for('environmental') }}"><i class="fas fa-tint"></i> Hydrogeology</a></li>
-                </ul>
-            </nav>
-        </div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}" class="active"><i class="fas fa-home"></i> ACCUEIL</a></li>
+                <li><a href="{{ url_for('dams') }}"><i class="fas fa-industry"></i> INSTALLATION DE STOCKAGE</a></li>
+                <li><a href="{{ url_for('geotechnical') }}"><i class="fas fa-mountain"></i> VISUALISATION GÉOTECHNIQUE</a></li>
+                <li><a href="{{ url_for('environmental') }}"><i class="fas fa-tint"></i> HYDROGÉOLOGIE</a></li>
+            </ul>
+        </nav>
     </header>
 
     <!-- Main Content Area -->
     <main class="main-content">
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="page-header-container">
-                <h1><i class="fas fa-calendar-day"></i> Daily Dam Observation Values</h1>
-                <p>Enter the daily monitoring data for dam operations and management</p>
-            </div>
+        <!-- Titre de la Page -->
+        <div class="hdd">
+            <h1><i class="fas fa-calendar-day"></i> Entrez les Valeurs d'observation de la digue</h1>
         </div>
 
-        <!-- Form Container -->
+        <!-- Conteneur du Formulaire -->
         <div class="form-container">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Dam Monitoring Form</h2>
+            <form id="dailyForm" action="{{ url_for('daily') }}" method="post">
+                <!-- Champs de Saisie Utilisateur -->
+                <div class="form-group required">
+                    <label for="sites"><i class="fas fa-map-marker-alt"></i> Site :</label>
+                    <select id="sites" name="sites" required>
+                        <option value="">Sélectionnez un site</option>
+                        <option value="AGM TSFN°3">AGM TSFN°3</option>
+                        <option value="BLEIDA Flotation TSFN°4">BLEIDA Flotation TSFN°4</option>
+                        <option value="Hajjar TSFN°3">Hajjar TSFN°3</option>
+                        <option value="Ouansimi TSF N°3">Ouansimi TSF N°3</option>
+                        <option value="BOU AZZER">BOU AZZER</option>
+                        <option value="SMI C8">SMI C8</option>
+                        <option value="SMI C7">SMI C7</option>
+                        <option value="SMI D10 FLOTATION">SMI D10 FLOTATION</option>
+                        <option value="TIZERT TSF1">TIZERT TSF1</option>
+                        <option value="GGM TSF1">GGM TSF1</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    <form id="dailyForm" action="{{ url_for('daily') }}" method="post">
-                        <div class="form-grid">
-                            <!-- Basic Information Section -->
-                            <div class="form-section">
-                                <div class="form-section-header">
-                                    <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
-                                </div>
-                                
-                                <div class="form-group required">
-                                    <label for="sites"><i class="fas fa-map-marker-alt"></i> Site</label>
-                                    <select id="sites" name="sites" required>
-                                        <option value="">Select a site</option>
-                                        <option value="AGM TSFN°3">AGM TSFN°3</option>
-                                        <option value="BLEIDA Flotation TSFN°4">BLEIDA Flotation TSFN°4</option>
-                                        <option value="Hajjar TSFN°3">Hajjar TSFN°3</option>
-                                        <option value="Ouansimi TSF N°3">Ouansimi TSF N°3</option>
-                                        <option value="BOU AZZER">BOU AZZER</option>
-                                        <option value="SMI C8">SMI C8</option>
-                                        <option value="SMI C7">SMI C7</option>
-                                        <option value="SMI D10 FLOTATION">SMI D10 FLOTATION</option>
-                                        <option value="TIZERT TSF1">TIZERT TSF1</option>
-                                        <option value="GGM TSF1">GGM TSF1</option>
-                                    </select>
-                                </div>
 
-                                <div class="form-group required">
-                                    <label for="date_of_actualisation"><i class="fas fa-calendar-alt"></i> Update Date</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-calendar input-icon"></i>
-                                        <input type="date" id="date_of_actualisation" name="date_of_actualisation" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="comments"><i class="fas fa-comment"></i> Comments</label>
-                                    <textarea id="comments" name="comments" rows="4"></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Capacity Information Section -->
-                            <div class="form-section">
-                                <div class="form-section-header">
-                                    <h3><i class="fas fa-chart-bar"></i> Capacity Information</h3>
-                                </div>
-                                
-                                <div class="form-group required">
-                                    <label for="total_capacity"><i class="fas fa-boxes"></i> Total Capacity (Mm³)</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-arrow-up input-icon"></i>
-                                        <input type="number" id="total_capacity" name="total_capacity" step="any" min="0" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group required">
-                                    <label for="stock_volume"><i class="fas fa-database"></i> Stock Volume (Mm³)</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-arrow-down input-icon"></i>
-                                        <input type="number" id="stock_volume" name="stock_volume" step="any" min="0" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group required">
-                                    <label for="partial_capacity"><i class="fas fa-box-open"></i> Partial Capacity (Mm³)</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-percent input-icon"></i>
-                                        <input type="number" id="partial_capacity" name="partial_capacity" step="any" min="0" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group required">
-                                    <label for="ready_capacity"><i class="fas fa-check-circle"></i> Ready Capacity (Mm³)</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-check input-icon"></i>
-                                        <input type="number" id="ready_capacity" name="ready_capacity" step="any" min="0" required>
-                                    </div>
-                                </div>
-
-                                <div class="form-group required">
-                                    <label for="production_rate"><i class="fas fa-tachometer-alt"></i> Production Rate (Mm³/year)</label>
-                                    <div class="input-wrapper">
-                                        <i class="fas fa-bolt input-icon"></i>
-                                        <input type="number" id="production_rate" name="production_rate" step="any" min="0" required>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Optional Fields Toggle -->
-                            <button type="button" id="toggleOptionalFields" class="btn btn-secondary btn-full">
-                                <i class="fas fa-plus-circle"></i> Show Additional Fields
-                            </button>
-
-                            <!-- Optional Fields Section -->
-                            <div id="optionalFields" class="optional-fields">
-                                <div class="form-section">
-                                    <div class="form-section-header">
-                                        <h3><i class="fas fa-clock"></i> Timeline Information</h3>
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label for="long_term_situation"><i class="fas fa-calendar-plus"></i> Long Term Situation</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-clock input-icon"></i>
-                                            <input type="text" id="long_term_situation" name="long_term_situation">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="short_term_situation"><i class="fas fa-calendar-minus"></i> Short Term Situation</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-clock input-icon"></i>
-                                            <input type="text" id="short_term_situation" name="short_term_situation">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="commission_date"><i class="fas fa-play-circle"></i> Commission Date</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-calendar input-icon"></i>
-                                            <input type="date" id="commission_date" name="commission_date">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="complete_full_date"><i class="fas fa-stop-circle"></i> Complete Fill Date</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-calendar input-icon"></i>
-                                            <input type="date" id="complete_full_date" name="complete_full_date">
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="stop_definitive_date"><i class="fas fa-power-off"></i> Definitive Stop Date</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-calendar input-icon"></i>
-                                            <input type="date" id="stop_definitive_date" name="stop_definitive_date">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="form-section">
-                                    <div class="form-section-header">
-                                        <h3><i class="fas fa-money-bill-wave"></i> CAPEX Information</h3>
-                                    </div>
-                                    
-                                    <div class="grid-cols-3">
-                                        <div class="form-group">
-                                            <label for="capex_2022">2022 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2022" name="capex_2022" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2023">2023 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2023" name="capex_2023" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2024">2024 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2024" name="capex_2024" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2025">2025 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2025" name="capex_2025" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2026">2026 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2026" name="capex_2026" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2027">2027 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2027" name="capex_2027" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2028">2028 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2028" name="capex_2028" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2029">2029 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2029" name="capex_2029" step="any" min="0">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="capex_2030">2030 (Mdh)</label>
-                                            <div class="input-wrapper">
-                                                <i class="fas fa-dollar-sign input-icon"></i>
-                                                <input type="number" id="capex_2030" name="capex_2030" step="any" min="0">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="total_autonomy"><i class="fas fa-clock"></i> Total Autonomy</label>
-                                        <div class="input-wrapper">
-                                            <i class="fas fa-hourglass input-icon"></i>
-                                            <input type="number" id="total_autonomy" name="total_autonomy" step="any" min="0">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
-                                <i class="fas fa-paper-plane"></i> Submit Data
-                            </button>
-                        </div>
-                    </form>
+                <div class="form-group required">
+                    <label for="date_of_actualisation"><i class="fas fa-calendar-alt"></i> Date d'Actualisation :</label>
+                    <input type="date" id="date_of_actualisation" name="date_of_actualisation" required>
                 </div>
-            </div>
+
+                <div class="form-group required">
+                    <label for="total_capacity"><i class="fas fa-boxes"></i> Capacité Totale (Mm³) :</label>
+                    <input type="number" id="total_capacity" name="total_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="stock_volume"><i class="fas fa-database"></i> Volume de Stock (Mm³) :</label>
+                    <input type="number" id="stock_volume" name="stock_volume" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="partial_capacity"><i class="fas fa-box-open"></i> Capacité Partielle (Mm³) :</label>
+                    <input type="number" id="partial_capacity" name="partial_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="ready_capacity"><i class="fas fa-check-circle"></i> Capacité Prête (Mm³) :</label>
+                    <input type="number" id="ready_capacity" name="ready_capacity" step="any" min="0" required>
+                </div>
+
+                <div class="form-group required">
+                    <label for="production_rate"><i class="fas fa-tachometer-alt"></i> Taux de Production (Mm³/an) :</label>
+                    <input type="number" id="production_rate" name="production_rate" step="any" min="0" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="comments"><i class="fas fa-comment"></i> Commentaires :</label>
+                    <textarea id="comments" name="comments" rows="4"></textarea>
+                </div>
+
+                <!-- Bouton pour Afficher les Champs Optionnels -->
+                <button type="button" id="toggleOptionalFields" class="full-width">
+                    <i class="fas fa-plus-circle"></i> Afficher les Champs Optionnels
+                </button>
+
+                <!-- Champs Optionnels (Initialement Cachés) -->
+                <div id="optionalFields">
+                    <h3><i class="fas fa-cog"></i> Champs Optionnels</h3>
+
+                    <div class="form-group">
+                        <label for="long_term_situation"><i class="fas fa-calendar-plus"></i> Situation à Long Terme :</label>
+                        <input type="text" id="long_term_situation" name="long_term_situation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="short_term_situation"><i class="fas fa-calendar-minus"></i> Situation à Court Terme :</label>
+                        <input type="text" id="short_term_situation" name="short_term_situation">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="commission_date"><i class="fas fa-play-circle"></i> Date de Mise en Service :</label>
+                        <input type="date" id="commission_date" name="commission_date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="complete_full_date"><i class="fas fa-stop-circle"></i> Date de Remplissage Complet :</label>
+                        <input type="date" id="complete_full_date" name="complete_full_date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="stop_definitive_date"><i class="fas fa-power-off"></i> Date d'Arrêt Définitif :</label>
+                        <input type="date" id="stop_definitive_date" name="stop_definitive_date">
+                    </div>
+
+                    <!-- Champs CAPEX -->
+                    <div class="form-group">
+                        <label for="capex_2022"><i class="fas fa-money-bill-wave"></i> CAPEX 2022 (Mdh) :</label>
+                        <input type="number" id="capex_2022" name="capex_2022" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2023"><i class="fas fa-money-bill-wave"></i> CAPEX 2023 (Mdh) :</label>
+                        <input type="number" id="capex_2023" name="capex_2023" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2024"><i class="fas fa-money-bill-wave"></i> CAPEX 2024 (Mdh) :</label>
+                        <input type="number" id="capex_2024" name="capex_2024" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2025"><i class="fas fa-money-bill-wave"></i> CAPEX 2025 (Mdh) :</label>
+                        <input type="number" id="capex_2025" name="capex_2025" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2026"><i class="fas fa-money-bill-wave"></i> CAPEX 2026 (Mdh) :</label>
+                        <input type="number" id="capex_2026" name="capex_2026" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2027"><i class="fas fa-money-bill-wave"></i> CAPEX 2027 (Mdh) :</label>
+                        <input type="number" id="capex_2027" name="capex_2027" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2028"><i class="fas fa-money-bill-wave"></i> CAPEX 2028 (Mdh) :</label>
+                        <input type="number" id="capex_2028" name="capex_2028" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2029"><i class="fas fa-money-bill-wave"></i> CAPEX 2029 (Mdh) :</label>
+                        <input type="number" id="capex_2029" name="capex_2029" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capex_2030"><i class="fas fa-money-bill-wave"></i> CAPEX 2030 (Mdh) :</label>
+                        <input type="number" id="capex_2030" name="capex_2030" step="any" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_autonomy"><i class="fas fa-clock"></i> Autonomie Totale :</label>
+                        <input type="number" id="total_autonomy" name="total_autonomy" step="any" min="0">
+                    </div>
+                </div>
+
+                <!-- Bouton de Soumission -->
+                <button type="submit" class="full-width" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i> Soumettre les Données
+                </button>
+            </form>
         </div>
     </main>
 
     <footer>
-        <p>&copy; 2023 Dam Control System. All rights reserved.</p>
+        <p>&copy; 2023 Gestion des Installations de Stockage des Résidus</p>
     </footer>
     
     <!-- JavaScript Libraries -->
@@ -890,12 +612,12 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <!-- Main Application Script -->
+    <!-- JavaScript pour Gérer la Soumission du Formulaire et Récupérer les Données Précédentes -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize Select2 for sites dropdown
             $('#sites').select2({
-                placeholder: "Select a site",
+                placeholder: "Sélectionnez un site",
                 allowClear: false,
                 width: '100%'
             });
@@ -908,209 +630,165 @@
             const toggleBtn = document.getElementById('toggleOptionalFields');
             const optionalFields = document.getElementById('optionalFields');
             
+            // Initialize optional fields as hidden
+            optionalFields.style.display = 'none';
+            
             toggleBtn.addEventListener('click', function() {
-                optionalFields.classList.toggle('active');
-                
-                if (optionalFields.classList.contains('active')) {
-                    toggleBtn.innerHTML = '<i class="fas fa-minus-circle"></i> Hide Additional Fields';
-                    toggleBtn.classList.remove('btn-secondary');
-                    toggleBtn.classList.add('btn-primary');
+                if (optionalFields.style.display === 'none' || optionalFields.style.display === '') {
+                    optionalFields.style.display = 'grid';
+                    toggleBtn.innerHTML = '<i class="fas fa-minus-circle"></i> Masquer les Champs Optionnels';
                 } else {
-                    toggleBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Show Additional Fields';
-                    toggleBtn.classList.remove('btn-primary');
-                    toggleBtn.classList.add('btn-secondary');
+                    optionalFields.style.display = 'none';
+                    toggleBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Afficher les Champs Optionnels';
                 }
             });
-
-            // Show toast notification
-            function showToast(message, type = 'success') {
-                const toast = document.getElementById('toastNotification');
-                const toastMessage = document.getElementById('toastMessage');
-                
-                toastMessage.textContent = message;
-                toast.className = 'toast';
-                
-                if (type === 'error') {
-                    toast.classList.add('error');
-                    toast.querySelector('i').className = 'fas fa-exclamation-circle';
-                } else if (type === 'warning') {
-                    toast.classList.add('warning');
-                    toast.querySelector('i').className = 'fas fa-exclamation-triangle';
-                } else {
-                    toast.classList.add('success');
-                    toast.querySelector('i').className = 'fas fa-check-circle';
-                }
-                
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 100);
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 5000);
-            }
-
-            // Form validation
-            function validateForm(formData) {
-                const requiredFields = [
-                    'sites', 'date_of_actualisation', 'total_capacity',
-                    'stock_volume', 'partial_capacity', 'ready_capacity',
-                    'production_rate'
-                ];
-                
-                for (const field of requiredFields) {
-                    if (!formData.get(field) {
-                        const fieldName = field.replace(/_/g, ' ');
-                        showToast(`Please fill in the ${fieldName} field`, 'error');
-                        document.getElementById(field).focus();
-                        return false;
-                    }
-                }
-                
-                // Validate numeric fields
-                const numericFields = [
-                    'total_capacity', 'stock_volume', 'partial_capacity',
-                    'ready_capacity', 'production_rate'
-                ];
-                
-                for (const field of numericFields) {
-                    const value = parseFloat(formData.get(field));
-                    if (isNaN(value) {
-                        showToast(`Please enter a valid number for ${field.replace(/_/g, ' ')}`, 'error');
-                        document.getElementById(field).focus();
-                        return false;
-                    }
-                    if (value < 0) {
-                        showToast(`${field.replace(/_/g, ' ')} cannot be negative`, 'error');
-                        document.getElementById(field).focus();
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
 
             // Form submission handling
             const form = document.getElementById('dailyForm');
             const submitBtn = document.getElementById('submitBtn');
             
-            form.addEventListener('submit', async function(event) {
+            form.addEventListener('submit', function(event) {
                 event.preventDefault();
-                
-                const formData = new FormData(form);
-                
-                // Validate form
-                if (!validateForm(formData)) {
-                    return;
-                }
                 
                 // Show loading indicator
                 document.getElementById('loadingIndicator').style.display = 'flex';
                 submitBtn.disabled = true;
                 
-                try {
-                    // Check if we need to fetch previous data
-                    const optionalFields = [
-                        'long_term_situation', 'short_term_situation',
-                        'commission_date', 'complete_full_date', 'stop_definitive_date',
-                        'comments', 'total_autonomy',
-                        'capex_2022', 'capex_2023', 'capex_2024', 'capex_2025',
-                        'capex_2026', 'capex_2027', 'capex_2028', 'capex_2029', 'capex_2030'
-                    ];
+                const formData = new FormData(form);
+                const site = formData.get('sites');
+                const optionalFields = [
+                    'long_term_situation', 'short_term_situation',
+                    'commission_date', 'complete_full_date', 'stop_definitive_date',
+                    'comments', 'total_autonomy',
+                    'capex_2022', 'capex_2023', 'capex_2024', 'capex_2025',
+                    'capex_2026', 'capex_2027', 'capex_2028', 'capex_2029', 'capex_2030'
+                ];
 
-                    const emptyFields = optionalFields.filter(field => !formData.get(field));
-                    
-                    if (emptyFields.length > 0) {
-                        // Fetch previous data for empty fields
-                        const site = formData.get('sites');
-                        const response = await fetch(`/get_previous_data/${encodeURIComponent(site)}`);
-                        
-                        if (!response.ok) throw new Error('Failed to fetch previous data');
-                        
-                        const data = await response.json();
-                        
-                        // Fill empty fields with previous values
-                        emptyFields.forEach(field => {
-                            if (data[field] !== undefined && data[field] !== null) {
-                                const element = document.getElementById(field);
-                                if (element) {
-                                    element.value = data[field];
-                                    formData.set(field, data[field]);
+                // Check for empty optional fields
+                const emptyFields = optionalFields.filter(field => {
+                    const value = formData.get(field);
+                    return !value || value.trim() === '';
+                });
+
+                if (emptyFields.length > 0) {
+                    // Fetch previous data if any optional fields are empty
+                    fetch(`/get_previous_data/${encodeURIComponent(site)}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Fill empty fields with previous values
+                            emptyFields.forEach(field => {
+                                if (data[field] !== undefined && data[field] !== null) {
+                                    const element = document.getElementById(field);
+                                    if (element) {
+                                        element.value = data[field];
+                                        formData.set(field, data[field]);
+                                    }
                                 }
+                            });
+                            
+                            // Submit the form
+                            return fetch(form.action, {
+                                method: 'POST',
+                                body: formData
+                            });
+                        })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Hide loading indicator
+                            document.getElementById('loadingIndicator').style.display = 'none';
+                            submitBtn.disabled = false;
+                            
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Succès',
+                                    text: 'Les données ont été enregistrées avec succès',
+                                    confirmButtonColor: '#2563eb',
+                                    background: '#ffffff',
+                                    color: '#1e293b',
+                                    iconColor: '#2563eb'
+                                }).then(() => {
+                                    form.reset();
+                                    // Reset the date to today
+                                    document.getElementById('date_of_actualisation').value = today;
+                                    // Reset the select2 dropdown
+                                    $('#sites').val('').trigger('change');
+                                });
+                            } else {
+                                throw new Error(data.message || 'Erreur inconnue');
                             }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('loadingIndicator').style.display = 'none';
+                            submitBtn.disabled = false;
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Erreur',
+                                text: error.message || 'Une erreur est survenue lors de l\'enregistrement des données',
+                                confirmButtonColor: '#dc2626',
+                                background: '#ffffff',
+                                color: '#1e293b',
+                                iconColor: '#dc2626'
+                            });
                         });
-                    }
-                    
-                    // Submit the form
-                    const submitResponse = await fetch(form.action, {
+                } else {
+                    // All fields are filled, submit immediately
+                    fetch(form.action, {
                         method: 'POST',
                         body: formData
-                    });
-                    
-                    if (!submitResponse.ok) throw new Error('Submission failed');
-                    
-                    const result = await submitResponse.json();
-                    
-                    if (result.success) {
-                        showToast('Data submitted successfully!');
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading indicator
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        submitBtn.disabled = false;
                         
-                        // Reset form but keep the site selected
-                        const selectedSite = $('#sites').val();
-                        form.reset();
-                        $('#sites').val(selectedSite).trigger('change');
-                        document.getElementById('date_of_actualisation').value = today;
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Succès',
+                                text: 'Les données ont été enregistrées avec succès',
+                                confirmButtonColor: '#2563eb',
+                                background: '#ffffff',
+                                color: '#1e293b',
+                                iconColor: '#2563eb'
+                            }).then(() => {
+                                form.reset();
+                                // Reset the date to today
+                                document.getElementById('date_of_actualisation').value = today;
+                                // Reset the select2 dropdown
+                                $('#sites').val('').trigger('change');
+                            });
+                        } else {
+                            throw new Error(data.message || 'Erreur inconnue');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        submitBtn.disabled = false;
                         
-                        // Hide optional fields if shown
-                        if (optionalFields.classList.contains('active')) {
-                            optionalFields.classList.remove('active');
-                            toggleBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Show Additional Fields';
-                            toggleBtn.classList.remove('btn-primary');
-                            toggleBtn.classList.add('btn-secondary');
-                        }
-                    } else {
-                        throw new Error(result.message || 'Submission failed');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    showToast(error.message || 'An error occurred', 'error');
-                } finally {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                    submitBtn.disabled = false;
-                }
-            });
-
-            // Auto-fill previous data when site changes
-            $('#sites').on('change', async function() {
-                const site = $(this).val();
-                if (!site) return;
-                
-                try {
-                    const response = await fetch(`/get_previous_data/${encodeURIComponent(site)}`);
-                    if (!response.ok) throw new Error('Failed to fetch previous data');
-                    
-                    const data = await response.json();
-                    
-                    // Fill fields with previous values
-                    const fieldsToFill = [
-                        'long_term_situation', 'short_term_situation',
-                        'commission_date', 'complete_full_date', 'stop_definitive_date',
-                        'comments', 'total_autonomy',
-                        'capex_2022', 'capex_2023', 'capex_2024', 'capex_2025',
-                        'capex_2026', 'capex_2027', 'capex_2028', 'capex_2029', 'capex_2030'
-                    ];
-                    
-                    fieldsToFill.forEach(field => {
-                        if (data[field] !== undefined && data[field] !== null) {
-                            const element = document.getElementById(field);
-                            if (element) {
-                                element.value = data[field];
-                            }
-                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: error.message || 'Une erreur est survenue lors de l\'enregistrement des données',
+                            confirmButtonColor: '#dc2626',
+                            background: '#ffffff',
+                            color: '#1e293b',
+                            iconColor: '#dc2626'
+                        });
                     });
-                    
-                    showToast('Previous data loaded for this site');
-                } catch (error) {
-                    console.error('Error fetching previous data:', error);
                 }
             });
         });
